@@ -14,19 +14,21 @@ Restore this repository as a maintainable, deployable OwlGaming roleplay server,
 
 ## Proposed delivery sequence
 
-### 1. Establish a reproducible boot
-
-- Make container build/start deterministic and validate required configuration before starting MTA.
-- Pin or otherwise record the MTA server artifact version; align the server config's client minimum with the supported release.
-- Separate development and production configuration, remove embedded secrets from generated config artifacts, and document required ports and health/log behavior.
-- Boot the server against disposable databases and resolve resource load errors before feature work.
-
-### 2. Stabilize the existing game mode
+### 1. Map and harden source before starting a server
 
 - Inventory resources, their dependencies, SQL tables, and resource start order.
-- Triage startup errors and high-impact player paths first: account login/registration, character selection/creation, persistence, inventory, vehicles, and jobs/factions.
-- Add focused checks for Lua syntax, resource metadata references, SQL bootstrap consistency, and container startup as these workflows are repaired.
+- Finish account, character, staff, faction, economy, inventory, vehicle and administration source reviews, prioritizing remotely triggered state changes.
+- Correct confirmed defects, add secret-free diagnostics and document each resource flow and integration.
+- Inspect metadata references, schema/bootstrap consistency, configuration generation and ACL statically. Do not start the server during this source-review stage.
 - Keep archived resources out of the active dependency graph unless a required gameplay feature depends on them.
+
+### 2. Prepare and validate a reproducible disposable boot
+
+- Make the container build deterministic and validate required configuration before starting MTA.
+- Pin or otherwise record the MTA server artifact version; align the server config's client minimum with the supported release.
+- Separate development and production configuration, remove embedded secrets from generated config artifacts, and document required ports and health/log behavior.
+- After source review is ready, boot only against disposable databases, capture startup errors, and resolve blocking resource load errors.
+- Add focused checks for Lua syntax, resource metadata references, SQL bootstrap consistency, and container startup as workflows are repaired.
 
 ### 3. Introduce a versioned database layout
 
@@ -35,12 +37,13 @@ Restore this repository as a maintainable, deployable OwlGaming roleplay server,
 - Add ordered, repeatable migrations and a read-only preflight that checks source version, row counts, duplicates, and orphaned IDs before any copy or cutover.
 - Migrate incrementally to InnoDB and `utf8mb4`, adding foreign keys only after existing data passes integrity checks. Keep rollback snapshots and a dual-read/verification stage before cutover.
 
-### 4. Replace the missing UCP path
+### 4. Keep account and server management website-free
 
-- Provide a separate web API/UI for account self-service: account recovery, email verification, linked Discord identity, character overview, and support requests.
-- Use Discord OAuth2 for identity proof and a unique account-link table; never use a Discord username as a credential or silently merge accounts by email.
-- Use short-lived, revocable sessions, rate limits, CSRF protection, and audit records for account changes. Keep password hashing compatible during transition and rehash on successful login where needed.
-- Keep the MTA server as the authority for gameplay and use a narrow authenticated API for actions requiring in-game changes.
+- No UCP website is available. Keep local account login, account recovery, character management, staff/faction tools, moderation and routine operator workflows in authenticated MTA interfaces and server-side resources.
+- Retire or narrowly secure legacy HTTP endpoints and remove the broad website ACL identity; do not assume a replacement management site exists.
+- A website may be built later as an optional companion, but must not be needed for server startup, local login, gameplay or routine management.
+- If Discord OAuth is implemented, use only a narrowly scoped callback/identity API for the browser authorization step. This is not a UCP website and must not replace in-game operations.
+- Use unique immutable Discord account links, short-lived sessions/tickets, rate limits, CSRF protection on browser flows and audit records. Never silently merge accounts by username or email.
 
 ### 5. Add Discord-focused operations
 
@@ -55,11 +58,11 @@ Restore this repository as a maintainable, deployable OwlGaming roleplay server,
 
 ## Initial priorities
 
-1. Build and boot the existing server in a disposable environment.
-2. Capture the startup log and resolve blocking resource/database errors.
-3. Agree on the account and character data model before changing SQL layouts.
-4. Build a migration inventory from both schema snapshots and the code that reads/writes those tables.
-5. Implement UCP replacement and Discord linking only after the account migration and threat boundaries are defined.
+1. Complete the source map and high-risk remote-event review before any server startup.
+2. Agree on the account and character data model; inventory schema readers/writers and define a reversible migration.
+3. Make container/config generation portable and pin the MTA server artifact.
+4. Prepare a disposable environment and boot only after source review, then capture startup errors and validate resource loading.
+5. Keep the gamemode manageable in-game without a website; add Discord account linking and role capabilities as optional integrations.
 
 ## Safety constraints for schema work
 

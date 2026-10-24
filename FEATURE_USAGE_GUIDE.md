@@ -10,7 +10,7 @@ This guide records how features are reached and used from the code, not a claim 
 - **Player action:** enter an account username and password, or use the registration form. The client submits `accounts:login:attempt` or `accounts:register:attempt` to the account server resource.
 - **Account effect:** successful login establishes `account:id` / `account:loggedin`, loads account-level ranks and then shows character selection. The account row is in `core.accounts`; the MTA-specific account row is in `mta.account_details`.
 - **Current integration limits:** registration still calls a missing localhost activation-mail API. Forum linking depends on a declared but unimplemented export. The login panel has legacy activation/rules/forum assumptions; see [GAMEMODE_GUIDE.md](GAMEMODE_GUIDE.md).
-- **Hardening in progress:** server-side confirmation and serial handling are being corrected; this draft should be refreshed after those changes are reviewed.
+- **Source status:** server-side confirmation and serial handling are corrected in committed source; these paths still need disposable-environment runtime validation.
 
 ### Select, create, or switch character
 
@@ -18,7 +18,7 @@ This guide records how features are reached and used from the code, not a claim 
 - **Player action:** select an owned character to spawn, create a character through the form, or return to selection using the character-change flow.
 - **Creation fields:** roleplay name, appearance, height, weight, age, language, birth date and arrival location. The client currently displays several arrival choices, but its own source says the selector is temporarily disabled and automatically submits the default bus-stop location.
 - **Server effect:** `account/s_characters.lua` restores the selected row's saved state; `account/s_create_character.lua` inserts a new character and starter items. General character persistence is handled by `saveplayer-system`, with other resources saving their owned state on the shared save event.
-- **Hardening in progress:** creation now checks that an account is authenticated, validates scalar inputs and the birth date, checks the character quota on the server, ignores client-supplied coordinates, and emits tagged debug messages. The client still receives the existing generic error-code UI.
+- **Source status:** creation now checks that an account is authenticated, validates scalar inputs and the birth date, checks the character quota on the server, ignores client-supplied coordinates, and emits tagged debug messages. The client still receives the existing generic error-code UI. Runtime validation remains open.
 - **Important boundary:** the target `account:id` must own the character row. A client-provided account or spawn coordinate must never select the row/location.
 
 ## Staff operations
@@ -43,7 +43,7 @@ This guide records how features are reached and used from the code, not a claim 
 - **Personal actions:** view balance/history, deposit cash, withdraw cash, transfer to another character or eligible recipient. ATM card services include apply, lock/unlock, recover/cancel, PIN validation and PIN change.
 - **Faction actions:** business balance/history and finance actions are available only for factions where the player's in-game faction rank grants `manage_finance`. This is an in-game faction permission, independent of Discord admin roles.
 - **Persistence:** character bank balances are stored in `characters.bankmoney`; faction balances are stored in `factions.bankbalance`; transaction history is written to `wiretransfers`.
-- **Hardening in progress:** server handlers now validate positive amounts and repeat faction-finance checks. Transfers attempt compensation if delivery fails. The client-triggerable ledger writer was removed; trusted resources use the server export. The storage model still spans MyISAM and element data, so compensation cannot provide full transactional guarantees.
+- **Source status:** server handlers validate positive amounts and repeat faction-finance checks. Transfers attempt compensation if delivery fails. The client-triggerable ledger writer was removed; trusted resources use the server export. The storage model still spans MyISAM and element data, so compensation cannot provide full transactional guarantees. Runtime validation remains open.
 - **Diagnostics:** `[BANK]` debug messages identify rejected operations and failed compensation/history writes without including account secrets.
 
 ## Feature guide coverage still needed

@@ -11,10 +11,71 @@ end
 
 function getRow(removeid)
     for k,v in pairs(t) do
-        if removeid == v[1] then
+        if tonumber(removeid) and tonumber(removeid) == tonumber(v[1]) then
             return k
         end
     end
+end
+
+local function getPrisonActorAccess(actor)
+    if not isElement(actor) or getElementType(actor) ~= "player" or getElementData(actor, "loggedin") ~= 1 then
+        return false, false, false
+    end
+    local admin = exports.integration:isPlayerTrialAdmin(actor) == true
+    local duty = tonumber(getElementData(actor, "duty")) or 0
+    local law = (exports.factions:isInFactionType(actor, 2) or exports.factions:isPlayerInFaction(actor, 81)) and duty > 0
+    local factionID = tonumber(getElementData(actor, "faction"))
+    local offlineManager = factionID == tonumber(pd_update_access) and duty > 0
+    return true, admin, law == true, offlineManager == true
+end
+
+local function prisonMutationAllowed(actor, targetOnline, operation)
+    local active, admin, law, offlineManager = getPrisonActorAccess(actor)
+    if not active then return false end
+    if admin then return true end
+	if operation ~= "add" and offlineManager then return true end
+	if targetOnline then return law end
+    if operation == "add" then return pd_offline_jail == true and law end
+    return offlineManager
+end
+
+local function findOnlinePrisoner(characterName, charID)
+    for _, player in ipairs(exports.pool:getPoolElementsByType("player")) do
+        if getElementData(player, "loggedin") == 1 and
+            ((charID and tonumber(getElementData(player, "dbid")) == tonumber(charID)) or
+            (characterName and string.lower(getPlayerName(player)) == string.lower(characterName))) then
+            return player
+        end
+    end
+    return false
+end
+
+local function validateSentence(days, hours, allowSpecial)
+    if days == "" then days = 0 end
+    if allowSpecial and days == "Life" and hours == "Sentence" then
+        days, hours = 9999, 999
+    elseif allowSpecial and days == "Awaiting" and hours == "Release" then
+        days, hours = 0, 0
+    end
+    days, hours = tonumber(days), tonumber(hours)
+    if not days or not hours or days < 0 or hours < 0 or days > 9999 or hours > 999 or days ~= math.floor(days) or hours ~= math.floor(hours) then
+        return false
+    end
+    local totalHours = days * 24 + hours
+    if hourLimit > 0 and totalHours > hourLimit then return false end
+    return days, hours
+end
+
+local function validatePrisonFields(cell, days, hours, charges, fine, allowSpecial)
+    if type(cell) ~= "string" or not cells[cell] or type(cells[cell].type) ~= "number" then return false end
+    if type(charges) ~= "string" or #charges < 1 or #charges > 500 then return false end
+    local validDays, validHours = validateSentence(days, hours, allowSpecial)
+    if validDays == false then return false end
+    if fine ~= nil then
+        fine = tonumber(fine)
+        if not fine or fine < 0 or fine > 2147483647 or fine ~= math.floor(fine) then return false end
+    end
+    return validDays, validHours, fine
 end
 
 addEventHandler("onResourceStart", resourceRoot, function()
@@ -46,6 +107,11 @@ addEventHandler("onResourceStop", resourceRoot, function()
 end)
 
 function startGUI(player)
+	-- Remote open requests may only open the caller's UI; UI access is not mutation authority.
+	if client then
+		if player and player ~= client then return end
+		player = client
+	end
 	local logged = getElementData(player, "loggedin")
 	if (logged==1) then
 		if exports.factions:isInFactionType(player, 2) or exports.factions:isPlayerInFaction(player, 81) and getElementData(player, "duty") > 0 or exports.integration:isPlayerTrialAdmin(player) then
@@ -60,12 +126,23 @@ addEventHandler("startPrisonGUI", root, startGUI)
 addEvent("removePrisoner", true)
 addEventHandler("removePrisoner", resourceRoot,
 	function( removeid, fromGUI )
-			local result = mysql:query_free( "DELETE FROM jailed WHERE id=" .. mysql:escape_string(removeid) .. "" )
-            local row = getRow(removeid)
+			local row = getRow(removeid)
+			if not row or not tonumber(t[row][2]) or not prisonMutationAllowed(client, findOnlinePrisoner(t[row][3], t[row][2]) ~= false, "remove") then
+				if isElement(client) then outputChatBox("You are not authorized to release this prisoner.", client, 255, 0, 0) end
+				return
+			end
+			local target = findOnlinePrisoner(t[row][3], t[row][2])
+			if target and not isCloseTo(client, target) then
+				outputChatBox("You must be near this prisoner to remove them.", client, 255, 0, 0)
+				return
+			end
+			-- This flag used to select a weaker cleanup path and is entirely client-controlled.
+			fromGUI = true
+			local result = mysql:query_free( "DELETE FROM jailed WHERE id=" .. mysql:escape_string(tonumber(t[row][1])) .. "" )
 			local charID = tonumber(t[row][2])
 			if result then
+				mysql:query_free("UPDATE characters SET pdjail=0 WHERE id=" .. mysql:escape_string(charID))
 				if not fromGUI then
-					local query = mysql:query_free("UPDATE characters SET pdjail=0 WHERE id="..mysql:escape_string(charID))
 					exports.logs:dbLog(client, 35, charID, "Removed from jail CharacterID= "..tostring(t[row][2]))
 				else
 					sendPrisonMsg(getPlayerName(client).." removed "..t[row][3].." from jail.")
@@ -75,12 +152,16 @@ addEventHandler("removePrisoner", resourceRoot,
 							outputChatBox("You were removed from jail by ".. string.gsub(getPlayerName(client), "_", " "), value, 0, 255, 0)
                             if not getElementData(value, "adminjailed") then
                                 local cell = getElementData(value, "jail:cell")
-                                local rel = releaseLocations[cells[cell].location]
-                                setElementPosition(value, rel[1], rel[2], rel[3])
-                                setElementDimension(value, rel[5])
-                                setElementInterior(value, rel[4])
+                                local cellData = cells[cell]
+                                local rel = cellData and releaseLocations[cellData.location]
+                                if rel then
+                                    setElementPosition(value, rel[1], rel[2], rel[3])
+                                    setElementDimension(value, rel[5])
+                                    setElementInterior(value, rel[4])
+                                end
                             end
-                            killTimer(getElementData(value, "jail:timer"))
+                            local jailTimer = getElementData(value, "jail:timer")
+                            if isTimer(jailTimer) then killTimer(jailTimer) end
                             if getElementData(value, "jailed") then
                                 removeElementData(value, "jailed")
                                 removeElementData(value, "jail_time")
@@ -107,27 +188,43 @@ addEventHandler("removePrisoner", resourceRoot,
 addEvent("addPrisoner", true)
 addEventHandler("addPrisoner", resourceRoot,
 	function( name, cell, days, hours, charges, fine, online )
-		local r = getRealTime()
-		if days=="" then
-			local days = 0
-		end
-
-		if online then
-			local duty = tonumber(getElementData(client, "duty"))
-            local arrestLocation = isInArrestColshape(name)
-			if not arrestLocation then
-				outputChatBox("The target player must be within the processing area.", client, 255, 0, 0)
-				return
-			elseif not (exports.factions:isInFactionType(client, 2) or exports.factions:isPlayerInFaction(client, 81)) or duty <= 0 then
-				outputChatBox("To jail an online player you must be in law faction and on duty.", client, 255, 0, 0)
-				return
-			end
+		local target
+		if online == true then
+			if not isElement(name) or getElementType(name) ~= "player" or getElementData(name, "loggedin") ~= 1 then return end
+			target = name
+			name = getPlayerName(target)
 		else
-            local arrestLocation = isInArrestColshape(client)
-			if not arrestLocation then
-				outputChatBox("You must be within the processing area to add a prisoner.", client, 255, 0, 0)
+			if type(name) ~= "string" then return end
+			name = string.gsub(name, " ", "_")
+			if #name < 3 or #name > 64 or string.find(name, "[^%w_%-]") then return end
+			if findOnlinePrisoner(name) then
+				outputChatBox("Select the online player to process this prisoner.", client, 255, 0, 0)
+				return
+			end
+			local characterResult = mysql:query("SELECT id FROM characters WHERE charactername='" .. mysql:escape_string(name) .. "' LIMIT 1")
+			local character = characterResult and mysql:fetch_assoc(characterResult)
+			if characterResult then mysql:free_result(characterResult) end
+			if not character or not tonumber(character.id) then
+				outputChatBox("No character found with that name.", client, 255, 0, 0)
+				return
 			end
 		end
+		online = target ~= nil
+		if not prisonMutationAllowed(client, target ~= nil, "add") then
+			outputChatBox("You are not authorized to add this prisoner.", client, 255, 0, 0)
+			return
+		end
+		if not isInArrestColshape(target or client) then
+			outputChatBox(target and "The target player must be within the processing area." or "You must be within the processing area to add a prisoner.", client, 255, 0, 0)
+			return
+		end
+		local validDays, validHours, validFine = validatePrisonFields(cell, days, hours, charges, fine, false)
+		if validDays == false then
+			outputChatBox("Invalid cell, sentence, charges, or fine.", client, 255, 0, 0)
+			return
+		end
+		days, hours, fine = validDays, validHours, validFine
+		local r = getRealTime()
 
 		if duplicateCheck(returnWhat(name, online)) then
 			outputChatBox("This player is already serving a sentence, use update prisoner instead.", client, 255, 0, 0)
@@ -227,16 +324,29 @@ addEventHandler("addPrisoner", resourceRoot,
 addEvent("changePrisoner", true)
 addEventHandler("changePrisoner", resourceRoot,
 	function( name, cell, days, hours, charges, removeid, online )
-		local r = getRealTime()
-		if days=="" then
-			days = 0
-		elseif days=="Life" and hours=="Sentence" then
-			days = 9999
-			hours = 999
-		elseif days=="Awaiting" and hours=="Release" then
-			days = 0
-			hours = 0
+		local rowIndex = getRow(removeid)
+		if not rowIndex or type(name) ~= "string" or string.lower(string.gsub(name, " ", "_")) ~= string.lower(t[rowIndex][3]) then
+			outputChatBox("Invalid prisoner record.", client, 255, 0, 0)
+			return
 		end
+		local target = findOnlinePrisoner(t[rowIndex][3], t[rowIndex][2])
+		if not prisonMutationAllowed(client, target ~= false, "change") then
+			outputChatBox("You are not authorized to update this prisoner.", client, 255, 0, 0)
+			return
+		end
+		online = target ~= false
+		if online and not isCloseTo(client, target) then
+			outputChatBox("You must be near this prisoner to update them.", client, 255, 0, 0)
+			return
+		end
+		name = t[rowIndex][3]
+		local validDays, validHours = validatePrisonFields(cell, days, hours, charges, nil, true)
+		if validDays == false then
+			outputChatBox("Invalid cell, sentence, or charges.", client, 255, 0, 0)
+			return
+		end
+		days, hours = validDays, validHours
+		local r = getRealTime()
 		local days = tonumber(days)*24
         if cells[cell].type == 1 then
             onlineTime = ( (days + tonumber(hours)) * 60 ) * onlineRatio -- In minutes

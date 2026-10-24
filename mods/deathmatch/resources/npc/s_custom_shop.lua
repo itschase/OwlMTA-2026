@@ -282,126 +282,99 @@ addEvent("shop:takeOffProductFromShop", true )
 addEventHandler("shop:takeOffProductFromShop", getRootElement(), takeOffProductFromShop)
 
 function customShopBuy(proID, itemI, itemV, itemPrice, itemName, payByBank, shopElement, metadata)
-	setElementData(client, "shop:NoAccess", true, true )
-	itemI = tonumber(itemI)
-	itemV = tostring(itemV)
-	local logString = false
-	local ownerNoti = nil
-	local r = getRealTime()
-	local timeString = ("%02d/%02d/%04d %02d:%02d"):format(r.monthday, r.month + 1, r.year+1900, r.hour, r.minute)
-
+	local player = client
+	local productID = tonumber(proID)
+	if not isElement(player) or not productID or productID < 1 or not tonumber(getElementData(player, "dbid")) then return false end
+	local function finish(message)
+		setElementData(player, "shop:NoAccess", false, true)
+		if message then outputChatBox(message, player, 255, 0, 0) end
+		triggerClientEvent(player, "hideGeneralshopUI", player)
+		return false
+	end
+	if not isElement(shopElement) or getElementType(shopElement) ~= "ped"
+		or not getElementData(shopElement, "customshop")
+		or getElementData(shopElement, "ped:type") ~= "shop"
+		or tonumber(getElementData(shopElement, "shoptype")) ~= 17 then
+		return finish("This shop is unavailable.")
+	end
+	local px, py, pz = getElementPosition(player)
+	local sx, sy, sz = getElementPosition(shopElement)
+	if getElementInterior(player) ~= getElementInterior(shopElement)
+		or getElementDimension(player) ~= getElementDimension(shopElement)
+		or getDistanceBetweenPoints3D(px, py, pz, sx, sy, sz) > 7 then
+		return finish("You must be near the shop to purchase this item.")
+	end
+	setElementData(player, "shop:NoAccess", true, true)
+	local shopID = tonumber(getElementData(shopElement, "dbid"))
+	local productIDString = tostring(math.floor(productID))
+	local product = shopID and mysql:query_fetch_assoc("SELECT pID,npcID,pItemID,pItemValue,pMetadata,pPrice,pDesc,pQuantity,pSetQuantity,pRestockInterval FROM shop_products WHERE pID='"..productIDString.."' AND npcID='"..tostring(shopID).."' LIMIT 1") or false
+	if not product or (tonumber(product.pQuantity) or 0) < 1 then return finish("That product is no longer available.") end
+	itemI = tonumber(product.pItemID)
+	itemV = tostring(product.pItemValue or "")
+	itemPrice = tonumber(product.pPrice)
+	metadata = {}
+	if product.pMetadata and product.pMetadata ~= mysql_null() then metadata = fromJSON(product.pMetadata) or {} end
+	if not itemI or not itemPrice or itemPrice < 0 then return finish("That product is no longer available.") end
+	itemName = exports["item-system"]:getItemName(itemI, itemV, metadata) or ("item #" .. tostring(itemI))
 	local pedName = getPedName(shopElement)
-	local playerName = getPlayerName(client):gsub("_", " ")
-
-
-
-	if itemI == 115 or itemI == 116 then --weapons and ammo
-		if getElementData( client, "license.gun" ) ~= 1 then
-			storeKeeperSay(client, "Nah, sorry. I can't sell you this unless you can show me the license..", pedName)
-			setElementData(client, "shop:NoAccess", false, true )
-			triggerClientEvent(client, "hideGeneralshopUI", client)
-			return false
-		end
+	if (itemI == 115 or itemI == 116) and getElementData(player, "license.gun") ~= 1 then
+		storeKeeperSay(player, "Nah, sorry. I can't sell you this unless you can show me the license..", pedName)
+		return finish()
 	end
-
-	local check = mysql:query_fetch_assoc("SELECT `pID`, `pPrice` FROM `shop_products` WHERE `pID`='"..tostring(proID).."'") or false
-	local checkingItem, checkingPrice = false
-	if check then
-		checkingItem = check["pID"]
-		checkingPrice = check["pPrice"]
+	-- Reserve this one item before delivery so stale/replayed requests cannot buy it twice.
+	if not mysql:query_free("DELETE FROM shop_products WHERE pID='"..productIDString.."' AND npcID='"..tostring(shopID).."' AND pQuantity > 0 LIMIT 1") then
+		return finish("That product is no longer available.")
 	end
-	if checkingItem and checkingPrice and (tonumber(checkingPrice) == tonumber(itemPrice) ) then
-		--outputDebugString(itemI.."-"..itemV)
-		local success, reason = exports["item-system"]:giveItem( client, itemI, itemV, false, false, metadata )
-		if success then
-			local playerGender = getElementData(client,"gender")
-			if not payByBank then
-				playBuySound(shopElement)
-				if playerGender == 0 then
-					triggerEvent('sendAme', client, "takes out a couple of dollar notes from his wallet, hands it over to "..pedName)
-				else
-					triggerEvent('sendAme', client, "takes out a couple of dollar notes from her wallet, hands it over to "..pedName)
-				end
-
-				if exports.global:takeMoney(client, itemPrice) then
-					--
-				else
-					storeKeeperSay(client, "Well, I'm sorry but this seems not enough..", pedName)
-					exports.global:takeItem( client, itemI, itemV )
-					setElementData(client, "shop:NoAccess", false, true )
-					triggerClientEvent(client, "hideGeneralshopUI", client)
-					return false
-				end
-				ownerNoti = "A customer bought a "..itemName.." for $"..exports.global:formatMoney(itemPrice).."."
-				logString = "- "..timeString.." : A customer bought a "..itemName.." for $"..exports.global:formatMoney(itemPrice)..".\n"
-			else
-				playBuySound(shopElement)
-				if playerGender == 0 then
-					triggerEvent('sendAme', client, "takes out a credit card from his wallet, hands it over to "..pedName)
-				else
-					triggerEvent('sendAme', client, "takes out a credit card from her wallet, hands it over to "..pedName)
-				end
-
-				if exports.bank:takeBankMoney(client, itemPrice) then
-					exports.bank:addBankTransactionLog(getElementData(client, "dbid"), nil, itemPrice, 0, "Purchase", "Purchased "..itemName.." for "..itemPrice.."$ from "..getElementData(shopElement, "name"), nil, nil)
-				else
-					storeKeeperSay(client, "Well, I'm sorry but this seems not enough..", pedName)
-					exports.global:takeItem( client, itemI, itemV )
-					setElementData(client, "shop:NoAccess", false, true )
-					triggerClientEvent(client, "hideGeneralshopUI", client)
-					return false
-				end
-				ownerNoti = getPlayerName(client):gsub("_", " ").."(Debit Card) bought a "..itemName.." for $"..exports.global:formatMoney(itemPrice).."."
-
-				logString = "- "..timeString.." : "..getPlayerName(client):gsub("_", " ").."(Debit Card) bought a "..itemName.." for $"..exports.global:formatMoney(itemPrice)..".\n"
-			end
-
-			local additionalText = ""
-			if payByBank then
-				additionalText = " and returns the debit card"
-			end
-
-			triggerEvent("sendAme", shopElement, "gave "..playerName.." a "..itemName..additionalText..".")
-
-			storeKeeperSay(client, "Here you are. And..", pedName)
-			if playerGender == 0 then
-				storeKeeperSay(client, "Thank you, sir. Have a nice day!", pedName)
-			else
-				storeKeeperSay(client, "Thank you, ma'am. Have a nice day!", pedName)
-			end
-
-		else
-			outputChatBox(reason, client, 255, 0, 0)
-			setElementData(client, "shop:NoAccess", false, true )
-			triggerClientEvent(client, "hideGeneralshopUI", client)
-			return false
+	local function restoreProduct()
+		local metaSQL = "NULL"
+		if type(metadata) == "table" and next(metadata) then
+			local encoded = toJSON(metadata)
+			if type(encoded) == "string" then metaSQL = "'"..exports.mysql:escape_string(encoded).."'" end
 		end
-
-		local addToShop = mysql:query_free("DELETE FROM `shop_products` WHERE `pID`='"..tostring(proID).."'") or false
-		if addToShop then
-
-			--notifyAllShopOwners(shopElement, ownerNoti.." Come and collect the money when you got time ;)")
-			--outputDebugString(ownerNoti)
-
-
-
-			local previousSales = getElementData(shopElement, "sSales") or ""
-			logString = string.sub(logString..previousSales,1,5000)
-			setElementData(shopElement, "sSales", logString, true)
-			mysql:query_free("UPDATE `shops` SET `sIncome` = `sIncome` + '" .. tostring(itemPrice) .. "', `sSales` = '"..logString:gsub("'","''").."' WHERE `id` = '"..tostring(getElementData(shopElement,"dbid")).."'")
-
-			exports.anticheat:setEld(shopElement, "sIncome", tonumber(getElementData(shopElement, "sIncome")) + tonumber(itemPrice), 'all')
-			setElementData(shopElement, "currentCap", tonumber(getElementData(shopElement, "currentCap")) - 1, true)
-
-			setElementData(client, "shop:NoAccess", false, true )
-			triggerClientEvent(client, "hideGeneralshopUI", client)
-		end
+		local restored = mysql:query_free("INSERT INTO shop_products (npcID,pItemID,pItemValue,pMetadata,pPrice,pDesc,pQuantity,pSetQuantity,pRestockInterval) VALUES ('"..
+			tostring(shopID).."','"..tostring(itemI).."','"..itemV:gsub("'","''").."',"..metaSQL..",'"..tostring(itemPrice).."','"..
+			tostring(product.pDesc or ""):gsub("'","''").."','"..tostring(product.pQuantity).."','"..tostring(product.pSetQuantity or product.pQuantity).."','"..tostring(product.pRestockInterval or 0).."')")
+		if not restored then outputDebugString("[npc/custom-shop] Failed to restore reserved product "..productIDString.." for shop "..tostring(shopID), 1) end
+		return restored
+	end
+	local success, reason = exports["item-system"]:giveItem(player, itemI, itemV, false, false, metadata)
+	if not success then
+		restoreProduct()
+		outputChatBox(reason, player, 255, 0, 0)
+		return finish()
+	end
+	local paid
+	playBuySound(shopElement)
+	if payByBank then paid = exports.bank:takeBankMoney(player, itemPrice)
+	else paid = exports.global:takeMoney(player, itemPrice) end
+	if not paid then
+		exports.global:takeItem(player, itemI, itemV)
+		restoreProduct()
+		storeKeeperSay(player, "Well, I'm sorry but this seems not enough..", pedName)
+		return finish()
+	end
+	local now = getRealTime()
+	local stamp = ("%02d/%02d/%04d %02d:%02d"):format(now.monthday, now.month + 1, now.year + 1900, now.hour, now.minute)
+	local playerName = getPlayerName(player):gsub("_", " ")
+	local payment = payByBank and "(Debit Card) " or ""
+	local logString = "- "..stamp.." : "..payment..playerName.." bought a "..itemName.." for $"..exports.global:formatMoney(itemPrice)..".\n"
+	logString = string.sub(logString..(getElementData(shopElement, "sSales") or ""), 1, 5000)
+	setElementData(shopElement, "sSales", logString, true)
+	if payByBank then
+		exports.bank:addBankTransactionLog(getElementData(player, "dbid"), nil, itemPrice, 0, "Purchase", "Purchased "..itemName.." for "..itemPrice.."$ from "..tostring(getElementData(shopElement, "name")), nil, nil)
+	end
+	local income = tonumber(getElementData(shopElement, "sIncome")) or 0
+	if mysql:query_free("UPDATE shops SET sIncome=sIncome+'"..tostring(itemPrice).."', sSales='"..logString:gsub("'","''").."' WHERE id='"..tostring(shopID).."'") then
+		exports.anticheat:setEld(shopElement, "sIncome", income + itemPrice, "all")
 	else
-		outputChatBox(" "..itemName.." is not existed in the store anymore.", client, 255,0, 0)
-		setElementData(client, "shop:NoAccess", false, true )
-		triggerClientEvent(client, "hideGeneralshopUI", client)
+		outputDebugString("[npc/custom-shop] Product "..productIDString.." delivered but shop income update failed for shop "..tostring(shopID), 1)
 	end
+	setElementData(shopElement, "currentCap", math.max(0, (tonumber(getElementData(shopElement, "currentCap")) or 1) - 1), true)
+	triggerEvent("sendAme", shopElement, "gave "..playerName.." a "..itemName..(payByBank and " and returns the debit card" or "")..".")
+	storeKeeperSay(player, "Here you are. Thank you, have a nice day!", pedName)
+	finish()
 end
+
 addEvent("shop:customShopBuy", true )
 addEventHandler("shop:customShopBuy", getRootElement(), customShopBuy)
 

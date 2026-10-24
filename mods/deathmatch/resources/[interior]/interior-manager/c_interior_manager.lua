@@ -223,7 +223,7 @@ function createIntManagerWindow(IntsList)
 						local row, col = guiGridListGetSelectedItem(activeList)
 						if row ~= -1 and col ~= -1 then
 							local gridID = guiGridListGetItemText( activeList , row, 1 )
-							if triggerServerEvent("interiorManager:delint", getLocalPlayer(), getLocalPlayer(), gridID) then
+							if triggerServerEvent("interiorManager:delint", localPlayer, gridID) then
 								-- closeIntManager()
 								-- triggerServerEvent("interiorManager:openit", getLocalPlayer(), getLocalPlayer())
 							end
@@ -244,7 +244,7 @@ function createIntManagerWindow(IntsList)
 						local row, col = guiGridListGetSelectedItem(activeList)
 						if row ~= -1 and col ~= -1 then
 							local gridID = guiGridListGetItemText( activeList , row, 1 )
-							if triggerServerEvent("interiorManager:disableInt", getLocalPlayer(), getLocalPlayer(), gridID) then
+							if triggerServerEvent("interiorManager:disableInt", localPlayer, gridID) then
 								-- closeIntManager()
 								-- triggerServerEvent("interiorManager:openit", getLocalPlayer(), getLocalPlayer())
 							end
@@ -265,7 +265,7 @@ function createIntManagerWindow(IntsList)
 						local row, col = guiGridListGetSelectedItem(activeList)
 						if row ~= -1 and col ~= -1 then
 							local gridID = guiGridListGetItemText( activeList , row, 1 )
-							if triggerServerEvent("interiorManager:gotoInt", getLocalPlayer(), getLocalPlayer(), gridID) then
+							if triggerServerEvent("interiorManager:gotoInt", localPlayer, gridID) then
 								--closeIntManager()
 								--triggerServerEvent("interiorManager:openit", getLocalPlayer(), getLocalPlayer())
 							end
@@ -286,7 +286,7 @@ function createIntManagerWindow(IntsList)
 						local row, col = guiGridListGetSelectedItem(activeList)
 						if row ~= -1 and col ~= -1 then
 							local gridID = guiGridListGetItemText( activeList , row, 1 )
-							if triggerServerEvent("interiorManager:restoreInt", getLocalPlayer(), getLocalPlayer(), gridID) then
+							if triggerServerEvent("interiorManager:restoreInt", localPlayer, gridID) then
 								-- closeIntManager()
 								-- triggerServerEvent("interiorManager:openit", getLocalPlayer(), getLocalPlayer())
 							end
@@ -307,7 +307,7 @@ function createIntManagerWindow(IntsList)
 						local row, col = guiGridListGetSelectedItem(activeList)
 						if row ~= -1 and col ~= -1 then
 							local gridID = guiGridListGetItemText( activeList , row, 1 )
-							if triggerServerEvent("interiorManager:removeInt", getLocalPlayer(), getLocalPlayer(), gridID) then
+							if triggerServerEvent("interiorManager:removeInt", localPlayer, gridID) then
 								-- closeIntManager()
 								-- triggerServerEvent("interiorManager:openit", getLocalPlayer(), getLocalPlayer())
 							end
@@ -328,7 +328,7 @@ function createIntManagerWindow(IntsList)
 						local row, col = guiGridListGetSelectedItem(activeList)
 						if row ~= -1 and col ~= -1 then
 							local gridID = guiGridListGetItemText( activeList , row, 1 )
-							if triggerServerEvent("interiorManager:forceSellInt", getLocalPlayer(), getLocalPlayer(), gridID) then
+							if triggerServerEvent("interiorManager:forceSellInt", localPlayer, gridID) then
 								-- closeIntManager()
 								-- triggerServerEvent("interiorManager:openit", getLocalPlayer(), getLocalPlayer())
 							end
@@ -349,7 +349,7 @@ function createIntManagerWindow(IntsList)
 						local row, col = guiGridListGetSelectedItem(activeList)
 						if row ~= -1 and col ~= -1 then
 							local gridID = guiGridListGetItemText( activeList , row, 1 )
-							if triggerServerEvent("interiorManager:openAdminNote", getLocalPlayer(), getLocalPlayer(), gridID) then
+							if triggerServerEvent("interiorManager:openAdminNote", localPlayer, gridID) then
 								--guiGridListRemoveRow ( activeList, row )
 							end
 						else
@@ -653,7 +653,7 @@ function createCheckIntWindow(result, adminTitle, history, notes1, players)
 	addEventHandler( "onClientGUIClick", bToggleInt1,
 		function( button )
 			if button == "left" then
-				triggerServerEvent("interiorManager:disableInt", getLocalPlayer(), getLocalPlayer(), result[1][1])
+				triggerServerEvent("interiorManager:disableInt", localPlayer, result[1][1])
 			end
 		end,
 	false)
@@ -669,7 +669,7 @@ function createCheckIntWindow(result, adminTitle, history, notes1, players)
 		addEventHandler( "onClientGUIClick", bRestoreInt1,
 			function( button )
 				if button == "left" then
-					if triggerServerEvent("interiorManager:restoreInt", getLocalPlayer(), getLocalPlayer(), result[1][1]) then
+					if triggerServerEvent("interiorManager:restoreInt", localPlayer, result[1][1]) then
 						--setTimer(function ()
 							triggerServerEvent("interiorManager:checkint", getLocalPlayer(), getLocalPlayer(), "checkint", result[1][1])
 						--end, 50, 1)
@@ -682,7 +682,7 @@ function createCheckIntWindow(result, adminTitle, history, notes1, players)
 		addEventHandler( "onClientGUIClick", bRemoveInt1,
 			function( button )
 				if button == "left" then
-					if triggerServerEvent("interiorManager:removeInt", getLocalPlayer(), getLocalPlayer(), result[1][1]) then
+					if triggerServerEvent("interiorManager:removeInt", localPlayer, result[1][1]) then
 						closeCheckIntWindow()
 					end
 				end
@@ -698,7 +698,7 @@ function createCheckIntWindow(result, adminTitle, history, notes1, players)
 		addEventHandler( "onClientGUIClick", bGotoInt1,
 			function( button )
 				if button == "left" then
-					triggerServerEvent("interiorManager:gotoInt", getLocalPlayer(), getLocalPlayer(), result[1][1])
+					triggerServerEvent("interiorManager:gotoInt", localPlayer, result[1][1])
 				end
 			end,
 		false)
@@ -707,7 +707,7 @@ function createCheckIntWindow(result, adminTitle, history, notes1, players)
 		addEventHandler( "onClientGUIClick", bDelInt1,
 			function( button )
 				if button == "left" then
-					if triggerServerEvent("interiorManager:delint", getLocalPlayer(), getLocalPlayer(), result[1][1]) then
+					if triggerServerEvent("interiorManager:delint", localPlayer, result[1][1]) then
 						triggerServerEvent("interiorManager:checkint", getLocalPlayer(), getLocalPlayer(), "checkint", result[1][1])
 					end
 				end

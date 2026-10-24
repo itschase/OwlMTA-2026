@@ -720,8 +720,17 @@ local allowedFactions = {
 	[159] = { ['80'] = true, ['89'] = true, ['95'] = true }, -- Western Solutions LLC
 }
 	
-function makeGenericItemCargo(thePlayer, admin, genericType, price, quantity, name, model, scale, texURL, texName)
-	local itemID = (tonumber(genericType) == 1 and 80) or (tonumber(genericType) == 2 and 89) or (tonumber(genericType) == 3 and 95) or false
+function makeGenericItemCargo(thePlayer, genericType, price, quantity, name, model, scale, texURL, texName)
+	local admin = exports.integration:isPlayerTrialAdmin(thePlayer) or exports.integration:isPlayerScripter(thePlayer)
+	genericType, price, quantity = tonumber(genericType), tonumber(price), tonumber(quantity)
+	model, scale = tonumber(model), tonumber(scale) or 1
+	local itemID = (genericType == 1 and 80) or (genericType == 2 and 89) or (genericType == 3 and 95) or false
+	if not isElement(thePlayer) or getElementType(thePlayer) ~= "player" or getElementData(thePlayer, "loggedin") ~= 1 then return false end
+	if not itemID or not price or price ~= price or price < 0 or (price == 0 and not admin) or price > 100000000 then return false end
+	if not quantity or quantity ~= math.floor(quantity) or quantity < 1 or quantity > 30 then return false end
+	if type(name) ~= "string" or #name < 3 or #name > 64 or not model or model ~= math.floor(model) or model < 1 or model > 20000 then return false end
+	if not scale or scale ~= scale or scale <= 0 or scale > 10 then return false end
+	if (texURL ~= nil or texName ~= nil) and (type(texURL) ~= "string" or #texURL > 500 or type(texName) ~= "string" or #texName < 1 or #texName > 64) then return false end
 	
 	-- faction checks
 	local factionID, isLeader = false, false
@@ -783,7 +792,10 @@ function makeGenericItemCargo(thePlayer, admin, genericType, price, quantity, na
 	end
 end
 addEvent("createCargoGeneric", true)
-addEventHandler("createCargoGeneric", getResourceRootElement(), makeGenericItemCargo)
+addEventHandler("createCargoGeneric", getResourceRootElement(), function(genericType, price, quantity, name, model, scale, texURL, texName)
+	if not client or source ~= resourceRoot then return end
+	makeGenericItemCargo(client, genericType, price, quantity, name, model, scale, texURL, texName)
+end)
 
 -- /TAKEITEM
 function takePlayerItem(thePlayer, commandName, targetPlayer, itemID, ...)

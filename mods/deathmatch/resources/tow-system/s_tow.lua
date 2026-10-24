@@ -212,11 +212,39 @@ end
 addCommandHandler("impoundbike", setbikeimpound)
 
 function payRelease(vehid)
-    if exports.global:takeMoney(source, 1000) then
+	local player = client
+	local vehicleID = tonumber(vehid)
+	if not player or not isElement(player) or getElementType(player) ~= "player" or not vehicleID then
+		return false
+	end
+	if not isElementWithinColShape(player, towImpoundSphere) then
+		outputChatBox("You must be at the impound lot to release a vehicle.", player, 255, 0, 0)
+		return false
+	end
+	local vehID = exports.pool:getElement("vehicle", vehicleID)
+	if not vehID or not isElement(vehID) then
+		outputChatBox("Invalid vehicle.", player, 255, 0, 0)
+		return false
+	end
+	local owner = tonumber(getElementData(vehID, "owner"))
+	local characterID = tonumber(getElementData(player, "dbid"))
+	local factionID = tonumber(getElementData(vehID, "faction"))
+	local impounder = tonumber(getElementData(vehID, "impounder")) or towingFactionID
+	local impounded = tonumber(getElementData(vehID, "Impounded")) or 0
+	local ownsVehicle = owner and owner > 0 and owner == characterID
+	local factionMember = factionID and factionID > 0 and exports.factions:isPlayerInFaction(player, factionID)
+	if impounded == 0 or impounder ~= towingFactionID or not (ownsVehicle or factionMember) then
+		outputChatBox("You are not authorized to release this vehicle.", player, 255, 0, 0)
+		return false
+	end
+	if not exports.global:hasMoney(player, 1000) then
+		outputChatBox("Insufficient funds.", player, 255, 0, 0)
+		return false
+	end
+	if exports.global:takeMoney(player, 1000) then
         local towingFactionTeam = exports.factions:getFactionFromID(towingFactionID)
         exports.global:giveMoney(towingFactionTeam, 1000) --give money to towing faction
-        exports.mysql:query_free( "INSERT INTO wiretransfers (`from`, `to`, `amount`, `reason`, `type`) VALUES (" .. exports.mysql:escape_string(getElementData(source, "dbid")) .. ", " .. -towingFactionID .. ", " .. 1000 .. ", 'Vehicle Release', 16)" )
-        local vehID = exports.pool:getElement("vehicle", tonumber(vehid))
+		exports.mysql:query_free( "INSERT INTO wiretransfers (`from`, `to`, `amount`, `reason`, `type`) VALUES (" .. exports.mysql:escape_string(characterID) .. ", " .. -towingFactionID .. ", " .. 1000 .. ", 'Vehicle Release', 16)" )
         setElementFrozen(vehID, false)
         local x, y, z, int, dim, rotation = getReleasePosition()
         setElementPosition(vehID, x, y, z)
@@ -230,9 +258,9 @@ function payRelease(vehid)
         exports.anticheat:changeProtectedElementDataEx(vehID, "handbrake", 0, true)
         exports.anticheat:setEld(vehID, "Impounded", 0, 'all')
 
-        outputChatBox("Your vehicle has been released, it's out front. (( Please remember to /park your vehicle so it does not respawn back here. ))", source, 255, 194, 14)
+		outputChatBox("Your vehicle has been released, it's out front. (( Please remember to /park your vehicle so it does not respawn back here. ))", player, 255, 194, 14)
     else
-        outputChatBox("Insufficient funds.", source, 255, 0, 0)
+		outputChatBox("Insufficient funds.", player, 255, 0, 0)
     end
 end
 addEvent("releaseCar", true)

@@ -114,14 +114,24 @@ addEventHandler( 'clothing:stream', resourceRoot,
 
 addEvent('clothes:duty:fetchFactionSkins', true)
 addEventHandler('clothes:duty:fetchFactionSkins', root, function ()
-	local fid = getElementData(source, 'faction')
+	local thePlayer = client
+	if not thePlayer or not isElement(thePlayer) or getElementType(thePlayer) ~= 'player'
+		or getElementData(thePlayer, 'loggedin') ~= 1 or not tonumber(getElementData(thePlayer, 'dbid')) then
+		return false
+	end
+
+	local factions = getElementData(thePlayer, 'faction')
+	if type(factions) ~= 'table' then return false end
+
 	local tab = {}
 	for id, value in pairs(savedClothing) do
-		if value.distribution == 5 and fid[-value.creator_char] then
-			table.insert(tab, value.skin..':'..id)
+		local factionID = value.creator_char and -value.creator_char
+		if value.distribution == 5 and factionID and factions[factionID]
+			and exports.factions:hasMemberPermissionTo(thePlayer, factionID, 'modify_duty_settings') then
+			table.insert(tab, value.skin .. ':' .. id)
 		end
 	end
-	triggerClientEvent( source, 'faction:dutySkins', source, tab)
+	triggerClientEvent(thePlayer, 'faction:dutySkins', resourceRoot, tab)
 end)
 
 addEvent( 'clothes:tempfix', true )

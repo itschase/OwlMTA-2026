@@ -11,6 +11,37 @@ addEventHandler("onPlayerJoinFaction", getRootElement(),
 locations = {}
 custom = {}
 
+local function getValidFactionID(factionID)
+	local id = tonumber(factionID)
+	if not id or id < 1 or id ~= math.floor(id) or not exports.pool:getElement("team", id) then
+		return false
+	end
+	return id
+end
+
+local function isActiveFactionMember(player, factionID)
+	local id = getValidFactionID(factionID)
+	if not id or not player or not isElement(player) or getElementType(player) ~= "player" then
+		return false
+	end
+	if getElementData(player, "loggedin") ~= 1 or not tonumber(getElementData(player, "dbid")) then
+		return false
+	end
+	local factions = getElementData(player, "faction")
+	return type(factions) == "table" and type(factions[id]) == "table", id
+end
+
+local function authorizeFactionAction(player, factionID, permission, action)
+	local isMember, id = isActiveFactionMember(player, factionID)
+	if not isMember or not hasMemberPermissionTo(player, id or tonumber(factionID), permission) then
+		if player and isElement(player) then
+			exports.logs:dbLog(player, 35, "fa" .. tostring(id or factionID), "Denied faction action " .. tostring(action) .. " (requires " .. tostring(permission) .. ")")
+		end
+		return false, id
+	end
+	return true, id
+end
+
 function loadOneFaction(row)
 	local id = tonumber(row.id)
 	local theTeam = exports.pool:getElement('team', id)
@@ -305,6 +336,14 @@ end
 
 -- // CALL BACKS FROM CLIENT GUI
 function loadFaction(factionID)
+	local isMember, validFactionID = isActiveFactionMember(client, factionID)
+	if not isMember then
+		if client and isElement(client) then
+			exports.logs:dbLog(client, 35, "fa" .. tostring(validFactionID or factionID), "Denied faction roster access")
+		end
+		return false
+	end
+	factionID = validFactionID
 	local theTeam = exports.pool:getElement("team", factionID)
 	if (theTeam) then
 		local theTeam = exports.pool:getElement("team", factionID)
@@ -693,6 +732,14 @@ addEvent("faction:perks:edit", true)
 addEventHandler("faction:perks:edit", getRootElement(), callbackPerkEdit)
 
 function callbackQuitFaction(factionID)
+	local isMember, validFactionID = isActiveFactionMember(client, factionID)
+	if not isMember then
+		if client and isElement(client) then
+			exports.logs:dbLog(client, 35, "fa" .. tostring(validFactionID or factionID), "Denied faction leave request")
+		end
+		return false
+	end
+	factionID = validFactionID
 	local theTeam = getFactionFromID(factionID)
 	local username = getPlayerName(client)
 	local theTeamName = getTeamName(theTeam)
@@ -732,15 +779,30 @@ addEvent("cguiQuitFaction", true)
 addEventHandler("cguiQuitFaction", getRootElement(), callbackQuitFaction)
 
 function callbackInvitePlayer(invitedPlayer, factionID)
+	local allowed, factionID = authorizeFactionAction(client, factionID, "add_member", "invite member")
+	if not allowed then
+		outputChatBox("Not allowed, sorry.", client)
+		return
+	end
 	local theTeam = getFactionFromID(factionID)
-	if getElementData(invitedPlayer, "loggedin") ~= 1 then
+	if not invitedPlayer or not isElement(invitedPlayer) or getElementType(invitedPlayer) ~= "player"
+		or invitedPlayer == client or getElementData(invitedPlayer, "loggedin") ~= 1
+		or not tonumber(getElementData(invitedPlayer, "dbid")) or not theTeam then
 		outputChatBox("Not allowed, sorry.", client)
 		return
 	end
 
 	local invitedPlayerNick = getPlayerName(invitedPlayer)
 	local factionInfo = getElementData(invitedPlayer, "faction")
+	if type(factionInfo) ~= "table" then
+		outputChatBox("Not allowed, sorry.", client)
+		return
+	end
 	local defaultRank = getDefaultRank(factionID)
+	if not defaultRank or getRankFaction(defaultRank) ~= factionID then
+		outputChatBox("This faction has no valid default rank.", client, 255, 0, 0)
+		return
+	end
 	local count = 0
 	for _ in pairs(factionInfo) do count = count + 1 end
 	if count >= 3 then
@@ -766,6 +828,7 @@ function callbackInvitePlayer(invitedPlayer, factionID)
 		factionInfo[factionID] = { rank = defaultRank, leader = false, phone = nil, perks = { {} }, count = max + 1 }
 		exports.anticheat:changeProtectedElementDataEx(invitedPlayer, "faction", factionInfo, false)
 		outputChatBox("Player " .. invitedPlayerNick:gsub("_", " ") .. " is now a member of faction '" .. tostring(theTeamName) .. "'.", client, 0, 255, 0)
+		exports.logs:dbLog(client, 35, "fa" .. tostring(factionID), "Invited " .. invitedPlayerNick .. " to faction")
 		exports.factions:sendNotiToAllFactionMembers(factionID, invitedPlayerNick:gsub("_", " ") .. " joined as a new member of your faction '" .. tostring(theTeamName) .. "'.")
 		triggerEvent("onPlayerJoinFaction", invitedPlayer, theTeam)
 		outputChatBox("You were set to Faction '" .. tostring(theTeamName) .. "'.", invitedPlayer, 255, 194, 14)
@@ -917,30 +980,47 @@ addEventHandler("factionmenu:getFinance", getResourceRootElement(), getFactionFi
 addEvent('factionmenu:setphone', true)
 addEventHandler('factionmenu:setphone', root,
 	function(playerName, number, factionID)
-		local theTeam = getFactionFromID(factionID)
-
-		local _, factionInfo, thePlayer = getPlayerFactions(playerName)
-		if thePlayer and not factionInfo[factionID] then
-			outputChatBox("Newp, not going to happen, sorry.", client)
-			return
+		local allowed, factionID = authorizeFactionAction(client, factionID, "set_member_duty", "set faction member phone")
+		if not allowed or type(playerName) ~= "string" or #playerName < 1 or #playerName > 64 then
+			return false
+		end
+		if number ~= nil and tostring(number) ~= "" then
+			local parsedNumber = tonumber(number)
+			if not parsedNumber or parsedNumber ~= math.floor(parsedNumber) or parsedNumber < 0 or parsedNumber > 99 then
+				return false
+			end
+		end
+		local targetCharacterID = exports.global:getCharacterIDFromName(playerName)
+		if not targetCharacterID then return false end
+		local membershipQuery = dbQuery(mysql:getConn("mta"), "SELECT id FROM characters_faction WHERE character_id=? AND faction_id=? LIMIT 1", targetCharacterID, factionID)
+		local membershipRows = dbPoll(membershipQuery, 10000)
+		if not membershipRows then
+			dbFree(membershipQuery)
+			return false
+		elseif #membershipRows == 0 then
+			return false
 		end
 
-		local username = getPlayerName(client)
-		local number = tonumber(number) or "NULL"
+		local parsedNumber = tonumber(number)
+		local storedNumber = parsedNumber or "NULL"
 
 		local success = false
-		if tonumber(number) then
-			success = dbExec(mysql:getConn("mta"), "UPDATE characters_faction SET faction_phone=? WHERE character_id=(SELECT id FROM characters WHERE charactername=?) AND faction_id=?", number, playerName, factionID)
+		if parsedNumber then
+			success = dbExec(mysql:getConn("mta"), "UPDATE characters_faction SET faction_phone=? WHERE character_id=? AND faction_id=?", storedNumber, targetCharacterID, factionID)
 		else
-			success = dbExec(mysql:getConn("mta"), "UPDATE characters_faction SET faction_phone=NULL WHERE character_id=(SELECT id FROM characters WHERE charactername=?) AND faction_id=?", playerName, factionID)
+			success = dbExec(mysql:getConn("mta"), "UPDATE characters_faction SET faction_phone=NULL WHERE character_id=? AND faction_id=?", targetCharacterID, factionID)
 		end
 
 		if success then
-			local thePlayer = getPlayerFromName(playerName)
+			local thePlayer = getPlayerFromCharacterID(targetCharacterID)
 			if (thePlayer) then -- Player is online, set them
-			factionInfo[factionID].phone = tonumber(number) or nil
-			setElementData(thePlayer, "faction", factionInfo)
+				local factionInfo = getElementData(thePlayer, "faction")
+				if type(factionInfo) == "table" and factionInfo[factionID] then
+					factionInfo[factionID].phone = parsedNumber
+					setElementData(thePlayer, "faction", factionInfo)
+				end
 			end
+			exports.logs:dbLog(client, 35, "fa" .. tostring(factionID), "Set member phone for " .. playerName .. " to " .. tostring(storedNumber))
 		end
 	end)
 
@@ -991,7 +1071,8 @@ end
 
 addEvent("fetchDutyInfo", true)
 addEventHandler("fetchDutyInfo", resourceRoot, function(factionID)
-	if not factionID then return end
+	local allowed, factionID = authorizeFactionAction(client, factionID, "modify_duty_settings", "view duty configuration")
+	if not allowed then return false end
 
 	local elementInfo = getElementData(resourceRoot, "DutyGUI")
 	elementInfo[client] = factionID
@@ -1002,7 +1083,8 @@ end)
 
 addEvent("Duty:Grab", true)
 addEventHandler("Duty:Grab", resourceRoot, function(factionID)
-	if not factionID then return end
+	local allowed, factionID = authorizeFactionAction(client, factionID, "modify_duty_settings", "view duty allowlist")
+	if not allowed then return false end
 
 	local t = getAllowList(factionID)
 
@@ -1011,7 +1093,8 @@ end)
 
 addEvent("Duty:GetPackages", true)
 addEventHandler("Duty:GetPackages", resourceRoot, function(factionID)
-	factionID = tonumber(factionID)
+	local allowed, factionID = authorizeFactionAction(client, factionID, "set_member_duty", "view member duty packages")
+	if not allowed then return false end
 
 	triggerClientEvent(client, "Duty:GotPackages", resourceRoot, custom[factionID])
 end)
@@ -1043,13 +1126,107 @@ end
 
 addEventHandler("onPlayerQuit", getRootElement(), disconnectThem)
 
-function addDuty(dutyItems, finalLocations, dutyNewSkins, name, factionID, dutyID)
-	local dutyItems = dutyItems or {}
-	local finalLocations = finalLocations or {}
-	local dutyNewSkins = dutyNewSkins or {}
+local function isFiniteNumber(value)
+	local number = tonumber(value)
+	return number and number == number and number ~= math.huge and number ~= -math.huge and number
+end
 
-	if not custom[tonumber(factionID)] then
-		custom[tonumber(factionID)] = {}
+local function isPositiveInteger(value)
+	local number = tonumber(value)
+	return number and number > 0 and number == math.floor(number) and number
+end
+
+local function validDutyPayload(t, maxEntries)
+	if type(t) ~= "table" then return false end
+	local count = 0
+	for key, value in pairs(t) do
+		count = count + 1
+		if count > maxEntries or (type(key) ~= "number" and type(key) ~= "string") then return false end
+		if type(value) ~= "table" and type(value) ~= "string" and type(value) ~= "number" and type(value) ~= "boolean" then return false end
+	end
+	local ok, encoded = pcall(toJSON, t)
+	return ok and type(encoded) == "string" and #encoded <= 65536
+end
+
+local function validDutyItems(dutyItems, factionID)
+	if not validDutyPayload(dutyItems, 256) then return false end
+	local allowedItems = {}
+	for _, row in pairs(getAllowList(factionID) or {}) do
+		if type(row) == "table" and tonumber(row[1]) and tonumber(row[2]) then
+			allowedItems[tonumber(row[1])] = { itemID = tonumber(row[2]), value = row[3] }
+		end
+	end
+	for key, item in pairs(dutyItems) do
+		if type(item) ~= "table" or not tonumber(item[1]) or tostring(tonumber(item[1])) ~= tostring(tonumber(key)) then return false end
+		local allowed = allowedItems[tonumber(item[1])]
+		if not allowed or tonumber(item[2]) ~= allowed.itemID then return false end
+		if allowed.itemID < 0 then
+			local amount, maximum = tonumber(item[3]), tonumber(allowed.value)
+			if not amount or not maximum or amount < 0 or amount > maximum then return false end
+		elseif tostring(item[3]) ~= tostring(allowed.value) then
+			return false
+		end
+	end
+	return true
+end
+
+local function validDutyLocations(dutyLocations, factionID)
+	if not validDutyPayload(dutyLocations, 128) then return false end
+	local normalized = {}
+	for key, name in pairs(dutyLocations) do
+		local locationID = isPositiveInteger(key)
+		local location = locationID and locations[factionID] and locations[factionID][locationID]
+		if not location or type(name) ~= "string" then return false end
+		normalized[tostring(locationID)] = location[2]
+	end
+	return normalized
+end
+
+local function validDutySkins(dutySkins, factionID)
+	if not validDutyPayload(dutySkins, 256) then return false end
+	local clothingQuery = dbQuery(mysql:getConn("mta"), "SELECT id, skin FROM clothing WHERE distribution=5 AND creator_char=?", -factionID)
+	local clothingRows = clothingQuery and dbPoll(clothingQuery, 10000)
+	if not clothingRows then
+		if clothingQuery then dbFree(clothingQuery) end
+		return false
+	end
+	local factionClothing = {}
+	for _, row in ipairs(clothingRows) do
+		factionClothing[tonumber(row.id)] = tonumber(row.skin)
+	end
+	for _, skin in pairs(dutySkins) do
+		if type(skin) ~= "table" then return false end
+		local modelID = tonumber(skin[1])
+		if not modelID or modelID ~= math.floor(modelID) or modelID < 0 or modelID > 312 then return false end
+		if skin[2] ~= "N/A" then
+			local clothingID = tonumber(skin[2])
+			if not clothingID or clothingID < 1 or clothingID ~= math.floor(clothingID) or factionClothing[clothingID] ~= modelID then return false end
+		end
+	end
+	return true
+end
+
+local function authorizeDutyMutation(action, factionID)
+	local allowed, id = authorizeFactionAction(client, factionID, "modify_duty_settings", action)
+	if not allowed then outputChatBox("Not allowed, sorry.", client, 255, 0, 0) end
+	return allowed, id
+end
+
+function addDuty(dutyItems, finalLocations, dutyNewSkins, name, factionID, dutyID)
+	local allowed, factionID = authorizeDutyMutation("edit faction duty", factionID)
+	if not allowed then return false end
+	dutyID = tonumber(dutyID)
+	local validatedLocations = validDutyLocations(finalLocations, factionID)
+	if type(name) ~= "string" or #name < 1 or #name > 64 or not name:match("%S")
+		or not validDutyItems(dutyItems, factionID) or not validatedLocations
+		or not validDutySkins(dutyNewSkins, factionID) or not dutyID or dutyID < 0 or dutyID ~= math.floor(dutyID) then
+		return false
+	end
+	finalLocations = validatedLocations
+	if dutyID ~= 0 and (not custom[factionID] or not custom[factionID][dutyID]) then return false end
+
+	if not custom[factionID] then
+		custom[factionID] = {}
 	end
 
 	if dutyID == 0 then
@@ -1057,15 +1234,14 @@ function addDuty(dutyItems, finalLocations, dutyNewSkins, name, factionID, dutyI
 		mysql:query_free("INSERT INTO duty_custom SET id=" .. index .. ", factionID=" .. mysql:escape_string(factionID) .. ", name='" .. mysql:escape_string(name) .. "', skins='" .. mysql:escape_string(toJSON(dutyNewSkins)) .. "', locations='" .. mysql:escape_string(toJSON(finalLocations)) .. "', items='" .. mysql:escape_string(toJSON(dutyItems)) .. "'")
 		setElementData(resourceRoot, "maxcindex", index)
 
-		custom[tonumber(factionID)][index] = { index, name, dutyNewSkins, finalLocations, dutyItems }
+		custom[factionID][index] = { index, name, dutyNewSkins, finalLocations, dutyItems }
 
 		refreshClient("> " .. getPlayerName(client):gsub("_", " ") .. ": Added duty '" .. name .. "'.", factionID, false)
 		exports.logs:dbLog(client, 35, "fa" .. tostring(factionID), "Added duty " .. name .. " Database ID #" .. index)
 	else
-		mysql:query_free("UPDATE duty_custom SET name='" .. mysql:escape_string(name) .. "', skins='" .. mysql:escape_string(toJSON(dutyNewSkins)) .. "', locations='" .. mysql:escape_string(toJSON(finalLocations)) .. "', items='" .. mysql:escape_string(toJSON(dutyItems)) .. "' WHERE id=" .. dutyID)
+		mysql:query_free("UPDATE duty_custom SET name='" .. mysql:escape_string(name) .. "', skins='" .. mysql:escape_string(toJSON(dutyNewSkins)) .. "', locations='" .. mysql:escape_string(toJSON(finalLocations)) .. "', items='" .. mysql:escape_string(toJSON(dutyItems)) .. "' WHERE id=" .. dutyID .. " AND factionID=" .. factionID)
 
-		table.remove(custom[tonumber(factionID)], dutyID)
-		custom[tonumber(factionID)][dutyID] = { dutyID, name, dutyNewSkins, finalLocations, dutyItems }
+		custom[factionID][dutyID] = { dutyID, name, dutyNewSkins, finalLocations, dutyItems }
 
 		refreshClient("> " .. getPlayerName(client):gsub("_", " ") .. ": Revised duty ID #" .. dutyID .. ".", factionID, false)
 		exports.logs:dbLog(client, 35, "fa" .. tostring(factionID), "Revised duty " .. name .. " Database ID #" .. dutyID)
@@ -1076,12 +1252,28 @@ addEvent("Duty:AddDuty", true)
 addEventHandler("Duty:AddDuty", resourceRoot, addDuty)
 
 function addLocation(x, y, z, r, i, d, name, factionID, index)
+	local allowed, factionID = authorizeDutyMutation("edit faction duty location", factionID)
+	if not allowed then return false end
+	local nx, ny, nz, radius = isFiniteNumber(x), isFiniteNumber(y), isFiniteNumber(z), isFiniteNumber(r)
+	local interior, dimension = tonumber(i), tonumber(d)
+	if not nx or not ny or not nz or not radius or nx < -3000 or nx > 3000 or ny < -3000 or ny > 3000
+		or nz < -1000 or nz > 2000 or radius < 1 or radius > 10
+		or not interior or interior < 0 or interior > 65535 or interior ~= math.floor(interior)
+		or not dimension or dimension < 0 or dimension > 65535 or dimension ~= math.floor(dimension)
+		or type(name) ~= "string" or #name < 1 or #name > 64 or not name:match("%S") then
+		return false
+	end
+	x, y, z, r, i, d = nx, ny, nz, radius, interior, dimension
+	if index ~= nil then
+		index = isPositiveInteger(index)
+		if not index or not locations[factionID] or not locations[factionID][index] or locations[factionID][index][9] then return false end
+	end
 	local interiorElement = exports.pool:getElement("interior", d) or d == 0
 	if interiorElement then
 		local interiorF = 0
 		if isElement(interiorElement) then
-			interiorStatus = getElementData(interiorElement, "status")
-			interiorF = interiorStatus.faction
+			local interiorStatus = getElementData(interiorElement, "status")
+			interiorF = type(interiorStatus) == "table" and interiorStatus.faction or 0
 		end
 
 		if tonumber(interiorF) == tonumber(factionID) or d == 0 then
@@ -1098,8 +1290,7 @@ function addLocation(x, y, z, r, i, d, name, factionID, index)
 			refreshClient("> " .. getPlayerName(client):gsub("_", " ") .. ": Added location '" .. name .. "'.", factionID, false)
 			exports.logs:dbLog(client, 35, "fa" .. tostring(factionID), "Added location, Name:" .. name .. " Database ID:" .. newIndex .. " x:" .. x .. " y:" .. y .. " z:" .. z .. " radius:" .. r .. " interior:" .. i .. " dimension:" .. d)
 			else
-				mysql:query_free("UPDATE duty_locations SET name='" .. mysql:escape_string(name) .. "', x=" .. mysql:escape_string(x) .. ", y=" .. mysql:escape_string(y) .. ", z=" .. mysql:escape_string(z) .. ", radius=" .. mysql:escape_string(r) .. ", dimension=" .. mysql:escape_string(d) .. ", interior=" .. mysql:escape_string(i) .. " WHERE id=" .. index)
-				table.remove(locations[factionID], index)
+				mysql:query_free("UPDATE duty_locations SET name='" .. mysql:escape_string(name) .. "', x=" .. mysql:escape_string(x) .. ", y=" .. mysql:escape_string(y) .. ", z=" .. mysql:escape_string(z) .. ", radius=" .. mysql:escape_string(r) .. ", dimension=" .. mysql:escape_string(d) .. ", interior=" .. mysql:escape_string(i) .. " WHERE id=" .. index .. " AND factionID=" .. factionID)
 				exports.duty:destroyDutyColShape(factionID, index)
 				exports.duty:createDutyColShape(x, y, z, r, i, d, factionID, index)
 				locations[tonumber(factionID)][index] = { index, name, x, y, z, r, d, i, nil, nil }
@@ -1118,9 +1309,13 @@ addEvent("Duty:AddLocation", true)
 addEventHandler("Duty:AddLocation", resourceRoot, addLocation)
 
 function addVehicle(vehicleID, factionID)
+	local allowed, factionID = authorizeDutyMutation("add faction duty vehicle", factionID)
+	if not allowed then return false end
+	vehicleID = isPositiveInteger(vehicleID)
+	if not vehicleID then return false end
 	local element = exports.pool:getElement("vehicle", vehicleID)
 	if element then
-		if getElementData(element, "faction") == factionID then
+		if tonumber(getElementData(element, "faction")) == factionID then
 			local newIndex = getElementData(resourceRoot, "maxlindex") + 1
 			mysql:query_free("INSERT INTO duty_locations SET id=" .. newIndex .. ", factionID=" .. mysql:escape_string(factionID) .. ", name='VEHICLE', vehicleid=" .. mysql:escape_string(vehicleID) .. ", model=" .. getElementModel(element))
 			setElementData(resourceRoot, "maxlindex", newIndex)
@@ -1143,9 +1338,13 @@ addEvent("Duty:AddVehicle", true)
 addEventHandler("Duty:AddVehicle", resourceRoot, addVehicle)
 
 function removeLocation(removeID, factionID)
-	locations[tonumber(factionID)][tonumber(removeID)] = nil
+	local allowed, factionID = authorizeDutyMutation("remove faction duty location", factionID)
+	if not allowed then return false end
+	removeID = isPositiveInteger(removeID)
+	if not removeID or not locations[factionID] or not locations[factionID][removeID] then return false end
+	locations[factionID][removeID] = nil
 	exports.duty:destroyDutyColShape(factionID, removeID)
-	mysql:query_free("DELETE FROM duty_locations WHERE id=" .. removeID)
+	mysql:query_free("DELETE FROM duty_locations WHERE id=" .. removeID .. " AND factionID=" .. factionID)
 	exports.logs:dbLog(client, 35, "fa" .. tostring(factionID), "Removed Location #" .. removeID)
 	--outputChatBox("Duty Location removed!", client, 0, 255, 0)
 
@@ -1156,8 +1355,12 @@ addEvent("Duty:RemoveLocation", true)
 addEventHandler("Duty:RemoveLocation", resourceRoot, removeLocation)
 
 function removeDuty(removeID, factionID)
-	custom[tonumber(factionID)][tonumber(removeID)] = nil
-	mysql:query_free("DELETE FROM duty_custom WHERE id=" .. removeID)
+	local allowed, factionID = authorizeDutyMutation("remove faction duty package", factionID)
+	if not allowed then return false end
+	removeID = isPositiveInteger(removeID)
+	if not removeID or not custom[factionID] or not custom[factionID][removeID] then return false end
+	custom[factionID][removeID] = nil
+	mysql:query_free("DELETE FROM duty_custom WHERE id=" .. removeID .. " AND factionID=" .. factionID)
 	exports.logs:dbLog(client, 35, "fa" .. tostring(factionID), "Removed duty #" .. removeID)
 	--outputChatBox("Custom Duty Loadout removed!", client, 0, 255, 0)
 
@@ -1219,7 +1422,16 @@ end
 
 addEvent("faction-system.showChangeRankGUI", true)
 addEventHandler("faction-system.showChangeRankGUI", root, function(playerName, factionID)
-	local factionID = tonumber(factionID)
+	local allowed, factionID = authorizeFactionAction(client, factionID, "change_member_rank", "open member rank editor")
+	if not allowed or type(playerName) ~= "string" or #playerName < 1 or #playerName > 64 then return false end
+	local targetCharacterID = exports.global:getCharacterIDFromName(playerName)
+	if not targetCharacterID then return false end
+	local membershipQuery = dbQuery(exports.mysql:getConn("mta"), "SELECT faction_rank FROM characters_faction WHERE character_id=? AND faction_id=? LIMIT 1", targetCharacterID, factionID)
+	local membershipRows = dbPoll(membershipQuery, 10000)
+	if not membershipRows or #membershipRows == 0 then
+		if not membershipRows then dbFree(membershipQuery) end
+		return false
+	end
 
 	local ranks = {}	-- Ranks Table
 	local def_table		-- Default Rank Table
@@ -1239,19 +1451,26 @@ end)
 addEvent("faction-system.saveNewRank", true)
 addEventHandler("faction-system.saveNewRank", root, 
 	function(playerName, oldRank, newRank, factionID)
-		local fID = tonumber(factionID)
-		local plrRank = getPlayerFactionRank(client)
+		local allowed, fID = authorizeFactionAction(client, factionID, "change_member_rank", "change member rank")
+		if not allowed or type(playerName) ~= "string" or #playerName < 1 or #playerName > 64
+			or type(oldRank) ~= "string" or type(newRank) ~= "string" then return false end
 		local oldRank = getFactionRankIDByName(fID, oldRank)
 		local newRank = getFactionRankIDByName(fID, newRank)
-		local rankName = getRankName(newRank)
 		local charID = exports.global:getCharacterIDFromName(playerName)
+		if not oldRank or not newRank or getRankFaction(oldRank) ~= fID or getRankFaction(newRank) ~= fID or not charID then return false end
+		local membershipQuery = dbQuery(exports.mysql:getConn("mta"), "SELECT cf.faction_rank FROM characters_faction cf INNER JOIN characters c ON c.id=cf.character_id WHERE cf.character_id=? AND cf.faction_id=? AND c.charactername=? LIMIT 1", charID, fID, playerName)
+		local membershipRows = dbPoll(membershipQuery, 10000)
+		if not membershipRows or #membershipRows == 0 or tonumber(membershipRows[1].faction_rank) ~= oldRank then
+			if not membershipRows then dbFree(membershipQuery) end
+			return false
+		end
 
 		if (oldRank == newRank) then
 			outputChatBox("You cannot change a person's faction rank to the same rank.", client, 255, 125, 0)
 			return
 		end
 		
-		dbExec(exports.mysql:getConn("mta"), "UPDATE `characters_faction` SET `faction_rank` = ? WHERE `character_id` = ? AND `faction_id` = ?", newRank, charID, fID)
+		if not dbExec(exports.mysql:getConn("mta"), "UPDATE `characters_faction` SET `faction_rank` = ? WHERE `character_id` = ? AND `faction_id` = ?", newRank, charID, fID) then return false end
 		local highOrLow = ""
 		if (getSeniorRank(fID, newRank, oldRank) == newRank) then
 			highOrLow = "promoted"
@@ -1261,11 +1480,14 @@ addEventHandler("faction-system.saveNewRank", root,
 		local thePlayer = exports.global:getPlayerFromCharacterID(charID)
 		if thePlayer then
 			local factionInfo = getElementData(thePlayer, "faction")
-			factionInfo[fID].rank = newRank
-			exports.anticheat:changeProtectedElementDataEx(thePlayer, "faction", factionInfo, true)
+			if type(factionInfo) == "table" and factionInfo[fID] then
+				factionInfo[fID].rank = newRank
+				exports.anticheat:changeProtectedElementDataEx(thePlayer, "faction", factionInfo, true)
+			end
 		end	
 
 		local rankName = getRankName(newRank)
 		exports.factions:sendNotiToAllFactionMembers(fID, playerName:gsub("_", " ") .. " was "..highOrLow.." from '" .. getRankName(oldRank) .. "' to '" .. rankName .. "' by "..getPlayerName(client):gsub("_", " "))
+		exports.logs:dbLog(client, 35, "fa" .. tostring(fID), "Changed faction rank for " .. playerName .. " from " .. tostring(oldRank) .. " to " .. tostring(newRank))
 	end
 )

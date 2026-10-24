@@ -154,7 +154,12 @@ end
 
 ------------------------------------------
 function login( charid, silent )
-	charid = tonumber(charid) or getElementData( source, "dbid" )
+	local requester = client or source
+	if client and client ~= source then return false end
+	if not isElement(requester) or getElementType(requester) ~= "player" or getElementData(requester, "loggedin") ~= 1 then return false end
+	-- A remote caller may not select another character; only the server-side active character is authoritative.
+	charid = tonumber(getElementData(requester, "dbid"))
+	if not charid then return false end
 	local accountQuery = dbQuery( exports.mysql:getConn('mta'), "SELECT * FROM mdc_users WHERE `charid` = ? ", charid )
 	local res, nums, id = dbPoll( accountQuery, 10000 )
 	if res and nums > 0 then
@@ -162,16 +167,17 @@ function login( charid, silent )
 		for _, row in pairs( res ) do
 			account[ row.organization ] = row.level
 		end
-		exports.anticheat:setEld( source, "mdc_account", account, 'one' )
+		exports.anticheat:setEld( requester, "mdc_account", account, 'one' )
 		if silent then
 			return account
 		else
-			triggerEvent( 'mdc:main', source )
+			triggerEvent( 'mdc:main', requester )
 		end
 	else
 		dbFree( accountQuery )
 		if not silent then
-			outputChatBox( "You do not have an account with sufficient access to use the MDC.", source, 255, 155, 155 )
+			exports.anticheat:setEld( requester, "mdc_account", false, 'one' )
+			outputChatBox( "You do not have an account with sufficient access to use the MDC.", requester, 255, 155, 155 )
 		end
 	end
 end
@@ -179,6 +185,16 @@ addEvent( 'mdc:login', true )
 addEventHandler( 'mdc:login', root, login )
 
 function main ( )
+	local requester = client or source
+	if client and client ~= source then return false end
+	if not isElement(requester) or getElementType(requester) ~= "player" or getElementData(requester, "loggedin") ~= 1 then return false end
+	local charid = tonumber(getElementData(requester, "dbid"))
+	if not charid then return false end
+	local account = login(charid, true)
+	if not account then
+		exports.anticheat:setEld( requester, "mdc_account", false, 'one' )
+		return false
+	end
 	local warrants = { }
 	local calls = { }
 

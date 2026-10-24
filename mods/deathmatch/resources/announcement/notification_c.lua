@@ -189,14 +189,10 @@ end
 addEventHandler("onClientRender",getRootElement(), drawPmPreviews)
 
 function deleteNotisServerSide()
-	local delete = nil
+	local delete = {}
 	if #notis_pending_deleted > 0 then
 		for i, noti in pairs(notis_pending_deleted) do
-			if not delete then
-				delete = "id="..noti.id
-			else
-				delete = delete.." OR id="..noti.id
-			end
+			delete[#delete + 1] = noti.id
 		end
 		notis_pending_deleted = {}
 	end
@@ -204,14 +200,10 @@ function deleteNotisServerSide()
 end
 
 function readNotisServerSide()
-	local read = nil
+	local read = {}
 	if #notis_pending_read > 0 then
 		for i, noti in pairs(notis_pending_read) do
-			if not read then
-				read = "id="..noti.id
-			else
-				read = read.." OR id="..noti.id
-			end
+			read[#read + 1] = noti.id
 		end
 		notis_pending_read = {}
 	end
@@ -256,20 +248,8 @@ function openNoti(noti)
 			 	return tonumber(a.read) < tonumber(b.read)
 			end
 		end)
-		local opm = nil
 		if noti.type and tonumber(noti.type) then
-			opm = {}
-			opm.sender = noti.type
-			opm.sentdate = noti.fdate
-			local text = noti.details and noti.details or nil
-			if text then
-				if string.len(text) > 20 then
-					text = string.sub(text, 1, 20)..".."
-				end
-			end
-			opm.details = text
-			opm.receiver = getElementData(localPlayer, "account:username")
-			triggerServerEvent("readNoti", localPlayer, noti.id, opm)
+			triggerServerEvent("readNoti", localPlayer, noti.id)
 		end
 	end
 end

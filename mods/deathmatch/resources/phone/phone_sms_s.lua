@@ -1,6 +1,17 @@
 --MAXIME
 local messageLimit = 20
 local threadLimit = 100
+local function getRequester()
+    if client and client ~= source then return nil end
+    return client or source
+end
+
+local function ownsPhone(player, phone)
+    phone = tonumber(phone)
+    return isElement(player) and getElementType(player) == "player"
+        and getElementData(player, "loggedin") == 1 and phone
+        and exports.global:hasItem(player, 2, phone) and phone or nil
+end
 function getOneSMSThread(fromPhone, threadIndex)
     local thread = {}
     local query = mysql:query("SELECT *, TIME_TO_SEC(TIMEDIFF(NOW(), `date`)) AS `secdiff` FROM `phone_sms` WHERE (`from`='"..fromPhone.."' AND `to`='"..threadIndex.."') OR (`from`='"..threadIndex.."' AND `to`='"..fromPhone.."') ORDER BY `date` DESC LIMIT "..messageLimit)
@@ -13,11 +24,14 @@ function getOneSMSThread(fromPhone, threadIndex)
 end
 
 function fetchSMS(fromPhone, forceUpdate, forceUpdateContactList1)
+    local player = getRequester()
+    if not player then return end
+    fromPhone = ownsPhone(player, fromPhone)
     fromPhone = tonumber(fromPhone)
     local SMSs = {}
     if fromPhone then
         if forceUpdateContactList1 then
-            forceUpdateContactList(source, fromPhone)
+            forceUpdateContactList(player, fromPhone)
         end
 
         local query = mysql:query("SELECT *, TO_SECONDS(`date`) AS `datesec` FROM `phone_sms` WHERE `from`='"..fromPhone.."' OR `to`='"..fromPhone.."' ORDER BY `date` DESC ")
@@ -28,25 +42,24 @@ function fetchSMS(fromPhone, forceUpdate, forceUpdateContactList1)
         end
     end
 
-    triggerClientEvent(source, "phone:receiveSMSFromServer", source, fromPhone, SMSs, forceUpdate)
+    triggerClientEvent(player, "phone:receiveSMSFromServer", player, fromPhone, SMSs, forceUpdate)
 end
 addEvent("phone:fetchSMS", true)
 addEventHandler("phone:fetchSMS", root, fetchSMS)
 
 function fetchOneSMSThread(fetchForPhone, messageSentTo, outGoing, forceUpdateContactList1, limit)
-    fetchForPhone = tonumber(fetchForPhone)
+    local player = getRequester()
+    if not player then return end
+    fetchForPhone = ownsPhone(player, fetchForPhone)
     messageSentTo = tonumber(messageSentTo)
     local SMSs = {}
     if fetchForPhone and messageSentTo then
         if forceUpdateContactList1 then
-            forceUpdateContactList(source, fetchForPhone)
+            forceUpdateContactList(player, fetchForPhone)
         end
         
-        if limit and tonumber(limit) then
-            limit = "LIMIT "..limit
-        else
-            limit = "LIMIT 10"
-        end
+        limit = math.min(math.max(tonumber(limit) or 10, 1), 100)
+        limit = "LIMIT "..limit
         local query = mysql:query("SELECT *, TO_SECONDS(`date`) AS `datesec` FROM `phone_sms` WHERE (`from`='"..fetchForPhone.."' AND `to`='"..messageSentTo.."') OR (`from`='"..messageSentTo.."' AND `to`='"..fetchForPhone.."') ORDER BY `date` DESC "..limit)
         while query do
             local row = mysql:fetch_assoc(query)
@@ -55,24 +68,32 @@ function fetchOneSMSThread(fetchForPhone, messageSentTo, outGoing, forceUpdateCo
         end
     end
     --outputDebugString("fetchOneSMSThread / "..getPlayerName(source))
-    triggerClientEvent(source, "phone:receiveOneSMSThreadFromServer", source, fetchForPhone, messageSentTo, SMSs, outGoing)
+    triggerClientEvent(player, "phone:receiveOneSMSThreadFromServer", player, fetchForPhone, messageSentTo, SMSs, outGoing)
 end
 addEvent("phone:fetchOneSMSThread", true)
 addEventHandler("phone:fetchOneSMSThread", root, fetchOneSMSThread)
 
 function sendSMS(from, to, content, private, showChatNotification)
-    from = tonumber(from)
+    local player = getRequester()
+    if not player then return false end
+    from = ownsPhone(player, from)
     to = tonumber(to)
-    private = tonumber(private) == 1 and 1 or 0
-    if not from or not to or not content or string.len(content) < 1 then
+    local powerOn, isSecret
+    if from then
+        local ringtone
+        powerOn, ringtone, isSecret = getPhoneSettings(from, true)
+    end
+    private = tonumber(isSecret) == 1 and 1 or 0
+    if not from or not to or not content or type(content) ~= "string" or string.len(content) < 1 or string.len(content) > 120 then
         return false
     end
+    if not powerOn or powerOn == 0 then return false end
 
     mysql:query_insert_free("INSERT INTO `phone_sms` SET `from`='"..from.."', `to`='"..to.."', `content`='"..exports.global:toSQL(content).."', private="..private)
-    local loggedElements = {source, "ph"..tostring(from), "ph"..tostring(to) }
+    local loggedElements = {player, "ph"..tostring(from), "ph"..tostring(to) }
 
     if showChatNotification then
-        outputChatBox("SMS to #" .. to .. ": " .. content, source, 120, 255, 80)
+        outputChatBox("SMS to #" .. to .. ": " .. content, player, 120, 255, 80)
     end
 
     local alertUser = true
@@ -81,9 +102,9 @@ function sendSMS(from, to, content, private, showChatNotification)
         if not t_powerOn then --not existed
             local notExisted = "Delivery has failed to these recipients: #"..to..". Number does not exist."
             mysql:query_insert_free("INSERT INTO `phone_sms` SET `from`='"..to.."', `to`='"..from.."', `content`='"..exports.global:toSQL(notExisted).."' ")
-            triggerEvent("phone:fetchOneSMSThread", source, from, to, true)
+            triggerEvent("phone:fetchOneSMSThread", player, from, to, true)
 
-            exports['logs']:dbLog(source, 30, loggedElements, content)
+            exports['logs']:dbLog(player, 30, loggedElements, content)
             return false
         end
 
@@ -100,9 +121,9 @@ function sendSMS(from, to, content, private, showChatNotification)
             triggerClientEvent(target, "newSMSReceived", resourceRoot, from, to, content)
         end
     end
-    triggerEvent("phone:fetchOneSMSThread", source, from, to, true)
+    triggerEvent("phone:fetchOneSMSThread", player, from, to, true)
 
-    exports['logs']:dbLog(source, 30, loggedElements, content)
+    exports['logs']:dbLog(player, 30, loggedElements, content)
 end
 addEvent("phone:sendSMS", true)
 addEventHandler("phone:sendSMS", root, sendSMS)
@@ -159,8 +180,11 @@ addEvent("phone:startRingingSMS", true)
 addEventHandler("phone:startRingingSMS", root, startRingingSMS)
 
 function updateSMSViewedState(fromPhone, threadIndex)
-    if mysql:query_free("UPDATE `phone_sms` SET `viewed`=1 WHERE `from`='"..threadIndex.."' AND `to`='"..fromPhone.."' ") then
-        triggerEvent("phone:fetchOneSMSThread", source, fromPhone, threadIndex)
+    local player = getRequester()
+    fromPhone = player and ownsPhone(player, fromPhone)
+    threadIndex = tonumber(threadIndex)
+    if fromPhone and threadIndex and mysql:query_free("UPDATE `phone_sms` SET `viewed`=1 WHERE `from`='"..threadIndex.."' AND `to`='"..fromPhone.."' ") then
+        triggerEvent("phone:fetchOneSMSThread", player, fromPhone, threadIndex)
     end
 end
 addEvent("phone:updateSMSViewedState", true)

@@ -1,3 +1,59 @@
+# OwlGaming MTA — Rebuild in Progress
+
+This repository is an active overhaul of the OwlGaming roleplay gamemode for Multi Theft Auto (MTA). It carries forward a large, mature codebase while we map how its resources work together, repair defects, modernize server-side validation, and make the project practical for independent server owners to configure and run.
+
+**This is work in progress.** The inherited code and setup instructions have not yet been validated as a complete, working server deployment. Source reviews and selected code changes are underway; do not treat the current branch as a tested release.
+
+## Project direction
+
+- Keep the gamemode self-hostable and suitable for importing into another operator's server.
+- Make account, character, gameplay, and routine staff workflows usable in game without requiring a website.
+- Keep Discord identity, login, and role-based authorization optional. Role IDs and integration settings will be operator-configured; no particular Discord server or role set is assumed.
+- Separate staff authority from supporter/donor levels. Supporter levels represent donor benefits and must not grant staff permissions.
+- Provide a documented API boundary so an independently built website or service can integrate without coupling core gameplay to that website.
+- Make external services such as media storage and metrics/log search optional adapters that can be enabled by an operator.
+- Document what resources do, how players and staff use them, how operators configure them, and how they depend on one another.
+
+These are project goals, not claims that each integration or workflow is already implemented.
+
+## Current state
+
+The repository is in source-review and hardening work. The existing resource tree, account and character flows, staff/faction systems, vehicle and property features, and data model are being documented and reviewed incrementally. Some source-level defects and authorization boundaries have been corrected, and findings are tracked in GitHub Issues. Runtime behavior remains unverified until the project is brought up in a controlled MTA and database environment.
+
+The inherited database and configuration still reflect the legacy gamemode. Schema restructuring, compatibility, deployment requirements, and upgrade/migration behavior are open work. No Discord role IDs, bot credentials, API secrets, or server-specific settings are supplied by this repository.
+
+## Documentation and project tracking
+
+Start with these guides, which are being expanded alongside the source review:
+
+- [Rebuild plan](REBUILD_PLAN.md) — phases, priorities, and readiness work.
+- [Gamemode architecture guide](GAMEMODE_GUIDE.md) — major systems and resource relationships.
+- [Resource catalog](RESOURCE_CATALOG.md) and [resource startup inventory](RESOURCE_INVENTORY.csv) — manifest coverage and startup inventory.
+- [Feature usage guide](FEATURE_USAGE_GUIDE.md) — feature discovery and usage notes.
+- [Player wiki](PLAYER_WIKI.md) — player-facing workflows and questions.
+- [Staff and admin guide](STAFF_ADMIN_GUIDE.md) — staff capabilities and operational procedures.
+- [Server operator guide](SERVER_OPERATOR_GUIDE.md) — setup, configuration, dependencies, and hosting notes.
+- [Codebase review](CODEBASE_REVIEW.md) and [enhancement register](ENHANCEMENT_REGISTER.md) — findings and improvement opportunities.
+- [Project knowledge log](PROJECT_KNOWLEDGE.md) — consolidated discoveries and decisions.
+- [Discord identity and permissions design](DISCORD_AUTH_DESIGN.md) and [Discord integration plan](DISCORD_INTEGRATION_PLAN.md) — proposed identity linking and configurable role-to-capability mapping.
+- [Optional integration API contract](API_CONTRACT.md) — boundary for future external clients and services.
+- [In-game UI framework plan](UI_FRAMEWORK_PLAN.md) — a future direction for consistent in-game interfaces.
+- [Issues and Discussions index](DISCUSSIONS_AND_ISSUES.md) — published tracker links and documentation workflow.
+- [Coding conventions](coding_conventions.md) and [useful functions](useful_functions.md) — inherited developer references under review.
+
+Use [GitHub Issues](https://github.com/itschase/OwlMTA-2026/issues) for actionable defects and implementation tasks. Use [GitHub Discussions](https://github.com/itschase/OwlMTA-2026/discussions) for feature plans, resource documentation, gameplay and staff guidance, operator knowledge, and design questions. Record source findings as findings; mark runtime claims as unverified until tested on a server.
+
+## Development status and contributions
+
+Changes should preserve existing player workflows where possible, validate remote event callers and server-owned state, and make authority decisions using explicit capabilities rather than trusting client-supplied values. Discord role mappings should remain configurable and optional, with supporter tiers modeled separately from staff access.
+
+Before proposing a behavior change, identify the resource, its metadata and dependencies, the client/server event flow, related data tables, and the operator-facing configuration. For each new or changed feature, document player use, staff use, operator setup, and known limitations as applicable. Runtime validation should be recorded separately from static source review.
+
+See [Rebuild plan](REBUILD_PLAN.md) for the current work sequence. Release and deployment steps are still being verified; the previous source README is preserved below for historical reference only.
+
+<details>
+<summary>Original source README</summary>
+
 # OwlGaming MTA
 
 This repository contains the OwlGaming MTA codebase for Multi Theft Auto. The recommended way to deploy the code is using a docker image.
@@ -24,14 +80,6 @@ Logs are written to `mods/deathmatch/resources/logs/logs` as they are created in
 * [Coding Conventions](coding_conventions.md)
 * [Useful Functions](useful_functions.md)
 
-## Rebuild and Development Notes
-
-* [Gamemode Architecture Guide](GAMEMODE_GUIDE.md)
-* [Feature Usage Guide](FEATURE_USAGE_GUIDE.md)
-* [Discord Identity and Permissions Design](DISCORD_AUTH_DESIGN.md)
-* [Codebase Review and Issue Tracker](CODEBASE_REVIEW.md)
-* [Resource Startup Inventory](RESOURCE_INVENTORY.csv)
-
 ## Docker Build Environment Variables
 
 ### MTASERVER.CONF
@@ -55,3 +103,5 @@ Logs are written to `mods/deathmatch/resources/logs/logs` as they are created in
 
 - `FORUMS_API_KEY`
 - `IMGUR_API_KEY`
+
+</details>

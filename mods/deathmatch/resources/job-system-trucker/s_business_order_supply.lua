@@ -39,7 +39,9 @@ function orderSupplies(thePlayer, commandName, money)
 		outputChatBox("SYNTAX: /" .. commandName .. " [Money spend on supplies] - Place an order of supplies to RS Haul to maintain your business.", thePlayer, 255, 194, 14)
 		return false
 	end
-	local done, why = remoteOrderSupplies(thePlayer, money, string.lower(commandName) == "aordersupplies")
+	local supplies = money / oneSupply
+	local isAdmin = string.lower(commandName) == "aordersupplies" and exports.integration:isPlayerAdmin(thePlayer)
+	local done, why = remoteOrderSupplies(thePlayer, supplies, money, isAdmin)
 	outputChatBox(why,thePlayer, 255, 194, 14)
 	return done
 end
@@ -47,13 +49,15 @@ addCommandHandler("ordersupplies", orderSupplies, false, false)
 
 function adminOrderSupplies(thePlayer, commandName, money)
 	if exports.integration:isPlayerAdmin(thePlayer) then
-		orderSupplies(thePlayer, commandName, tonumber(money)>5000 and 5000 or money) -- Noone should be able to give away too much supplies as it is expensive as fuck atm.
+		local amount = tonumber(money) or 0
+		orderSupplies(thePlayer, commandName, amount > 5000 and 5000 or amount) -- Noone should be able to give away too much supplies as it is expensive as fuck atm.
 	end
 end
 addCommandHandler("aordersupplies", adminOrderSupplies, false, false)
 
 local function canOrderSupplies(player, is_admin, money)
-	if money%1~=0 or money <= 0 then
+	money = tonumber(money)
+	if not money or money%1~=0 or money <= 0 then
 		return false, "Invalid money input."
 	end
 
@@ -72,6 +76,9 @@ local function canOrderSupplies(player, is_admin, money)
 	-- non business
 	if int_type ~= 1 then
 		return false, "You can not place a supplies order for a non business property"
+	end
+	if is_admin then
+		return true, false
 	end
 
 	-- if faction owned
@@ -102,7 +109,38 @@ local function canOrderSupplies(player, is_admin, money)
 end
 
 function remoteOrderSupplies(thePlayer, supplies, money, isAdmin)
-	if source then thePlayer = source end
+	-- For client-triggered callers, the event's client is authoritative. Export
+	-- callers and command handlers retain their explicit server-side player.
+	if client and isElement(client) and getElementType(client) == "player" then
+		thePlayer = client
+	end
+	if not isElement(thePlayer) or getElementType(thePlayer) ~= "player" then
+		return false, "Invalid player."
+	end
+	local admin = isAdmin == true and exports.integration:isPlayerAdmin(thePlayer)
+	local amount = tonumber(money)
+	if type(supplies) ~= "number" and type(supplies) ~= "table" then
+		return false, "Invalid supply amount."
+	end
+	if type(supplies) == "number" and (supplies <= 0 or supplies ~= supplies or supplies == math.huge) then
+		return false, "Invalid supply amount."
+	end
+	if type(supplies) == "table" then
+		local hasSupply = false
+		for key, value in pairs(supplies) do
+			local quantity = tonumber(value)
+			if type(key) ~= "string" or not quantity or quantity < 0 or quantity ~= quantity or quantity == math.huge then
+				return false, "Invalid supply amount."
+			end
+			if quantity > 0 then hasSupply = true end
+		end
+		if not hasSupply then return false, "Invalid supply amount." end
+	end
+	local authorized, payerOrReason = canOrderSupplies(thePlayer, admin, amount)
+	if not authorized then return false, payerOrReason end
+	local payer = payerOrReason
+	if payer == nil then payer = true end -- true means the player wallet
+	if payer ~= true and payer ~= false and not isElement(payer) then return false, "Invalid business payer." end
 
 	--Find the closest interior on world map.
 	local safeCount = 0 -- To prevent freezing server in the worst case.
@@ -119,23 +157,37 @@ function remoteOrderSupplies(thePlayer, supplies, money, isAdmin)
 		return false, "Your interior has no entrance from world map. Therefore, RS Haul Driver will not be able to reach here. Hit F1 for assistance."
 	end
 
+	-- Confirm funds above before creating the delivery order. If the order
+	-- cannot be recorded after payment, refund the same server-derived payer.
+	local charged = false
+	if payer == true then
+		charged = exports.global:takeMoney(thePlayer, amount)
+	elseif payer ~= false then
+		charged = exports.bank:takeBankMoney(payer, amount)
+	else
+		charged = true -- administrator order
+	end
+	if not charged then return false, "The selected payer no longer has enough money." end
 	local done, why = addOrder(getElementDimension(thePlayer), supplies, x, y, z, name)
 	if done then
-		if isAdmin then
+		if admin then
 			exports["interior-manager"]:addInteriorLogs(getElementDimension(thePlayer), "aordersupplies ~ $"..money, thePlayer)
 		else
 			local gender = getElementData(thePlayer, 'gender')
 			local customerName = exports.global:getPlayerName(thePlayer)
 			notifyTruckers("RS Haul Operator: "..(gender == 0 and "Mr. " or "Mrs. ")..customerName.." ordered supplies to "..name..". Deliver them as soon as you can please.", true)
-			if faction then
-				if exports.bank:takeBankMoney(faction, money) then
-					exports.bank:addBankTransactionLog(-getElementData(faction, 'id'), 0, money, 15, "RS Haul order for "..name.." ("..customerName..")", "RS Haul")
-				end
+			if isElement(payer) and getElementType(payer) == "team" then
+				exports.bank:addBankTransactionLog(-getElementData(payer, 'id'), 0, amount, 15, "RS Haul order for "..name.." ("..customerName..")", "RS Haul")
 			end
-			exports["interior-manager"]:addInteriorLogs(getElementDimension(thePlayer), "ordersupplies ~ $"..money, thePlayer)
+			exports["interior-manager"]:addInteriorLogs(getElementDimension(thePlayer), "ordersupplies ~ $"..amount, thePlayer)
 		end
 		return true, "Half of your order has been sent to the RS Haul delivery drivers."
 	else
+		if payer == true then
+			exports.global:giveMoney(thePlayer, amount)
+		elseif payer ~= false then
+			exports.bank:giveBankMoney(payer, amount)
+		end
 		return false, why
 	end
 end

@@ -1,4 +1,5 @@
 local outboundPhoneNumber = "Hidden No."
+local lastNpc911Call = {}
 
 function promptGUI(thePlayer)
 	if exports.integration:isPlayerSupporter(thePlayer) or exports.integration:isPlayerTrialAdmin(thePlayer) then
@@ -7,7 +8,19 @@ function promptGUI(thePlayer)
 end
 addCommandHandler("911", promptGUI)
 
-function doTheCall(thePlayer, location, message)
+function doTheCall(location, message)
+	local thePlayer = client
+	if not thePlayer or source ~= resourceRoot or getElementData(thePlayer, "loggedin") ~= 1 then return end
+	if not (exports.integration:isPlayerSupporter(thePlayer) or exports.integration:isPlayerTrialAdmin(thePlayer)) then return end
+	if type(location) ~= "string" or type(message) ~= "string" then return end
+	location, message = location:gsub("[%c]", " "), message:gsub("[%c]", " ")
+	if #location < 1 or #location > 160 or #message < 1 or #message > 500 then return end
+	local now = getTickCount()
+	if lastNpc911Call[thePlayer] and now - lastNpc911Call[thePlayer] < 10000 then
+		outputChatBox("Please wait before sending another NPC 911 call.", thePlayer, 255, 0, 0)
+		return
+	end
+	lastNpc911Call[thePlayer] = now
 
 	local playerStack = { }
 
@@ -54,3 +67,4 @@ function doTheCall(thePlayer, location, message)
 end
 addEvent("npc911", true)
 addEventHandler("npc911", getResourceRootElement(), doTheCall)
+addEventHandler("onPlayerQuit", root, function() lastNpc911Call[source] = nil end)

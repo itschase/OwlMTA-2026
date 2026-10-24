@@ -49,7 +49,7 @@
 	<script src="images_s.lua" type="server"/>
 	<script src="images_c.lua" type="client"/>
 	<export function="addImage" type="shared"/>
-	<export function="removeImage" type="shared" http="true"/>
+	<export function="removeImage" type="shared"/>
 	<export function="getImage" type="shared"/>
 	<file src="default.png"/>
 

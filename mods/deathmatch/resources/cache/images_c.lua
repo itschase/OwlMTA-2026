@@ -20,6 +20,8 @@ end
 -- If you intend to cache a new image from URL from client, call the function directly or use triggerServerEvent instead.
 function addImage(id, data)
 	local url = nil
+	id = tonumber(id)
+	if not id or id == 0 or id ~= math.floor(id) then return false end
 
 	if source then -- Triggered from server.
 		if not data or not id then
@@ -46,11 +48,11 @@ function addImage(id, data)
 	else -- Caching new image from client. 
 		if id and id > 0 then
 			local ply = false
-			if getElementData(localPlayer, "account:id") == id then
+			if tonumber(getElementData(localPlayer, "account:id")) == id then
 				ply = localPlayer
 			else
 				for _, player in pairs(exports.pool:getPoolElementsByType("player")) do
-					if getElementData(player, "account:id") == id then
+					if tonumber(getElementData(player, "account:id")) == id then
 						ply = player
 						break
 					end
@@ -64,7 +66,7 @@ function addImage(id, data)
 		end
 
 		if url then
-			triggerServerEvent("cache:addImage", localPlayer, url)
+			triggerServerEvent("cache:addImage", localPlayer, id, url)
 		else
 			--outputDebugString("[CACHE] Images / Client / addImage / Url is required parameters.")
 			return 
@@ -99,11 +101,11 @@ function getImage(id)
 
 	if id and id > 0 then
 		local ply = false
-		if getElementData(localPlayer, "account:id") == id then
+		if tonumber(getElementData(localPlayer, "account:id")) == id then
 			ply = localPlayer
 		else
 			for _, player in pairs(exports.pool:getPoolElementsByType("player")) do
-				if isElement(player) and getElementData(player, "account:id") == id then
+				if isElement(player) and tonumber(getElementData(player, "account:id")) == id then
 					ply = player
 					break
 				end

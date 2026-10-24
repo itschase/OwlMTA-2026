@@ -1,10 +1,56 @@
 FactionRanks = {}	
 RanksByFaction = {}
 
+local function authorizeRankAction(player, factionID, action)
+	local fID = tonumber(factionID)
+	local team = fID and getFactionFromID(fID)
+	local factions = player and isElement(player) and getElementData(player, "faction")
+	local member = type(factions) == "table" and fID and factions[fID]
+	local allowed = team and member and getElementData(player, "loggedin") == 1
+		and tonumber(getElementData(player, "dbid")) and hasMemberPermissionTo(player, fID, "modify_ranks")
+	if not allowed and player and isElement(player) then
+		exports.logs:dbLog(player, 35, "fa" .. tostring(fID or factionID), "Denied faction rank action " .. tostring(action))
+	end
+	return allowed and fID or false
+end
+
+local function isFactionRank(rankID, factionID)
+	local id = tonumber(rankID)
+	return id and id > 0 and id == math.floor(id) and getRankFaction(id) == factionID and getRankName(id) ~= nil and id
+end
+
+local function validRankName(name)
+	return type(name) == "string" and #name >= 1 and #name <= 32 and name:match("%S") ~= nil
+end
+
+local function validRankPermissions(permissions, factionID)
+	if type(permissions) ~= "table" then return false end
+	local available = {}
+	for _, permission in ipairs(getFactionPermissions(factionID) or {}) do
+		for index, known in ipairs(mem_permissions) do
+			if known[1] == permission[1] then available[index] = true end
+		end
+	end
+	local result, seen, count = {}, {}, 0
+	for key, value in pairs(permissions) do
+		count = count + 1
+		local index = tonumber(value)
+		if type(key) ~= "number" or key < 1 or key ~= math.floor(key) or count > #mem_permissions
+			or not index or index ~= math.floor(index) or not available[index] or seen[index] then
+			return false
+		end
+		seen[index] = true
+		result[#result + 1] = index
+	end
+	table.sort(result)
+	return result
+end
+
 
 function getRankInfo(factionID, player)
-	if (not client) then client = player end
-	local fID = tonumber(factionID)
+	player = player or client
+	local fID = authorizeRankAction(player, factionID, "view rank configuration")
+	if not fID then return false end
 	local ranks_ = getFactionRanks(fID, true)
 	local ranks = {}			-- Ranks Table
 	local rank_perms = {}		-- Permissions by Rank
@@ -26,7 +72,7 @@ function getRankInfo(factionID, player)
 	for i,perm in ipairs(permissions_) do
 		table.insert(permissions, perm[2])
 	end
-	triggerClientEvent(client, "faction-system.setRankInfo", resourceRoot, ranks, rank_perms, permissions, wages)
+	triggerClientEvent(player, "faction-system.setRankInfo", resourceRoot, ranks, rank_perms, permissions, wages)
 end
 addEvent("faction-system.getRankInfo", true)
 addEventHandler("faction-system.getRankInfo", root, getRankInfo)
@@ -36,18 +82,23 @@ addEventHandler("faction-system.getRankInfo", root, getRankInfo)
 
 addEvent("faction-system.addFactionRank", true)
 addEventHandler("faction-system.addFactionRank", root, function(rank, perms, factionID)
-	local fID = tonumber(factionID)
-		-- Check for Same Rank Name
+	local fID = authorizeRankAction(client, factionID, "add faction rank")
+	if not fID or not validRankName(rank) then return false end
+	local sourceRank = isFactionRank(perms, fID)
+	if not sourceRank then return false end
+	local rank_perms = validRankPermissions(getAllRankPermissions(sourceRank, true) or {}, fID)
+	if not rank_perms then return false end
+	-- Check for Same Rank Name
 	for i,rankID in ipairs(getFactionRanks(fID)) do
 		local rankName = getRankName(rankID)
-		if (rankName == rank) then
+		if rankName and rankName:lower() == rank:lower() then
 			outputChatBox("A rank with this name already exists. Choose another rank name.", client, 255, 100, 100)
 			return
 		end
 	end
 	
-	local rank_perms = getAllRankPermissions(perms, true) or {}
-	addFactionRank(fID, rank, rank_perms, client)
+	if not addFactionRank(fID, rank, rank_perms, client) then return false end
+	exports.logs:dbLog(client, 35, "fa" .. tostring(fID), "Added faction rank " .. rank)
 	getRankInfo(fID, client)
 	outputChatBox("Faction rank '"..rank.."' has been successfully created.", client, 255, 100, 100)
 	triggerClientEvent(client, "faction-system.closeAddFactionRankPanel", resourceRoot)
@@ -58,28 +109,33 @@ end)
 ------------------>>
 
 function addFactionRank(FactionID, rankName, permissions, plr)
-	local rank_perms = getAllRankPermissions(perms, true) or {}
+	local factionID = tonumber(FactionID)
+	if not factionID or not validRankName(rankName) then return false end
 	-- Add Permissions Set
 	if (type(permissions) ~= "table") then
 		permissions = getDefaultPermissionSet("New Member")
 	end
+	permissions = validRankPermissions(permissions, factionID)
+	if not permissions then return false end
 	permissions = table.concat(permissions, ",") or ""
-	local qh = dbQuery(exports.mysql:getConn("mta"),"INSERT INTO `faction_ranks` (`faction_id`, `name`, `permissions`) VALUES ('"..FactionID.."','"..rankName.."','"..permissions.."')")
+	local qh = dbQuery(exports.mysql:getConn("mta"), "INSERT INTO `faction_ranks` (`faction_id`, `name`, `permissions`) VALUES (?, ?, ?)", factionID, rankName, permissions)
 	local res, num, rID = dbPoll(qh, 10000)
 
 	local rankID = tonumber(rID)
 		-- Rank by Faction Association
-	if not (RanksByFaction[FactionID]) then RanksByFaction[FactionID] = {} end
-	table.insert(RanksByFaction[FactionID], rankID)
+	if not rankID then return false end
+	if not (RanksByFaction[factionID]) then RanksByFaction[factionID] = {} end
+	table.insert(RanksByFaction[factionID], rankID)
 	if not FactionRanks[rankID] then FactionRanks[rankID] = {} end
 	FactionRanks[rankID]["name"] = rankName
 	FactionRanks[rankID]["permissions"] = permissions
 	FactionRanks[rankID]["isDefault"] = "0"
 	FactionRanks[rankID]["isLeader"] = "0"
-	FactionRanks[rankID]["faction_id"] = FactionID
+	FactionRanks[rankID]["faction_id"] = factionID
 	local factionRanks = {}
 	factionRanks[rankID] = rankName
-	local theTeam = getFactionFromID(FactionID)
+	local theTeam = getFactionFromID(factionID)
+	if not theTeam then return false end
 	for i,v in pairs(getElementData(theTeam, "ranks")) do
 		factionRanks[i] = v
 	end	
@@ -88,10 +144,10 @@ function addFactionRank(FactionID, rankName, permissions, plr)
 	if rankOrder then
 		local newOrder = rankOrder..","..rankID
 		exports.anticheat:setEld(theTeam, "rank_order", newOrder, 'all') 
-		dbExec(exports.mysql:getConn("mta"), "UPDATE `factions` SET `rank_order` = '"..newOrder.."' WHERE `id` = "..FactionID)
+		dbExec(exports.mysql:getConn("mta"), "UPDATE `factions` SET `rank_order` = ? WHERE `id` = ?", newOrder, factionID)
 	end
 	exports.anticheat:setEld(theTeam, "ranks", factionRanks, 'all')
-	triggerClientEvent("faction-system.cacheRanks", client, FactionRanks)
+	if plr and isElement(plr) then triggerClientEvent(plr, "faction-system.cacheRanks", plr, FactionRanks) end
 	return true
 end
 
@@ -269,21 +325,20 @@ end)
 
 addEvent("faction-system.setFactionRankName", true)
 addEventHandler("faction-system.setFactionRankName", root, function(rankID, rankName, factionID)
-	if not hasMemberPermissionTo(client, factionID, "modify_ranks") then
-		return false
-	end
-	
-	local factionID = tonumber(factionID)
-		-- Check for Same Rank Name
+	local factionID = authorizeRankAction(client, factionID, "rename faction rank")
+	rankID = factionID and isFactionRank(rankID, factionID)
+	if not factionID or not rankID or not validRankName(rankName) then return false end
+	-- Check for Same Rank Name
 	for i,rank in ipairs(getFactionRanks(factionID)) do
 		local rankNm = getRankName(rank)
-		if (rankNm == rankName) then
+		if rank ~= rankID and rankNm and rankNm:lower() == rankName:lower() then
 			outputChatBox("A rank with this name already exists. Choose another rank name.", client, 255, 100, 100)
 			return
 		end
 	end
 	local oldName = getRankName(rankID)
-	dbExec(exports.mysql:getConn("mta"), "UPDATE `faction_ranks` SET `name` = '"..rankName.."' WHERE `id` = "..rankID)
+	if not dbExec(exports.mysql:getConn("mta"), "UPDATE `faction_ranks` SET `name` = ? WHERE `id` = ? AND `faction_id` = ?", rankName, rankID, factionID) then return false end
+	exports.logs:dbLog(client, 35, "fa" .. tostring(factionID), "Renamed faction rank " .. tostring(rankID) .. " to " .. rankName)
 	outputChatBox("The '"..oldName.."' rank has been renamed to '"..rankName.."'", client, 255, 100, 100)
 	FactionRanks[rankID]["name"] = rankName
 	local factionRanks = {}
@@ -304,14 +359,12 @@ end)
 
 addEvent("faction-system.removeFactionRank", true)
 addEventHandler("faction-system.removeFactionRank", root, function(rankID, factionID)
-	-- Security check.
-	if not hasMemberPermissionTo(client, factionID, "modify_ranks") then
-		return false
-	end
-
-	local factionID = tonumber(factionID)
+	local factionID = authorizeRankAction(client, factionID, "remove faction rank")
+	rankID = factionID and isFactionRank(rankID, factionID)
+	if not factionID or not rankID or getFactionRankData(rankID, "isDefault") == 1 then return false end
 	local rankName = getRankName(rankID)
-	dbExec(exports.mysql:getConn("mta"), "DELETE FROM `faction_ranks` WHERE id="..rankID) 
+	if not dbExec(exports.mysql:getConn("mta"), "DELETE FROM `faction_ranks` WHERE id=? AND faction_id=?", rankID, factionID) then return false end
+	exports.logs:dbLog(client, 35, "fa" .. tostring(factionID), "Removed faction rank " .. tostring(rankID))
 	dbQuery(resetPlayerRanks,{rankID, factionID},exports.mysql:getConn("mta"), "SELECT * FROM `characters_faction` WHERE `faction_rank` = ?", rankID)
 	outputChatBox("The '"..rankName.."' rank has been successfully deleted.", client, 255, 100, 100)
 	FactionRanks[rankID] = nil
@@ -326,7 +379,7 @@ addEventHandler("faction-system.removeFactionRank", root, function(rankID, facti
 			newrank_order = newrank_order..rID..","
 		end	
 	end	
-	dbExec(exports.mysql:getConn("mta"), "UPDATE `factions` SET `rank_order` = '"..newrank_order.."' WHERE `id` = "..factionID)
+	dbExec(exports.mysql:getConn("mta"), "UPDATE `factions` SET `rank_order` = ? WHERE `id` = ?", newrank_order, factionID)
 	exports.anticheat:setEld(theTeam, "rank_order", newrank_order, 'all')
 	exports.anticheat:setEld(theTeam, "ranks", factionRankTable, 'all')
 	getRankInfo(factionID, client)
@@ -359,15 +412,17 @@ end
 
 addEvent("faction-system.updateRankPermissions", true)
 addEventHandler("faction-system.updateRankPermissions", root, function(rankID, permissions, wage, factionID)
-	if not hasMemberPermissionTo(client, factionID, "modify_ranks") then
-		return false
-	end
-	
-	local factionID = tonumber(factionID)
+	local factionID = authorizeRankAction(client, factionID, "update rank permissions")
+	rankID = factionID and isFactionRank(rankID, factionID)
+	permissions = factionID and validRankPermissions(permissions, factionID)
+	local numericWage = (wage == nil or tostring(wage) == "") and 0 or tonumber(wage)
+	if not factionID or not rankID or not permissions or not numericWage or numericWage ~= numericWage
+		or numericWage < 0 or numericWage > 2500 then return false end
 	local rankName = getRankName(rankID)
-	local newWage = math.min(2500, math.max(0, tonumber(wage) or 0))
-	setAllRankPermissions(rankID, permissions, newWage, factionID)
-	triggerClientEvent("faction-system.cacheRanks", root, FactionRanks)
+	local newWage = numericWage
+	if not setAllRankPermissions(rankID, permissions, newWage, factionID) then return false end
+	exports.logs:dbLog(client, 35, "fa" .. tostring(factionID), "Updated permissions and wage for faction rank " .. tostring(rankID))
+	triggerClientEvent(root, "faction-system.cacheRanks", resourceRoot, FactionRanks)
 	outputChatBox("The permissions for '"..rankName.."' have been successfully updated.", client, 255, 100, 100)
 end) 
 
@@ -376,13 +431,24 @@ end)
 
 addEvent("faction-system.updateRankOrder", true)
 addEventHandler("faction-system.updateRankOrder", root, function(rankIDs, factionID)
-	if not hasMemberPermissionTo(client, factionID, "modify_ranks") then
-		return false
+	local factionID = authorizeRankAction(client, factionID, "reorder faction ranks")
+	if not factionID or type(rankIDs) ~= "table" then return false end
+	local currentRanks, seen = getFactionRanks(factionID), {}
+	if #rankIDs ~= #currentRanks then return false end
+	local keyCount = 0
+	for _, suppliedRankID in ipairs(rankIDs) do
+		keyCount = keyCount + 1
+		local rankID = isFactionRank(suppliedRankID, factionID)
+		if not rankID or seen[rankID] then return false end
+		seen[rankID] = true
 	end
-	
-	local factionID = tonumber(factionID)
+	for key in pairs(rankIDs) do
+		if type(key) ~= "number" or key < 1 or key > #currentRanks or key ~= math.floor(key) then return false end
+	end
+	if keyCount ~= #currentRanks then return false end
 	local theTeam = getFactionFromID(factionID)
-	sortFactionRanks(factionID, rankIDs, theTeam)
+	if not sortFactionRanks(factionID, rankIDs, theTeam) then return false end
+	exports.logs:dbLog(client, 35, "fa" .. tostring(factionID), "Reordered faction ranks")
 	getRankInfo(factionID, client)
 end)
 
@@ -393,7 +459,7 @@ function sortFactionRanks(factionID, ranks, theTeam)
 	if (not factionID or type(factionID) ~= "number") then return false end
 	if (not ranks or type(ranks) ~= "table") then return false end
 	ranks = table.concat(ranks, ",")
-	dbExec(exports.mysql:getConn("mta"), "UPDATE `factions` SET `rank_order` = '"..ranks.."' WHERE `id` = "..factionID)
+	if not dbExec(exports.mysql:getConn("mta"), "UPDATE `factions` SET `rank_order` = ? WHERE `id` = ?", ranks, factionID) then return false end
 	exports.anticheat:setEld(theTeam, "rank_order", ranks, 'all')
 	return true
 end

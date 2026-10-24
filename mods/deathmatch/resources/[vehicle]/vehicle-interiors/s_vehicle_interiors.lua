@@ -697,41 +697,73 @@ addEvent( "enterVehicleInterior", true )
 addEventHandler( "enterVehicleInterior", getRootElement( ),
 	function( vehicle )
 		--outputDebugString("enterVehicleInterior")
-		if vehicles[ vehicle ] then
-			if isVehicleLocked( vehicle ) then
-				outputChatBox( "You try the door handle, but it seems to be locked.", source, 255, 0, 0 )
-			else
-				local model = getElementModel(vehicle)
-				if(model == 577 or model == 592) then --texture change
-					triggerClientEvent(source, "vehicle-interiors:changeTextures", vehicle, model)
-				end
+		local player = client
+		if not player or source ~= player or not isElement(player) or getElementType(player) ~= "player" then
+			return
+		end
+		if not isElement(vehicle) or getElementType(vehicle) ~= "vehicle" then
+			return
+		end
 
-				if (model == 592) or (model == 435) then -- Entering with another vehicle?
-					if(isPedInVehicle(source)) then
-						if(getPedOccupiedVehicleSeat(source) == 0) then
-							local pedVehicle = getPedOccupiedVehicle(source)
-							exports.anticheat:changeProtectedElementDataEx(pedVehicle, "health", getElementHealth(pedVehicle), false)
-							for i = 0, getVehicleMaxPassengers( pedVehicle ) do
-								local p = getVehicleOccupant( pedVehicle, i )
-								if p then
-									triggerClientEvent( p, "CantFallOffBike", p )
-								end
-							end
-							local exit = vehicles[ vehicle ]
-							local x, y, z = getElementPosition(exit)
-							setTimer(warpVehicleIntoInteriorfunction, 500, 1, pedVehicle, getElementInterior(exit), getElementDimension(exit), x, y, z)
-						end
-						return
-					end
-				end
+		local exit = vehicles[vehicle]
+		local vehicleID = tonumber(getElementData(vehicle, "dbid"))
+		if not isElement(exit) or not vehicleID or vehicleID <= 0 then
+			return
+		end
+		if getElementInterior(player) ~= getElementInterior(vehicle) or getElementDimension(player) ~= getElementDimension(vehicle) then
+			return
+		end
 
-				local exit = vehicles[ vehicle ]
-				local x, y, z = getElementPosition(exit)
-				local targetInt, targetDim = getElementInterior(exit), getElementDimension(exit)
-				local teleportArr = { x = x, y = y, z = z, int = targetInt, dim = targetDim, rot = 0 }
-				exports.interior_system:setPlayerInsideInterior3(false, source, teleportArr)
+		-- Only accept entry from the physical entrance colshape used to show the client prompt.
+		local isNearEntrance = false
+		for _, attachedElement in ipairs(getAttachedElements(vehicle) or {}) do
+			if isElement(attachedElement) and getElementType(attachedElement) == "colshape"
+				and getElementInterior(player) == getElementInterior(attachedElement)
+				and getElementDimension(player) == getElementDimension(attachedElement)
+				and isElementWithinColShape(player, attachedElement) then
+				isNearEntrance = true
+				break
 			end
 		end
+		if not isNearEntrance then
+			return
+		end
+
+		local model = getElementModel(vehicle)
+		local playerVehicle = getPedOccupiedVehicle(player)
+		if playerVehicle then
+			-- Andromadas and trailers can load a driven vehicle; all other interiors are entered on foot.
+			if (model ~= 592 and model ~= 435) or getPedOccupiedVehicleSeat(player) ~= 0 then
+				return
+			end
+		end
+
+		if isVehicleLocked(vehicle) then
+			outputChatBox("You try the door handle, but it seems to be locked.", player, 255, 0, 0)
+			return
+		end
+
+		if model == 577 or model == 592 then -- texture change
+			triggerClientEvent(player, "vehicle-interiors:changeTextures", vehicle, model)
+		end
+
+		if playerVehicle then
+			exports.anticheat:changeProtectedElementDataEx(playerVehicle, "health", getElementHealth(playerVehicle), false)
+			for i = 0, getVehicleMaxPassengers(playerVehicle) do
+				local passenger = getVehicleOccupant(playerVehicle, i)
+				if passenger then
+					triggerClientEvent(passenger, "CantFallOffBike", passenger)
+				end
+			end
+			local x, y, z = getElementPosition(exit)
+			setTimer(warpVehicleIntoInteriorfunction, 500, 1, playerVehicle, getElementInterior(exit), getElementDimension(exit), x, y, z)
+			return
+		end
+
+		local x, y, z = getElementPosition(exit)
+		local targetInt, targetDim = getElementInterior(exit), getElementDimension(exit)
+		local teleportArr = { x = x, y = y, z = z, int = targetInt, dim = targetDim, rot = 0 }
+		exports.interior_system:setPlayerInsideInterior3(false, player, teleportArr)
 	end
 )
 

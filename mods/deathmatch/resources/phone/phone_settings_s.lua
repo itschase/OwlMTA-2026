@@ -2,7 +2,9 @@ local updateablePhoneSettings = {'turnedon', 'secretnumber', 'phonebook', 'ringt
 
 function updatePhoneSetting(fromPhone, index, value)
 	fromPhone = tonumber(fromPhone)
-	if fromPhone and index and value then
+	local player = client
+	if player and player == source and getElementData(player, "loggedin") == 1
+		and fromPhone and exports.global:hasItem(player, 2, fromPhone) and index and value then
 		for _, settingName in ipairs(updateablePhoneSettings) do
 			if settingName == index then
 				outputDebugString("[Phone] updatePhoneSetting / "..fromPhone.." / "..index.." / "..value)

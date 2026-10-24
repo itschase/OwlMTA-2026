@@ -4,7 +4,7 @@ addEventHandler("onClientChangeChar", getRootElement(), function ()
 			setElementData(localPlayer, "supervising", false)
 		end
 
-		triggerServerEvent("admin:disabledisappear", root, localPlayer)
+		triggerServerEvent("admin:disabledisappear", localPlayer)
  end)
 
 --Reworked by Chaos
@@ -255,7 +255,7 @@ function displayReconInfo()
 
 	-- Follow the recon target through interiors
 	if dim ~= getElementDimension(localPlayer) then
-		triggerServerEvent("recon:reattach", resourceRoot, reconTarget, int, dim)
+		triggerServerEvent("recon:reattach", resourceRoot)
 	end
 
 	if dim > 0 then

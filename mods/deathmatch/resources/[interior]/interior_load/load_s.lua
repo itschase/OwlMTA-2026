@@ -160,13 +160,14 @@ function loadOne( data, updatePlayers, massLoad )
 		end
 
 		--settings
-		local settings
+		local settings = {}
 		if data.settings then
-			settings = fromJSON(data.settings)
-		else
-			settings = {}
+			local decodedSettings = fromJSON(data.settings)
+			if type(decodedSettings) == "table" then
+				settings = decodedSettings
+			end
 		end
-		exports.anticheat:setEld(veh, "settings", settings or {}, false)
+		exports.anticheat:setEld(element, "settings", settings, false)
 
 		return true
 	-- load one.

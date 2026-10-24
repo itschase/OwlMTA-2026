@@ -294,9 +294,14 @@ end
 
 
 function checkExpiration(thePlayer, accountID)
-	if thePlayer and not accountID then
+	-- This event is used by the server-side login workflow. Reject every
+	-- remote invocation, and bind connected-player requests to that player's account.
+	if client then return false end
+	if isElement(thePlayer) and getElementType(thePlayer) == "player" then
 		accountID = getElementData(thePlayer, "account:id")
 	end
+	accountID = tonumber(accountID)
+	if not accountID or accountID < 1 then return false end
 
 	--local qh = dbQuery(exports.mysql:getConn('mta'), "SELECT id, punishpoints, punishdate, TIMESTAMPDIFF(DAY,punishdate,NOW()) AS date FROM accounts WHERE `id`=? AND TIMESTAMPDIFF(DAY,punishdate,NOW()) > 45 LIMIT 1", accountID)
 	local qh = dbQuery(exports.mysql:getConn('core'), "SELECT id, punishpoints, punishdate, TIMESTAMPDIFF(DAY,punishdate,NOW()) AS date FROM accounts WHERE `id`=? LIMIT 1", accountID)

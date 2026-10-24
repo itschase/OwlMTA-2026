@@ -21,7 +21,7 @@ function build_Dialog()
 	
 	gui["pushButton"] = guiCreateButton(250, 145, 75, 23, "Send", false, gui["_root"])
 	addEventHandler("onClientGUIClick", gui["pushButton"], function()
-			triggerServerEvent("npc911", getResourceRootElement(), localPlayer, guiGetText(gui["lineEdit"]), guiGetText(gui["lineEdit_2"]))
+			triggerServerEvent("npc911", resourceRoot, guiGetText(gui["lineEdit"]), guiGetText(gui["lineEdit_2"]))
 			destroyElement(gui["_root"])
 			showCursor(false)
 			guiSetInputMode("allow_binds")

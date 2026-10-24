@@ -17,7 +17,7 @@ for k, v in pairs( cells ) do
 		setElementData(v, "spawnoffset", -5, false)
 		setElementInterior(v, 10)
 		setElementDimension(v, 1158)
-	elseif k == 5 or k == 6 or k == 7 or k == 7 then
+	elseif k == 5 or k == 6 or k == 7 or k == 8 then
 		setElementData(v, "spawnoffset", -5, false)
 		setElementInterior(v, 10)
 		setElementDimension(v, 18)

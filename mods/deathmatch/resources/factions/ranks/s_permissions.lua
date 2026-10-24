@@ -23,26 +23,37 @@ mem_permissions = {
 -- Get Permissions
 ------------------->>
 function hasMemberPermissionTo(player, factionID, action)
-	if (not player or not action or not factionID) then return false end
-	if (not isElement(player) or getElementType(player) ~= "player" or type(action) ~= "string" or type(factionID) ~= "number") then return false end
 	local factionID = tonumber(factionID)
-	local rankID = 0
+	if not player or not action or not factionID or type(action) ~= "string" then return false end
+	if not isElement(player) or getElementType(player) ~= "player" then return false end
+
 	local faction = getElementData(player, "faction")
-	for i,v in pairs(faction) do
-		if i == factionID then
-			rankID = tonumber(v.rank)
-		end	
-	end	
-	local perm = FactionRanks[rankID]["permissions"] or ""
-	if perm ~= true then
-		local perProfile = split(perm, ",")
-		for i,v in ipairs(perProfile) do
-			v = tonumber(v)
-			if (mem_permissions[v][1] == action) then
-				return true
-			end
+	local member = type(faction) == "table" and faction[factionID]
+	local rankID = type(member) == "table" and tonumber(member.rank)
+	local rank = rankID and FactionRanks[rankID]
+	if not rank then return false end
+
+	local permissionIndex
+	for index, permission in ipairs(mem_permissions) do
+		if permission[1] == action then
+			permissionIndex = index
+			break
 		end
-	end	
+	end
+	if not permissionIndex then return false end
+
+	-- Some permissions are only available to particular faction types.
+	local theTeam = getFactionFromID(factionID)
+	if not theTeam then return false end
+	local factionType = tonumber(getElementData(theTeam, "type"))
+	if (permissionIndex == 16 or permissionIndex == 17) and (not factionType or factionType <= 1) then return false end
+	if permissionIndex == 18 and factionID ~= 4 then return false end
+
+	local perm = rank.permissions or ""
+	if perm == true then return true end
+	for _, value in ipairs(split(tostring(perm), ",")) do
+		if tonumber(value) == permissionIndex then return true end
+	end
 	return false
 end
 
@@ -82,8 +93,8 @@ function getFactionPermissions(factionID)
 	end
 	
 	local theTeam = getFactionFromID(factionID)
-	local factionType = getElementData(theTeam, "type")
 	if (theTeam) then
+		local factionType = tonumber(getElementData(theTeam, "type")) or 0
 		local perms = {}
 		for i,perm in ipairs(mem_permissions) do
 			table.insert(perms, {perm[1], perm[2]})

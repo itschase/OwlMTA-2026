@@ -51,18 +51,21 @@ function openLocationManager(thePlayer)
     end
 end
 addEvent("server:openLocationManager", true)
-addEventHandler("server:openLocationManager", root, openLocationManager)
+addEventHandler("server:openLocationManager", root, function()
+    if not client or source ~= client then return end
+    openLocationManager(client)
+end)
 addCommandHandler("tps", openLocationManager)
 
 function addNewLocation(thePlayer, newValue, newDesc)
     if canManageTPS(thePlayer) then
-        if not newValue or not newDesc then
+        if type(newValue) ~= "string" or type(newDesc) ~= "string" or #newValue < 1 or #newDesc < 1 then
             return nil
         else
             newValue = string.upper(tostring(newValue)) -- prevent duplications, looks more neat
         end
 
-        if string.len(newValue) >= 10 or string.len(newDesc) >= 25 then
+        if string.len(newValue) >= 10 or string.len(newDesc) >= 25 or newValue:find("[%c]") or newDesc:find("[%c]") then
             -- should have already been detected anyway
             return nil
         end
@@ -91,11 +94,15 @@ function addNewLocation(thePlayer, newValue, newDesc)
     end
 end
 addEvent("addNewLocation", true)
-addEventHandler("addNewLocation", root, addNewLocation)
+addEventHandler("addNewLocation", root, function(newValue, newDesc)
+    if not client or source ~= client then return end
+    addNewLocation(client, newValue, newDesc)
+end)
 
 function deleteLocation(thePlayer, id)
     if canManageTPS(thePlayer) then
-        if not id and not tonumber(id) then
+        id = tonumber(id)
+        if not id or id < 1 or id ~= math.floor(id) then
             return nil
         end
 
@@ -115,7 +122,10 @@ function deleteLocation(thePlayer, id)
     end
 end
 addEvent("deleteLocation", true)
-addEventHandler("deleteLocation", root, deleteLocation)
+addEventHandler("deleteLocation", root, function(id)
+    if not client or source ~= client then return end
+    deleteLocation(client, id)
+end)
 
 -- Teleport to location
 

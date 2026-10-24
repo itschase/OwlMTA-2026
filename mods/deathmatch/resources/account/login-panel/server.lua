@@ -10,6 +10,32 @@
 addEvent( 'account:character:select', true )
 local mysql = exports.mysql
 local accountCharacters = {}
+local tutorialSessions = {}
+local tutorialSessionSequence = 0
+
+local function getAuthenticatedAccountID(player)
+	if not isElement(player) or getElementType(player) ~= "player" or getElementData(player, "account:loggedin") ~= true then
+		return false
+	end
+	local accountID = tonumber(getElementData(player, "account:id"))
+	if not accountID or accountID < 1 or accountID ~= math.floor(accountID) then
+		return false
+	end
+	return accountID
+end
+
+local function getCharacterCount(accountID)
+	local qh = dbQuery(exports.mysql:getConn("mta"), "SELECT COUNT(*) AS chars FROM characters WHERE account = ?", accountID)
+	if not qh then
+		return false
+	end
+	local result = dbPoll(qh, 10000)
+	if not result or not result[1] then
+		return false
+	end
+	return tonumber(result[1].chars)
+end
+
 function validateCredentials(username,password,checksave)
 	if not (username == "") then
 		if not (password == "") then
@@ -53,6 +79,9 @@ function getAccountDetails(id)
 end
 
 function playerLogin(username,password,checksave)
+	if isElement(client) then
+		tutorialSessions[client] = nil
+	end
 	local encryptionRuleData, encryptionRuleQuery, accountCheckQuery, preparedQuery, accountData,newAccountHash,safeusername,safepassword = nil
 
 	if not validateCredentials(username,password,checksave) then
@@ -282,10 +311,29 @@ end
 addEvent("accounts:login:attempt",true)
 addEventHandler("accounts:login:attempt",getRootElement(),playerLogin)
 
-function playerFinishTutorial()
-	-- DONE TUTORIAL, RUN LOGIN
-	triggerClientEvent(client, "accounts:login:attempt", client, 0)
-    triggerEvent("social:account", client, getElementData(client, "account:id"))
+function playerFinishTutorial(sessionID)
+	local player = client
+	local accountID = getAuthenticatedAccountID(player)
+	local session = isElement(player) and tutorialSessions[player]
+	local requestedSession = tonumber(sessionID)
+	if not accountID or not session or session.accountID ~= accountID or not requestedSession or session.id ~= requestedSession then
+		return false
+	end
+
+	local characterCount = getCharacterCount(accountID)
+	if characterCount == false then
+		triggerClientEvent(player, "accounts:tutorialFinishRetry", player, session.id)
+		return false
+	elseif characterCount ~= 0 then
+		tutorialSessions[player] = nil
+		triggerClientEvent(player, "accounts:tutorialFinishRejected", player, session.id)
+		return false
+	end
+
+	-- Consume before advancing so replayed finish events cannot start login twice.
+	tutorialSessions[player] = nil
+	triggerClientEvent(player, "accounts:login:attempt", player, 0)
+	triggerEvent("social:account", player, accountID)
 end
 addEvent("accounts:tutorialFinished", true)
 addEventHandler("accounts:tutorialFinished", resourceRoot, playerFinishTutorial)
@@ -309,14 +357,17 @@ function goFromLoginToSelectionScreen(player)
 	if tonumber(getElementData(player, "punishment:points")) > 0 then triggerEvent("points:checkexpiration", player, player) end
 
 	-- TUTORIAL
-	local qh = dbQuery(exports.mysql:getConn("mta"), "SELECT COUNT(*) as chars FROM characters WHERE account = ?", getElementData(player,"account:id"))
-	local result = dbPoll(qh, 10000)
-
-	if (result and result[1]['chars'] < 1) then
-		triggerClientEvent(player, "tutorial:run", player)
+	local accountID = getAuthenticatedAccountID(player)
+	local characterCount = accountID and getCharacterCount(accountID)
+	if characterCount == 0 then
+		tutorialSessionSequence = tutorialSessionSequence + 1
+		local sessionID = tutorialSessionSequence
+		tutorialSessions[player] = { accountID = accountID, id = sessionID }
+		triggerClientEvent(player, "tutorial:run", player, sessionID)
 		triggerClientEvent(player, "hideLoginWindow", player)
 		return false
 	end
+	tutorialSessions[player] = nil
 
 	triggerClientEvent(player, "accounts:login:attempt", player, 0 )
 	triggerEvent( "social:account", player, getElementData(player,"account:id") )
@@ -327,8 +378,12 @@ function goFromLoginToSelectionScreen(player)
 		exports.integration:fetchForumInfo(fid, player)
 	end]]
 end
-addEvent("goFromLoginToSelectionScreen",true)
+addEvent("goFromLoginToSelectionScreen", false)
 addEventHandler("goFromLoginToSelectionScreen",root,goFromLoginToSelectionScreen)
+
+addEventHandler("onPlayerQuit", root, function()
+	tutorialSessions[source] = nil
+end)
 
 function playerFinishApps()
 	if source then

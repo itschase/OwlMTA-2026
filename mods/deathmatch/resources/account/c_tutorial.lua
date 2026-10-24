@@ -1,5 +1,7 @@
 local currentStage = 1
 local FINAL_STAGE = 13
+local tutorialSessionID = nil
+local tutorialFinishPending = false
 local TUTORIAL_STAGES = {
     [1] = {"Welcome", "Hello and Welcome to OwlGaming! \n\nYou've successfully passed the application stage and you're on your journey to begin roleplaying here. To help you get started we've created this tutorial, enjoy!", 1271.6337890625, -2037.69140625, 81.409843444824, 1125.6396484375, -2036.96484375, 69.880661010742},
     [2] = {"Properties", "Los Santos offers a variety of properties you may buy, including both commercial and residential locations such as shops, garages, businesses, and houses. New characters receive a property token allowing you to purchase a house with a value up to $40,000, allowing you to start roleplaying immediately as if you were already a resident of Los Santos!\n\nWhen purchasing a property you may choose to use a default interior provided or you may upload your own custom mapped interior, purchasable with GameCoins through our interior uploader on the User Control Panel.", 2092.314453125, -1220.6669921875, 35.311351776123, 2108.9404296875, -1240.2802734375, 27.001424789429},
@@ -16,7 +18,14 @@ local TUTORIAL_STAGES = {
     [13] = {"Final Note", "Roleplaying with factions is as endless as your imagination, by exploring the server and meet new people. You'll find lots of interesting scenarios both legal and illegal.", 1981.0166015625, -1349.6162109375, 61.649375915527, 1925.7919921875, -1400.3291015625, 34.439781188965}
 }
 
-function runTutorial()
+function runTutorial(sessionID)
+	sessionID = tonumber(sessionID)
+	if not sessionID or sessionID < 1 or sessionID ~= math.floor(sessionID) then
+		return false
+	end
+	tutorialSessionID = sessionID
+	tutorialFinishPending = false
+	currentStage = 1
     tutorialWindow = guiCreateWindow(0.78, 0.63, 0.21, 0.35, "", true)
     guiWindowSetMovable(tutorialWindow, false)
     guiWindowSetSizable(tutorialWindow, false)
@@ -35,6 +44,39 @@ function runTutorial()
 end
 addEvent("tutorial:run", true)
 addEventHandler("tutorial:run", root, runTutorial)
+
+addEvent("accounts:tutorialFinishRetry", true)
+addEventHandler("accounts:tutorialFinishRetry", root, function(sessionID)
+	if tonumber(sessionID) == tutorialSessionID and tutorialWindow and isElement(tutorialWindow) then
+		tutorialFinishPending = false
+		guiSetEnabled(nextButton, true)
+		outputChatBox("The tutorial could not be verified. Please try again.", 255, 0, 0)
+	end
+end)
+
+addEvent("accounts:tutorialFinishRejected", true)
+addEventHandler("accounts:tutorialFinishRejected", root, function(sessionID)
+	if tonumber(sessionID) == tutorialSessionID and tutorialWindow and isElement(tutorialWindow) then
+		removeEventHandler("onClientGUIClick", tutorialWindow, buttonFunctionality)
+		destroyElement(tutorialWindow)
+		tutorialSessionID = nil
+		tutorialFinishPending = false
+		showCursor(false)
+		outputChatBox("Your account state changed during the tutorial. Please reconnect to continue.", 255, 0, 0)
+	end
+end)
+
+addEventHandler("accounts:login:attempt", root, function(statusCode)
+	if statusCode == 0 and tutorialSessionID then
+		if tutorialWindow and isElement(tutorialWindow) then
+			removeEventHandler("onClientGUIClick", tutorialWindow, buttonFunctionality)
+			destroyElement(tutorialWindow)
+		end
+		tutorialSessionID = nil
+		tutorialFinishPending = false
+		showCursor(false)
+	end
+end)
 
 function setStage(stage)
     if (stage > FINAL_STAGE) then 
@@ -70,9 +112,10 @@ function buttonFunctionality(button, state)
         end            
     elseif (button == "left") and (source == nextButton) then 
         if (currentStage == -1) then 
-            removeEventHandler("onClientGUIClick", tutorialWindow, buttonFunctionality)
-            destroyElement(tutorialWindow)   
-            triggerServerEvent("accounts:tutorialFinished", resourceRoot)
+            if tutorialFinishPending then return end
+            tutorialFinishPending = true
+            guiSetEnabled(nextButton, false)
+            triggerServerEvent("accounts:tutorialFinished", resourceRoot, tutorialSessionID)
         else
             currentStage = currentStage + 1
             fadeClientScreen()

@@ -31,52 +31,107 @@ end
 addCommandHandler("interiors", getAllInts)
 addCommandHandler("ints", getAllInts)
 addEvent("interiorManager:openit", true)
-addEventHandler("interiorManager:openit", root, getAllInts)
+addEventHandler("interiorManager:openit", root, function()
+	if isElement(client) and getElementType(client) == "player" and exports.integration:isPlayerAdmin(client) then
+		getAllInts(client)
+	end
+end)
 
-function delIntCmd(thePlayer, intID )
-	executeCommandHandler ( "delint", thePlayer, intID )
+local function isInteriorManagerAdmin(player)
+	return isElement(player) and getElementType(player) == "player" and exports.integration:isPlayerAdmin(player)
+end
+
+local function isInteriorManagerTrialAdminOrMapper(player)
+	return isElement(player) and getElementType(player) == "player" and (exports.integration:isPlayerTrialAdmin(player) or exports.integration:isPlayerMappingTeamMember(player))
+end
+
+local function isInteriorManagerTrialAdminSupporterOrMapper(player)
+	return isElement(player) and getElementType(player) == "player" and (exports.integration:isPlayerTrialAdmin(player) or exports.integration:isPlayerSupporter(player) or exports.integration:isPlayerMappingTeamMember(player))
+end
+
+local function isInteriorManagerTrialAdminOrSupporter(player)
+	return isElement(player) and getElementType(player) == "player" and (exports.integration:isPlayerTrialAdmin(player) or exports.integration:isPlayerSupporter(player))
+end
+
+local function isInteriorManagerTrialAdmin(player)
+	return isElement(player) and getElementType(player) == "player" and exports.integration:isPlayerTrialAdmin(player)
+end
+
+local function validInteriorManagerID(intID)
+	local id = tonumber(intID)
+	return id and id > 0 and id % 1 == 0 and id or false
+end
+
+function delIntCmd(intID)
+	local actor, id = client, validInteriorManagerID(intID)
+	if isInteriorManagerTrialAdminOrMapper(actor) and id then
+		executeCommandHandler("delint", actor, id)
+	end
 end
 addEvent("interiorManager:delint", true)
 addEventHandler("interiorManager:delint", root, delIntCmd)
 
-function disableInt(thePlayer, intID )
-	executeCommandHandler ( "toggleinterior", thePlayer, intID )
+function disableInt(intID)
+	local actor, id = client, validInteriorManagerID(intID)
+	if isInteriorManagerTrialAdminOrMapper(actor) and id then
+		executeCommandHandler("toggleinterior", actor, id)
+	end
 end
 addEvent("interiorManager:disableInt", true)
 addEventHandler("interiorManager:disableInt", root, disableInt)
 
-function gotoInt(thePlayer, intID )
-	executeCommandHandler ( "gotohouse", thePlayer, intID )
+function gotoInt(intID)
+	local actor, id = client, validInteriorManagerID(intID)
+	if isInteriorManagerTrialAdminSupporterOrMapper(actor) and id then
+		executeCommandHandler("gotohouse", actor, id)
+	end
 end
 addEvent("interiorManager:gotoInt", true)
 addEventHandler("interiorManager:gotoInt", root, gotoInt)
 
-function restoreInt(thePlayer, intID )
-	executeCommandHandler ( "restoreInt", thePlayer, intID )
+function restoreInt(intID)
+	local actor, id = client, validInteriorManagerID(intID)
+	if isInteriorManagerTrialAdminOrMapper(actor) and id then
+		executeCommandHandler("restoreInt", actor, id)
+	end
 end
 addEvent("interiorManager:restoreInt", true)
 addEventHandler("interiorManager:restoreInt", root, restoreInt)
 
-function removeInt(thePlayer, intID )
-	executeCommandHandler ( "removeint", thePlayer, intID )
+function removeInt(intID)
+	local actor, id = client, validInteriorManagerID(intID)
+	if actor and exports.integration:isPlayerLeadAdmin(actor) and id then
+		executeCommandHandler("removeint", actor, id)
+	end
 end
 addEvent("interiorManager:removeInt", true)
 addEventHandler("interiorManager:removeInt", root, removeInt)
 
-function forceSellInt(thePlayer, intID )
-	executeCommandHandler ( "fsell", thePlayer, intID )
+function forceSellInt(intID)
+	local actor, id = client, validInteriorManagerID(intID)
+	if isInteriorManagerTrialAdmin(actor) and id then
+		executeCommandHandler("fsell", actor, id)
+	end
 end
 addEvent("interiorManager:forceSellInt", true)
 addEventHandler("interiorManager:forceSellInt", root, forceSellInt)
 
-function openAdminNote(thePlayer, intID )
-	executeCommandHandler ( "checkint", thePlayer, intID )
+function openAdminNote(intID)
+	local actor, id = client, validInteriorManagerID(intID)
+	if isInteriorManagerTrialAdminOrSupporter(actor) and id then
+		executeCommandHandler("checkint", actor, id)
+	end
 end
 addEvent("interiorManager:openAdminNote", true)
 addEventHandler("interiorManager:openAdminNote", root, openAdminNote)
 
 function interiorSearch(keyword)
-	if keyword and keyword ~= "" and keyword ~= "Search..." then
+	local actor = client
+	if not isInteriorManagerAdmin(actor) or type(keyword) ~= "string" or #keyword == 0 or #keyword > 100 or keyword == "Search..." then
+		return
+	end
+	keyword = mysql:escape_string(keyword)
+	if keyword ~= "" then
 		local interiorsResultList = {}
 		local mQuery1 = nil
 		mQuery1 = mysql:query("SELECT characters.account AS accID, factions.name AS fowner, interiors.id AS iID, interiors.type AS type, interiors.name AS name, cost, charactername, cked, locked, address, supplies, safepositionX, disabled, deleted, interiors.createdDate AS iCreatedDate, interiors.creator AS iCreator, DATEDIFF(NOW(), lastused) AS DiffDate, interiors.x, interiors.y, interiors.y FROM interiors LEFT JOIN characters ON interiors.owner = characters.id LEFT JOIN factions ON interiors.faction=factions.id WHERE interiors.id LIKE '%"..keyword.."%' OR interiors.name LIKE '%"..keyword.."%' OR factions.name LIKE '%"..keyword.."%' OR cost LIKE '%"..keyword.."%' OR charactername LIKE '%"..keyword.."%' OR interiors.creator LIKE '%"..keyword.."%' ORDER BY interiors.createdDate DESC")
@@ -86,7 +141,7 @@ function interiorSearch(keyword)
 			table.insert(interiorsResultList, { row["iID"], row["type"], row["name"], row["cost"], row["charactername"], row["accID"], row["cked"], row["DiffDate"], row["locked"], row["supplies"], row["safepositionX"], row["disabled"], row["deleted"], '', row["iCreatedDate"],row["iCreator"], row["`interiors`.`x`"], row["`interiors`.`y`"], row["`interiors`.`z`"], row['fowner'], row['address'] } )
 		end
 		mysql:free_result(mQuery1)
-		triggerClientEvent(client, "interiorManager:FetchSearchResults", client, interiorsResultList, getElementData(client, "account:username"))
+		triggerClientEvent(actor, "interiorManager:FetchSearchResults", actor, interiorsResultList, getElementData(actor, "account:username"))
 	end
 end
 addEvent("interiorManager:Search", true)
@@ -153,7 +208,12 @@ end
 addCommandHandler("checkint", checkInt)
 addCommandHandler("checkinterior", checkInt)
 addEvent("interiorManager:checkint", true)
-addEventHandler("interiorManager:checkint", root, checkInt)
+addEventHandler("interiorManager:checkint", root, function(_, _, intID)
+	local actor = client
+	if isInteriorManagerTrialAdminOrSupporter(actor) then
+		checkInt(actor, "checkint", intID)
+	end
+end)
 
 function formatCreator(creator, creatorId)
 	if creator and creatorId then
@@ -172,32 +232,39 @@ function formatCreator(creator, creatorId)
 end
 
 function saveAdminNote(intID, adminNote, noteId )
-	if not exports.integration:isPlayerTrialAdmin(client) then
+	local actor = client
+	local interiorID = validInteriorManagerID(intID)
+	local noteID = noteId and validInteriorManagerID(noteId) or nil
+	local accountID = actor and tonumber(getElementData(actor, "account:id"))
+	if not isInteriorManagerTrialAdmin(actor) then
 		return
 	end
 
-	if not intID or not adminNote then
-		outputChatBox("Internal Error!", source, 255,0,0)
+	if not interiorID or type(adminNote) ~= "string" or not accountID then
+		outputChatBox("Internal Error!", actor, 255,0,0)
 		return false
 	end
 
-	if string.len(adminNote) > 500 then
-		outputChatBox("Admin note has failed to add. Reason: Exceeded 500 characters.", source, 255, 0, 0)
+	if #adminNote > 500 then
+		outputChatBox("Admin note has failed to add. Reason: Exceeded 500 characters.", actor, 255, 0, 0)
 		return false
 	end
 
-	if noteId then
-		if mysql:query_free("UPDATE interior_notes SET note='"..mysql:escape_string(adminNote).."', creator="..getElementData(source, "account:id").." WHERE id ="..noteId.." AND intid="..intID) then
-			outputChatBox("You have successfully updated admin note entry #"..noteId.." on interior #"..intID..".", source, 0, 255,0)
-			addInteriorLogs(intID, "Modified admin note entry #"..noteId, source)
+	if noteId and not noteID then
+		return false
+	end
+
+	if noteID then
+		if mysql:query_free("UPDATE interior_notes SET note='"..mysql:escape_string(adminNote).."', creator="..accountID.." WHERE id ="..noteID.." AND intid="..interiorID) then
+			outputChatBox("You have successfully updated admin note entry #"..noteID.." on interior #"..interiorID..".", actor, 0, 255,0)
+			addInteriorLogs(interiorID, "Modified admin note entry #"..noteID, actor)
 			return true
 		end
 	else
-		--outputChatBox("INSERT INTO interior_notes SET note='"..mysql:escape_string(adminNote).."', creator="..getElementData(source, "account:id")..", intid="..intID )
-		local insertedId = mysql:query_insert_free("INSERT INTO interior_notes SET note='"..mysql:escape_string(adminNote).."', creator="..getElementData(source, "account:id")..", intid="..intID )
+		local insertedId = mysql:query_insert_free("INSERT INTO interior_notes SET note='"..mysql:escape_string(adminNote).."', creator="..accountID..", intid="..interiorID )
 		if insertedId then
-			outputChatBox("You have successfully added a new admin note entry #"..insertedId.." to interior #"..intID..".", source, 0, 255,0)
-			addInteriorLogs(intID, "Added new admin note entry #"..insertedId, source)
+			outputChatBox("You have successfully added a new admin note entry #"..insertedId.." to interior #"..interiorID..".", actor, 0, 255,0)
+			addInteriorLogs(interiorID, "Added new admin note entry #"..insertedId, actor)
 			return true
 		end
 	end

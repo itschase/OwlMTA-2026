@@ -42,21 +42,13 @@ function canAccessMgmtTab( player )
 end
 
 function canEditMap( player, map, tab_id )
-	local isReqEditable = not exports.map_load:isMapLoaded( map.id ) and map.approved == 0
-	if tab_id == 1 then
-		return isReqEditable
-	else
-		return isReqEditable and canAdminMaps( player )
-	end
+	local isOwner = tonumber(map.uploader) == tonumber(getElementData(player, 'account:id'))
+	return isOwner and not exports.map_load:isMapLoaded(map.id) and tonumber(map.approved) == 0 and tonumber(map.enabled) == 0
 end
 
 function canDeleteMap( player, map, tab_id )
-	if tab_id == 1 then
-		return map.approved == 0 and map.enabled == 0 and not exports.map_load:isMapLoaded( map.id )
-	elseif tab_id == 3 then
-		return (not exports.map_load:isMapLoaded( map.id ) and map.enabled == 0) and canAdminMaps( player )
-	end
-	return false
+	local isOwner = tonumber(map.uploader) == tonumber(getElementData(player, 'account:id'))
+	return isOwner and tonumber(map.approved) == 0 and tonumber(map.enabled) == 0 and not exports.map_load:isMapLoaded(map.id)
 end
 
 function canAcceptMap( player, map, tab_id )

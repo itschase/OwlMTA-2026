@@ -805,6 +805,31 @@ addEvent("shop:collectMoney", true )
 addEventHandler("shop:collectMoney", getRootElement(), collectMoney)
 
 function solvePendingWage(payer, ped, solver)
+	-- The event arguments are supplied by the client. Use MTA's event caller and
+	-- validate the shop and its business access before reading or charging wage.
+	local player = client
+	if not player or not isElement(player) or getElementType(player) ~= "player" then
+		return 0
+	end
+	if not isElement(ped) or getElementType(ped) ~= "ped" or not getElementData(ped, "shopkeeper") then
+		return 0
+	end
+	local interior = exports.pool:getElement("interior", getElementDimension(ped))
+	local status = interior and getElementData(interior, "status")
+	local interiorID = interior and getElementData(interior, "dbid")
+	if not interior or getElementDimension(player) ~= getElementDimension(ped) or getElementInterior(player) ~= getElementInterior(ped) then
+		return 0
+	end
+	local ownerID = status and tonumber(status.owner)
+	local playerID = tonumber(getElementData(player, "dbid"))
+	local hasAccess = ownerID and ownerID == playerID
+		or (interiorID and (exports.global:hasItem(player, 4, interiorID) or exports.global:hasItem(player, 5, interiorID)))
+	local factionID = status and tonumber(status.faction)
+	local hasFactionAccess = factionID and factionID > 0 and exports.factions:hasMemberPermissionTo(player, factionID, "manage_finance")
+	if not hasAccess and not hasFactionAccess then
+		return 0
+	end
+
 	-- if wage is not positive, assuming everything is done
 	local wage = tonumber(getElementData(ped, "sPendingWage")) or 0
 	if wage <= 0 then
@@ -815,18 +840,12 @@ function solvePendingWage(payer, ped, solver)
 	local pedName = getPedName(ped)
 	local took_money = false
 
-	if getElementType(payer) == 'player' then
-		local playerName = exports.global:getPlayerName(payer)
-		if exports.global:takeMoney(payer, wage) then
+	-- Only the actual event caller can pay; never accept a client-selected team
+	-- or another player's element as the payer.
+	if exports.global:hasMoney(player, wage) then
+		if exports.global:takeMoney(player, wage) then
 			playPayWageSound(ped )
 			took_money = true
-		end
-	elseif getElementType(payer) == 'team' then
-		if exports.bank:takeBankMoney(payer, wage) then
-			playPayWageSound(ped )
-			took_money = true
-			-- leave some bank transaction logs
-			exports.bank:addBankTransactionLog(-getElementData(payer, 'id'), 0, wage, 3, 'NPC wage', pedName)
 		end
 	end
 

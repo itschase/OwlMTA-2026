@@ -52,13 +52,8 @@ function removePlayerFromList(button, state)
 		if (row==-1) or (col==-1) then
 			outputChatBox("Please select a player first!", 255, 0, 0)
 		else
-			local name = tostring(guiGridListGetItemText(monitorList, guiGridListGetSelectedItem(monitorList), 2))
-			local player = getPlayerFromName(name:gsub(" ", "_"))
-			if player then
-				triggerServerEvent("monitor:remove", player)
-			else
-				outputChatBox("No such player (anymore)...", 255, 0, 0)
-			end
+			local username = tostring(guiGridListGetItemText(monitorList, row, 1))
+			triggerServerEvent("monitor:remove", localPlayer, username)
 		end
 	end
 end
@@ -69,13 +64,7 @@ function editPlayerFromList(button, state)
 		if (row==-1) or (col==-1) then
 			outputChatBox("Please select a player first!", 255, 0, 0)
 		else
-			local name = tostring(guiGridListGetItemText(monitorList, guiGridListGetSelectedItem(monitorList), 2))
-			local player = getPlayerFromName(name:gsub(" ", "_"))
-			if player then
-				showMonitorEdit(tostring(guiGridListGetItemText(monitorList, guiGridListGetSelectedItem(monitorList), 1)), tostring(guiGridListGetItemText(monitorList, guiGridListGetSelectedItem(monitorList), 2)), tostring(guiGridListGetItemText(monitorList, guiGridListGetSelectedItem(monitorList), 3)))
-			else
-				outputChatBox("No such player (anymore)...", 255, 0, 0)
-			end
+			showMonitorEdit(tostring(guiGridListGetItemText(monitorList, row, 1)), tostring(guiGridListGetItemText(monitorList, row, 2)), tostring(guiGridListGetItemText(monitorList, row, 3)))
 		end
 	end
 end
@@ -239,7 +228,7 @@ function showMonitorEdit(username, charname, monitorContent)
 	
 	addEventHandler ( "onClientGUIClick", bSave1,  function(button, state)
 		if(button == "left") then
-			triggerServerEvent("monitor:onSaveEdittedMonitor",getLocalPlayer(),getLocalPlayer(), username, guiGetText(mMonitorContent), tostring(charname):gsub(" ", "_"))
+			triggerServerEvent("monitor:onSaveEdittedMonitor", localPlayer, username, guiGetText(mMonitorContent))
 			destroyElement(wMonitorEdit)
 			guiSetInputEnabled ( false)
 			wMonitorEdit = nil

@@ -34,7 +34,7 @@ function newAPB(thePlayer, commandName, ...)
 		local theTeam = exports.factions:getFactionFromID(faction)
 		local ftype = getElementData(theTeam, "type")
 		
-		if (factionType==2) or (factionType==3) then
+		if ftype == 2 or ftype == 3 then
 			if not  (...) then
 				outputChatBox("Syntax: /"..commandName.." [Description]", thePlayer)
 			else

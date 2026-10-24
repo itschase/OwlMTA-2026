@@ -55,7 +55,7 @@ function openLocationManager(locationData)
             local r, c = guiGridListGetSelectedItem(gui.grid)
             if r ~= -1 and c ~= -1 then
                 local id = guiGridListGetItemText(gui.grid, r, 1)
-                triggerServerEvent("deleteLocation", localPlayer, localPlayer, id)
+                triggerServerEvent("deleteLocation", localPlayer, id)
                 exports.global:playSoundCreate()
                 terminateLocationManager()
                 updateLocations()
@@ -180,7 +180,7 @@ function openNewLocation()
                             local c1, c2, c3 = 255, 0, 0 --red
                             guiLabelSetColor(gui.localeMessage, c1, c2, c3)
                         else
-                            triggerServerEvent("addNewLocation", localPlayer, localPlayer, newValue, newDesc)
+                            triggerServerEvent("addNewLocation", localPlayer, newValue, newDesc)
                             exports.global:playSoundCreate()
                             updateLocations()
                             terminateNewLocation()
@@ -210,7 +210,7 @@ function terminateNewLocation()
 end
 
 function updateLocations()
-    triggerServerEvent("server:openLocationManager", root, localPlayer)
+    triggerServerEvent("server:openLocationManager", localPlayer)
 end
 
 -- [[ Permissions ]] --

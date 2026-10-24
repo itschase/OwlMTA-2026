@@ -258,7 +258,7 @@ function buildCargoGUI(admin)
 			end
 			-- end checks
 
-			triggerServerEvent("createCargoGeneric", getResourceRootElement(), localPlayer, admin, genericType, price, quantity, name, model, scale, texURL, texName)
+			triggerServerEvent("createCargoGeneric", getResourceRootElement(), genericType, price, quantity, name, model, scale, texURL, texName)
 		end
 	end)
 end
@@ -310,7 +310,7 @@ function genericTextureFileValidationResult(url, result, error)
 			genericAlertClose()
 			if pendingItemCreationData then
 				local data = pendingItemCreationData
-				triggerServerEvent("createCargoGeneric", resourceRoot, localPlayer, data[1], data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9])
+				triggerServerEvent("createCargoGeneric", resourceRoot, data[2], data[3], data[4], data[5], data[6], data[7], data[8], data[9])
 			end
 			genericAbortWaitForTexture()
 		else
