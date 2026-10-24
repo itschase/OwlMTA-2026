@@ -7,10 +7,67 @@
 * ***********************************************************************************************************************
 ]]
 
+local function isFactionManagerPlayer(player)
+	return isElement(player)
+		and getElementType(player) == "player"
+		and getElementData(player, "loggedin") == 1
+end
+
+local function logFactionManager(eventName, player, reason)
+	local accountID = isFactionManagerPlayer(player) and getElementData(player, "account:id") or "unknown"
+	outputDebugString("[FACTION][SECURITY] " .. tostring(eventName) .. " account=" .. tostring(accountID) .. " " .. tostring(reason), 2)
+end
+
+local function canViewFactionManager(player)
+	return isFactionManagerPlayer(player)
+		and (exports.integration:isPlayerTrialAdmin(player)
+			or exports.integration:isPlayerScripter(player)
+			or exports.integration:isPlayerFMTMember(player))
+end
+
+local function canEditFactionManager(player)
+	return isFactionManagerPlayer(player)
+		and (exports.integration:isPlayerLeadAdmin(player) or exports.integration:isPlayerFMTLeader(player))
+end
+
+local function isIntegerInRange(value, minimum, maximum)
+	return type(value) == "number" and value == value and value % 1 == 0 and value >= minimum and value <= maximum
+end
+
+local function isValidFactionData(data)
+	if type(data) ~= "table" or type(data.name) ~= "string" or #data.name < 3 or #data.name > 200 or string.find(data.name, "%c") then
+		return false
+	end
+	if not isIntegerInRange(data.type, 0, 7)
+		or not isIntegerInRange(data.max_interiors, 0, 2147483647)
+		or not isIntegerInRange(data.max_vehicles, 0, 2147483647)
+		or not isIntegerInRange(data.free_custom_ints, 0, 1)
+		or not isIntegerInRange(data.free_custom_skins, 0, 1)
+		or not isIntegerInRange(data.before_tax_value, 0, 2147483647)
+		or not isIntegerInRange(data.free_wage_amount, 0, 2147483647) then
+		return false
+	end
+	return true
+end
+
+local function denyFactionManagerView(eventName, player)
+	logFactionManager(eventName, player, "denied")
+	if isFactionManagerPlayer(player) then
+		outputChatBox("You are not authorized to access faction management.", player, 255, 0, 0)
+	end
+end
+
 addEvent( 'factions:fetchFactionList', true )
 addEventHandler( 'factions:fetchFactionList', resourceRoot, function ( )
+	if not canViewFactionManager(client) then
+		return denyFactionManagerView("factions:fetchFactionList", client)
+	end
 	dbQuery( function( qh, client )
 		local res, nums, id = dbPoll( qh, 0 )
+		if not res then
+			logFactionManager("factions:fetchFactionList", client, "database query failed")
+			return
+		end
 		local factions = { }
 		if res and nums > 0 then
 			for _, row in ipairs( res ) do
@@ -37,6 +94,21 @@ end )
 
 addEvent( 'factions:editFaction', true )
 addEventHandler( 'factions:editFaction', resourceRoot, function( data, old_id )
+	if not canEditFactionManager(client) then
+		logFactionManager("factions:editFaction", client, "denied")
+		if isFactionManagerPlayer(client) then
+			triggerClientEvent(client, 'factions:editFaction:callback', resourceRoot, 'You are not authorized to modify factions.')
+		end
+		return
+	end
+	if not isValidFactionData(data) or (old_id ~= nil and not isIntegerInRange(tonumber(old_id), 1, 4294967295)) then
+		logFactionManager("factions:editFaction", client, "invalid payload")
+		triggerClientEvent(client, 'factions:editFaction:callback', resourceRoot, 'Invalid faction data.')
+		return
+	end
+	if old_id ~= nil then
+		old_id = tonumber(old_id)
+	end
 	local qh = dbQuery( exports.mysql:getConn('mta'), "SELECT id, name FROM factions WHERE id!=? AND name=? LIMIT 1", old_id or 0, data.name )
 	local res, nums, id = dbPoll( qh, 10000 )
 	if res then
@@ -66,6 +138,7 @@ addEventHandler( 'factions:editFaction', resourceRoot, function( data, old_id )
 				exports.logs:dbLog( client, 4, team, "EDIT FACTION" )
 				return triggerClientEvent( client, 'factions:editFaction:callback', resourceRoot, 'ok' )
 			else
+				logFactionManager("factions:editFaction", client, "update failed")
 				return not triggerClientEvent( client, 'factions:editFaction:callback', resourceRoot, 'Error code 61 occurred during the process. Faction modification failed. ' )
 			end
 		-- if creating new faction.
@@ -141,20 +214,40 @@ addEventHandler( 'factions:editFaction', resourceRoot, function( data, old_id )
 				triggerClientEvent("faction-system.cacheRanks", root, FactionRanks)
 				return triggerClientEvent( client, 'factions:editFaction:callback', resourceRoot, 'ok' )
 			else
+				logFactionManager("factions:editFaction", client, "insert failed")
 				return not triggerClientEvent( client, 'factions:editFaction:callback', resourceRoot, 'Error code 88 occurred during the process. Faction modification failed.' )
 			end
 		end
 	else
 		dbFree( qh )
+		logFactionManager("factions:editFaction", client, "duplicate-name query failed")
 		return not triggerClientEvent( client, 'factions:editFaction:callback', resourceRoot, 'Error code 97 occurred during the process. Faction modification failed.' )
 	end
 end )
 
 addEvent( 'factions:delete', true )
 addEventHandler( 'factions:delete', resourceRoot, function( factionID )
-	factionID = tonumber( factionID )
-	dbExec(exports.mysql:getConn("mta"), "DELETE FROM factions WHERE id=?", factionID )
-	dbExec(exports.mysql:getConn("mta"), "DELETE FROM faction_ranks WHERE faction_id=?", factionID )
+	if not canEditFactionManager(client) then
+		logFactionManager("factions:delete", client, "denied")
+		if isFactionManagerPlayer(client) then
+			outputChatBox("You are not authorized to modify factions.", client, 255, 0, 0)
+		end
+		return
+	end
+	factionID = tonumber(factionID)
+	if not isIntegerInRange(factionID, 1, 4294967295) or not exports.pool:getElement('team', factionID) then
+		logFactionManager("factions:delete", client, "invalid or missing faction")
+		outputChatBox("The selected faction could not be found.", client, 255, 0, 0)
+		return
+	end
+	if not dbExec(exports.mysql:getConn("mta"), "DELETE FROM factions WHERE id=?", factionID ) then
+		logFactionManager("factions:delete", client, "faction database delete failed")
+		outputChatBox("Faction deletion failed. Check the server debug log.", client, 255, 0, 0)
+		return
+	end
+	if not dbExec(exports.mysql:getConn("mta"), "DELETE FROM faction_ranks WHERE faction_id=?", factionID ) then
+		logFactionManager("factions:delete", client, "faction rank delete failed")
+	end
 	--Clean all players in the faction
 	for key, value in pairs( getPlayersInFaction( factionID ) ) do
 		local factionInfo = getElementData(value, "faction")
@@ -248,9 +341,22 @@ end)
 
 addEvent( 'factions:listMember', true )
 addEventHandler( 'factions:listMember', resourceRoot, function ( fact_id )
+	if not canViewFactionManager(client) then
+		return denyFactionManagerView("factions:listMember", client)
+	end
+	fact_id = tonumber(fact_id)
+	if not isIntegerInRange(fact_id, 1, 4294967295) then
+		logFactionManager("factions:listMember", client, "invalid faction id")
+		triggerClientEvent(client, 'factions:listMember', resourceRoot, fact_id, 'Invalid faction id.')
+		return
+	end
 	dbQuery( function( qh, client, fact_id )
 		fact_id = tonumber(fact_id)
 		local res, nums, id = dbPoll( qh, 0 )
+		if not res then
+			logFactionManager("factions:listMember", client, "member query failed")
+			return triggerClientEvent(client, 'factions:listMember', resourceRoot, fact_id, 'Errors occurred while fetching information from server.')
+		end
 		if nums and tonumber( nums ) then
 			if nums > 0 then
 				local qh2 = dbQuery( exports.mysql:getConn('mta'), "SELECT * FROM factions WHERE id=?", fact_id )
@@ -280,6 +386,7 @@ addEventHandler( 'factions:listMember', resourceRoot, function ( fact_id )
 					return triggerClientEvent( client, 'factions:listMember', resourceRoot, res2[1].name, 'ok', members )
 				else
 					dbFree( qh2 )
+					logFactionManager("factions:listMember", client, "faction lookup failed")
 					return not triggerClientEvent( client, 'factions:listMember', resourceRoot, fact_id, 'Errors occurred while fetching information from server.' )
 				end
 			else

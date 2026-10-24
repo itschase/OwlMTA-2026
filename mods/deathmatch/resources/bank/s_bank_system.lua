@@ -1,4 +1,29 @@
 mysql = exports.mysql
+
+local function normalizePositiveBankAmount(amount, eventName)
+	amount = tonumber(amount)
+	if not amount or amount ~= amount or amount == math.huge or amount == -math.huge or amount <= 0 then
+		outputDebugString("[BANK] Rejected " .. eventName .. ": invalid amount.", 2)
+		return false
+	end
+	amount = math.floor(amount)
+	if amount < 1 then
+		outputDebugString("[BANK] Rejected " .. eventName .. ": amount below one dollar.", 2)
+		return false
+	end
+	return amount
+end
+
+local function hasFinancePermission(player, factionID, eventName)
+	factionID = tonumber(factionID)
+	if not factionID or factionID < 1 or not exports.factions:hasMemberPermissionTo(player, factionID, "manage_finance") then
+		local accountID = player and getElementData(player, "account:id") or "unknown"
+		outputDebugString("[BANK] Rejected " .. eventName .. ": account " .. tostring(accountID) .. " lacks faction finance permission.", 2)
+		return false
+	end
+	return factionID
+end
+
 function setElementDataEx(theElement, theParameter, theValue, syncToClient, noSyncAtall)
 	if syncToClient == nil then
 		syncToClient = false
@@ -25,7 +50,16 @@ addEventHandler( "onResourceStart", getResourceRootElement(),
 )
 
 function showGeneralServiceGUI(atm, ped)
+	if not client or not isElement(client) or tonumber(getElementData(client, "loggedin")) ~= 1 then
+		outputDebugString("[BANK] Rejected bank UI request from an unauthenticated caller.", 2)
+		return false
+	end
+
 	local factions = getElementData(client, "faction")
+	if type(factions) ~= "table" then
+		outputDebugString("[BANK] Missing faction data while opening bank UI for account " .. tostring(getElementData(client, "account:id") or "unknown") .. ".", 2)
+		factions = {}
+	end
 
 	local fTable = {}	
 	for k,v in pairs(factions) do
@@ -48,15 +82,33 @@ addEventHandler( "bank:showGeneralServiceGUI", getRootElement(), showGeneralServ
 function withdrawMoneyPersonal(amount)
 	local state = tonumber(getElementData(client, "loggedin")) or 0
 	if (state == 0) then
+		outputDebugString("[BANK] Rejected personal withdrawal: unauthenticated caller.", 2)
 		return
 	end
-	
-	local money = getElementData(client, "bankmoney") - amount
+	amount = normalizePositiveBankAmount(amount, "personal withdrawal")
+	if not amount then
+		return outputChatBox("Invalid withdrawal amount.", client, 255, 0, 0)
+	end
+	local bankBalance = tonumber(getElementData(client, "bankmoney")) or 0
+	if amount > bankBalance then
+		return outputChatBox("No.", client, 255, 0, 0)
+	end
+	local money = bankBalance - amount
 	if money >= 0 then
-		exports.global:giveMoney(client, amount, true)
-		
-		setElementDataEx(client, "bankmoney", money, true)
-		saveBank(client)
+		if not exports.global:giveMoney(client, amount, true) then
+			outputDebugString("[BANK] Personal withdrawal failed while crediting cash; bank balance was not changed.", 2)
+			return outputChatBox("Transaction failed. Please try again.", client, 255, 0, 0)
+		end
+		if not takeBankMoney(client, amount) then
+			outputDebugString("[BANK] Personal withdrawal failed while debiting the bank balance; attempting to reverse the cash credit.", 2)
+			if not exports.global:takeMoney(client, amount, nil, true) then
+				outputDebugString("[BANK] Critical: failed to reverse cash after personal withdrawal could not debit bank balance.", 1)
+			end
+			if not setBankMoney(client, bankBalance) then
+				outputDebugString("[BANK] Critical: failed to restore bank balance after personal withdrawal failure.", 1)
+			end
+			return outputChatBox("Transaction failed. Please try again.", client, 255, 0, 0)
+		end
 		
 		mysql:query_free("INSERT INTO wiretransfers (`from`, `to`, `amount`, `reason`, `type`) VALUES (" .. mysql:escape_string(getElementData(client, "dbid")) .. ", 0, " .. mysql:escape_string(amount) .. ", '', 0)" )
 
@@ -72,7 +124,12 @@ addEventHandler("withdrawMoneyPersonal", getRootElement(), withdrawMoneyPersonal
 function depositMoneyPersonal(amount)
 	local state = tonumber(getElementData(client, "loggedin")) or 0
 	if (state == 0) then
+		outputDebugString("[BANK] Rejected personal deposit: unauthenticated caller.", 2)
 		return
+	end
+	amount = normalizePositiveBankAmount(amount, "personal deposit")
+	if not amount then
+		return outputChatBox("Invalid deposit amount.", client, 255, 0, 0)
 	end
 	if exports.global:takeMoney(client, amount, nil, true) then
 			local money = getElementData(client, "bankmoney")
@@ -91,16 +148,35 @@ addEventHandler("depositMoneyPersonal", getRootElement(), depositMoneyPersonal)
 function withdrawMoneyBusiness(amount, factionID)
 	local state = tonumber(getElementData(client, "loggedin")) or 0
 	if (state == 0) then
+		outputDebugString("[BANK] Rejected business withdrawal: unauthenticated caller.", 2)
 		return
 	end
-	
+	amount = normalizePositiveBankAmount(amount, "business withdrawal")
+	if not amount then
+		return outputChatBox("Invalid withdrawal amount.", client, 255, 0, 0)
+	end
+	factionID = hasFinancePermission(client, factionID, "business withdrawal")
+	if not factionID then
+		return outputChatBox("You do not have permission to manage this faction's finances.", client, 255, 0, 0)
+	end
 	local theTeam = exports.factions:getFactionFromID(factionID)
+	if not theTeam then
+		outputDebugString("[BANK] Business withdrawal failed: faction element was not found.", 2)
+		return
+	end
 	if exports.global:takeMoney(theTeam, amount) then
 		if exports.global:giveMoney(client, amount) then
 			mysql:query_free("INSERT INTO wiretransfers (`from`, `to`, `amount`, `reason`, `type`) VALUES (" .. mysql:escape_string(-getElementData(theTeam, "id")) .. ", " .. mysql:escape_string(getElementData(client, "dbid")) .. ", " .. mysql:escape_string(amount) .. ", '', 4)" ) 
 			outputChatBox("You withdrew $" .. exports.global:formatMoney(amount) .. " from your business account.", client, 255, 194, 14)
 			exports.logs:dbLog(client, 25, theTeam, "WITHDRAW FROM BUSINESS " .. amount)
+		else
+			outputDebugString("[BANK] Business withdrawal failed while crediting cash; attempting to restore faction funds.", 2)
+			if not exports.global:giveMoney(theTeam, amount) then
+				outputDebugString("[BANK] Critical: failed to restore faction funds after a failed withdrawal.", 1)
+			end
 		end
+	else
+		outputDebugString("[BANK] Business withdrawal rejected: insufficient faction funds or database error.", 2)
 	end
 end
 addEvent("withdrawMoneyBusiness", true)
@@ -109,14 +185,29 @@ addEventHandler("withdrawMoneyBusiness", getRootElement(), withdrawMoneyBusiness
 function depositMoneyBusiness(amount, factionID)
 	local state = tonumber(getElementData(client, "loggedin")) or 0
 	if (state == 0) then
+		outputDebugString("[BANK] Rejected business deposit: unauthenticated caller.", 2)
 		return
+	end
+	amount = normalizePositiveBankAmount(amount, "business deposit")
+	if not amount then
+		return outputChatBox("Invalid deposit amount.", client, 255, 0, 0)
+	end
+	factionID = hasFinancePermission(client, factionID, "business deposit")
+	if not factionID then
+		return outputChatBox("You do not have permission to manage this faction's finances.", client, 255, 0, 0)
 	end
 	if exports.global:takeMoney(client, amount) then
 		local theTeam = exports.factions:getFactionFromID(factionID)
-		if exports.global:giveMoney(theTeam, amount) then
+		local creditedFaction = theTeam and exports.global:giveMoney(theTeam, amount)
+		if creditedFaction then
 			mysql:query_free("INSERT INTO wiretransfers (`from`, `to`, `amount`, `reason`, `type`) VALUES (" .. mysql:escape_string(getElementData(client, "dbid")) .. ", " .. mysql:escape_string(-getElementData(theTeam, "id")) .. ", " .. mysql:escape_string(amount) .. ", '', 5)" )
 			outputChatBox("You deposited $" .. exports.global:formatMoney(amount) .. " into your business account.", client, 255, 194, 14)
 			exports.logs:dbLog(client, 25, theTeam, "DEPOSIT TO BUSINESS " .. amount)
+		else
+			outputDebugString("[BANK] Business deposit failed while crediting faction funds; attempting to restore player cash.", 2)
+			if not exports.global:giveMoney(client, amount) then
+				outputDebugString("[BANK] Critical: failed to restore player cash after a failed deposit.", 1)
+			end
 		end
 	else
 	outputChatBox("You don't have that amount in one sorted money item.", client, 255, 194, 14)
@@ -127,11 +218,9 @@ addEventHandler("depositMoneyBusiness", getRootElement(), depositMoneyBusiness)
 
 function transferMoneyToPersonal( fromFactionId, name, amount, reason )
 	if getElementData( client, "loggedin" ) == 1 then
-		-- validate and format amount.
-		if not amount or not tonumber(amount) or tonumber(amount) <=0 then
+		amount = normalizePositiveBankAmount(amount, "bank transfer")
+		if not amount then
 			return not outputChatBox( "Invalid amount to transfer.", client, 255, 0, 0 )
-		else
-			amount = math.floor(tonumber(amount))
 		end
 		
 		-- validate and format reason
@@ -142,6 +231,10 @@ function transferMoneyToPersonal( fromFactionId, name, amount, reason )
 		local sender = nil
 		-- sending from faction bank.
 		if fromFactionId then
+			fromFactionId = hasFinancePermission(client, fromFactionId, "faction bank transfer")
+			if not fromFactionId then
+				return not outputChatBox("You do not have permission to manage this faction's finances.", client, 255, 0, 0)
+			end
 			sender = exports.pool:getElement( 'team', fromFactionId )
 			if not sender then 
 				return not outputChatBox( "Transaction failed. Error Code: 147", client, 255, 0, 0 )
@@ -189,12 +282,18 @@ function transferMoneyToPersonal( fromFactionId, name, amount, reason )
 		if hasBankMoney( sender, amount ) then
 			if takeBankMoney( sender, amount ) then
 				-- if receiver_bank is not null then, receiver must be an offline player.
+				local delivered = false
 				if receiver_bank then
-					dbExec( exports.mysql:getConn('mta'), "UPDATE characters SET bankmoney=bankmoney+? WHERE id=?", amount, receiver )
+					delivered = dbExec( exports.mysql:getConn('mta'), "UPDATE characters SET bankmoney=bankmoney+? WHERE id=?", amount, receiver )
 				else
-					if not giveBankMoney( receiver, amount ) then
-						outputDebugString( "[BANK] Took bankmoney from sender, but unable to give receiver. Code 188." )
+					delivered = giveBankMoney( receiver, amount )
+				end
+				if not delivered then
+					outputDebugString("[BANK] Transfer delivery failed; attempting to restore sender balance.", 2)
+					if not giveBankMoney(sender, amount) then
+						outputDebugString("[BANK] Critical: failed to restore sender balance after transfer delivery failed.", 1)
 					end
+					return not outputChatBox("Transaction failed. Please try again.", client, 255, 0, 0)
 				end
 				
 				-- logs
@@ -240,28 +339,70 @@ addEventHandler("transferMoneyToPersonal", getRootElement(), transferMoneyToPers
 ]]
 
 function tellTransfersPersonal(cardInfo)
-	local dbid = getElementData(client, "dbid")
-	if cardInfo then
-		dbid = cardInfo
+	if not client or not isElement(client) or tonumber(getElementData(client, "loggedin")) ~= 1 then
+		outputDebugString("[BANK] Rejected personal history request from an unauthenticated caller.", 2)
+		return false
 	end
-	tellTransfers(client, dbid, "recievePersonalTransfer")
+
+	local characterID = tonumber(getElementData(client, "dbid"))
+	if not characterID or characterID < 1 then
+		outputDebugString("[BANK] Rejected personal history request without an active character.", 2)
+		return false
+	end
+
+	local cardNumber
+	if cardInfo ~= nil then
+		if type(cardInfo) ~= "table" or type(cardInfo[2]) ~= "string" or #cardInfo[2] < 4 or #cardInfo[2] > 32 or not cardInfo[2]:match("^%d+$") or tonumber(cardInfo[4]) ~= characterID then
+			outputDebugString("[BANK] Rejected personal history request with invalid card data for account " .. tostring(getElementData(client, "account:id") or "unknown") .. ".", 2)
+			return false
+		end
+
+		cardNumber = cardInfo[2]
+		local escapedCardNumber = mysql:escape_string(cardNumber)
+		local card = mysql:query_fetch_assoc("SELECT `card_owner` FROM `atm_cards` WHERE `card_number`='" .. escapedCardNumber .. "' AND `card_owner`='" .. tostring(characterID) .. "' AND `card_type`='1' LIMIT 1")
+		if not card or tonumber(card.card_owner) ~= characterID then
+			outputDebugString("[BANK] Rejected personal history request for a card not owned by the active character.", 2)
+			return false
+		end
+	end
+
+	tellTransfers(client, characterID, "recievePersonalTransfer", cardNumber)
 end
 
 function tellTransfersBusiness(name)
-	local dbid = exports.factions:getFactionIDFromName(name)
-	--local dbid = tonumber(getElementData(getPlayerTeam(client), "id")) or 0
-	if dbid > 0 then
-		tellTransfers(client, -dbid, "recieveBusinessTransfer")
+	if not client or not isElement(client) or tonumber(getElementData(client, "loggedin")) ~= 1 then
+		outputDebugString("[BANK] Rejected business history request from an unauthenticated caller.", 2)
+		return false
 	end
+	if type(name) ~= "string" or #name < 1 or #name > 128 then
+		outputDebugString("[BANK] Rejected business history request with invalid faction name.", 2)
+		return false
+	end
+	local factionID
+	local factions = getElementData(client, "faction")
+	if type(factions) == "table" then
+		for memberFactionID in pairs(factions) do
+			local candidateID = tonumber(memberFactionID)
+			if candidateID and candidateID > 0 and exports.factions:getFactionName(candidateID) == name then
+				factionID = candidateID
+				break
+			end
+		end
+	end
+	if not factionID or not exports.factions:hasMemberPermissionTo(client, factionID, "manage_finance") then
+		outputDebugString("[BANK] Rejected business history request without faction finance permission for account " .. tostring(getElementData(client, "account:id") or "unknown") .. ".", 2)
+		return false
+	end
+	tellTransfers(client, -factionID, "recieveBusinessTransfer")
 end
 
-function tellTransfers(source, dbid, event)
-	local where = ""
-	if type(dbid) == "table" then
-		where = "( ( `from` = (SELECT `card_owner` FROM `atm_cards` WHERE `card_number` = '" .. dbid[2] .. "' LIMIT 1) ) OR (`to` = (SELECT `card_owner` FROM `atm_cards` WHERE `card_number` = '" .. dbid[2] .. "' LIMIT 1) ) )"
-	else
-		where = "( `from` = " .. dbid .. " OR `to` = " .. dbid .. " )"
+
+function tellTransfers(player, dbid, event, cardNumber)
+	if not isElement(player) or getElementType(player) ~= "player" or type(dbid) ~= "number" or dbid ~= dbid or dbid == math.huge or dbid == -math.huge or dbid ~= math.floor(dbid) or dbid == 0 or (event ~= "recievePersonalTransfer" and event ~= "recieveBusinessTransfer") then
+		outputDebugString("[BANK] Rejected invalid internal transaction history query.", 2)
+		return false
 	end
+	local where = "( `from` = " .. dbid .. " OR `to` = " .. dbid .. " )"
 	
 	if tonumber(dbid) and dbid < 0 then
 		where = where .. " AND type != 6" -- skip paydays for factions 
@@ -316,11 +457,7 @@ function tellTransfers(source, dbid, event)
 			end
 				
 			if amount > 0 then
-				if tonumber(dbid) then  -- Not ATM
-					if tostring(row["from"]) == tostring(dbid) then
-						amount = -amount
-					end
-				elseif tostring(row["from_card"]) == tostring(dbid[2]) or tostring(row["from"]) == tostring(dbid[4])  then
+				if (cardNumber and tostring(row["from_card"]) == cardNumber) or tostring(row["from"]) == tostring(dbid) then
 					amount = -amount
 				end 
 			end
@@ -339,7 +476,7 @@ function tellTransfers(source, dbid, event)
 			if row["details"] ~= mysql_null() then
 				details = row["details"]
 			end
-			triggerClientEvent(source, event, source, id, amount, time, type, from, to, reason, details, dbid)
+			triggerClientEvent(player, event, player, id, amount, time, type, from, to, reason, details, dbid)
 		end
 		mysql:free_result(query)
 	else
@@ -354,7 +491,10 @@ addEvent("tellTransfersBusiness", true)
 addEventHandler("tellTransfersBusiness", getRootElement(), tellTransfersBusiness)
 
 function addBankTransactionLog(fromAccount, toAccount, amount, type, reason, details, fromCard, toCard)
-	if not amount or not tonumber(amount) or not type or not tonumber(type) or fromAccount == toAccount then
+	amount = tonumber(amount)
+	type = tonumber(type)
+	if not amount or amount ~= amount or amount == math.huge or amount <= 0 or not type or type ~= math.floor(type) or type < 0 or type > 16 or fromAccount == toAccount then
+		outputDebugString("[BANK] Rejected invalid bank transaction log request.", 2)
 		return false
 	end
 
@@ -378,10 +518,12 @@ function addBankTransactionLog(fromAccount, toAccount, amount, type, reason, det
 		sql = sql..", `details` = '"..exports.global:toSQL(details).."' "
 	end
 
-	return mysql:query_free(sql) 
+	local saved = mysql:query_free(sql)
+	if not saved then
+		outputDebugString("[BANK] Failed to persist transaction history row.", 2)
+	end
+	return saved
 end
-addEvent("addBankTransactionLog", true)
-addEventHandler("addBankTransactionLog", getRootElement(), addBankTransactionLog)
 
 
 --MAXIME

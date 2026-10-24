@@ -45,21 +45,34 @@ This is the first pass over the upstream `main` snapshot. It maps the major syst
 ## Findings added during the architecture pass
 
 - The account registration path calls a localhost activation-mail endpoint that is not part of this repository. The forum login export is declared but no active implementation was located; account/character forum paths also query an `accounts` table through the MTA connection although the checked-in account table is in `core`.
-- `account/login-panel/server.lua` selects only `mtaserial` during registration duplicate checks but later reads `id` and `username` from that result.
+- `account/login-panel/server.lua` selected only `mtaserial` during registration duplicate checks but later read `id` and `username` from that result. The current working changes query `account_id`, free the result on rejection, and validate password confirmation server-side.
 - `account/s_characters.lua` character switching leaves live cash set; upstream PR #57 proposes clearing it. `adminjail_s.lua` writes jail columns against `accounts` although the checked-in jail columns are in `mta.account_details`; upstream PR #46 proposes the correction.
 - The legacy UCP resource declares HTTP-callable management actions and provisions a `website` ACL account that belongs to the broad `Admin` group. The UCP web application itself is missing.
-- Critical source-level authorization gaps were found in the sample audit: remotely triggerable `staff:editStaff` can update admin/supporter/specialty ranks without a handler permission check and interpolates client-provided ranks into SQL fragments; faction edit/delete events also mutate state without an apparent permission check. Staff/faction listing events disclose protected data. These findings have not been exercised against a live server.
-- Additional sampled transaction risks include negative personal bank withdrawals increasing the stored balance, faction bank transfers without `manage_finance` checks, insurance and inventory handlers trusting client-selected targets, a remote bank-ledger writer, and car-shop charging before stock validation. Character creation similarly relies on UI-only quota checks and accepts client spawn coordinates. See the prioritized findings in [GAMEMODE_GUIDE.md](GAMEMODE_GUIDE.md); no runtime exploit testing was performed.
+- Critical source-level authorization gaps were found in the sample audit: remotely triggerable `staff:editStaff` could update ranks without permission checks, and faction edit/delete plus staff/faction data events lacked server authorization. The current working changes add server authorization, validate rank/faction payloads, and move staff side effects after the durable rank update.
+- Additional sampled transaction risks included negative personal bank withdrawals, faction transfers without `manage_finance` checks, insurance and inventory handlers trusting client-selected targets, and a remote bank-ledger writer. The current working changes harden bank handlers and bank-history access. Insurance/inventory authorization, car-shop ordering and the full event audit remain open. Character creation now checks account state and quota server-side and ignores client coordinates. These source changes have not been runtime tested; see [GAMEMODE_GUIDE.md](GAMEMODE_GUIDE.md).
 - Discord login is being designed separately from Discord staff permissions: browser OAuth proves identity, an explicit link maps that identity to an existing game account, and in-game login uses a short-lived one-use server-redeemed ticket. [DISCORD_AUTH_DESIGN.md](DISCORD_AUTH_DESIGN.md) records the proposed flow, capability vocabulary, blank role-ID slots, and staged migration.
 - A broader scan found 181 remotely-triggerable event declarations in active server scripts (rough count, not unique or confirmed vulnerabilities). A further handler-by-handler review is needed, starting with money, inventory, ownership, character, ban and staff actions.
-- `event-system/bmxpier/server.lua` includes a hard-coded key in an external score-submission URL. Treat it as exposed; remove it and rotate/disable the remote credential after confirming endpoint ownership. Do not copy the key into docs or logs.
+- `event-system/bmxpier/server.lua` contained a hard-coded external score-submission key. The current working changes remove the key and disable outbound submission; external credential revocation and repository-history cleanup remain tracked work. Do not copy the key into docs or logs.
 - The checked-in `mtaserver.conf.bak` has 138 startup entries for 136 unique resources and 144 resource manifests overall. `event-system` and `selfck-system` are duplicated; eight manifests are not startup-listed. See [RESOURCE_INVENTORY.csv](RESOURCE_INVENTORY.csv).
 - PRs #48/#49 (car shop purchase range), #54 (admin interior transfer), #55 (ammo scope), and #58 (elevator ID fallback) are review references only; none were imported. PR #67 is Discord Rich Presence, not role-based authorization.
 - A reference fork with broad gameplay changes and webhook notifications was inspected but not copied. Its Discord code does not establish role-based staff permissions.
 
 ## Review status
 
-The account/data, gameplay-domain, deployment, and sampled authorization architecture passes are complete at a map-and-triage level. The complete event/query inventory, call-site authorization audit, dependency validation, disposable server boot, and runtime reproduction of reported issues remain outstanding. No tests or server boot were run during this documentation pass.
+The account/data, gameplay-domain, deployment, and sampled authorization architecture passes are complete at a map-and-triage level. A first hardening batch is in progress in the working tree and has not been committed or runtime-tested. The complete event/query inventory, call-site authorization audit, dependency validation, disposable server boot, and runtime reproduction of reported issues remain outstanding.
+
+## GitHub issue tracker
+
+The remaining work is tracked in the private repository's GitHub Issues and assigned to `itschase`:
+
+- [#1 Audit and secure every remotely triggered server event](https://github.com/itschase/OwlMTA-2026/issues/1)
+- [#2 Implement Discord identity linking and optional MTA login](https://github.com/itschase/OwlMTA-2026/issues/2)
+- [#3 Replace legacy staff ranks with configurable capability grants](https://github.com/itschase/OwlMTA-2026/issues/3)
+- [#4 Replace missing UCP integrations and narrow its ACL](https://github.com/itschase/OwlMTA-2026/issues/4)
+- [#5 Make server configuration safe and reproducible](https://github.com/itschase/OwlMTA-2026/issues/5)
+- [#6 Design and stage a versioned schema migration](https://github.com/itschase/OwlMTA-2026/issues/6)
+- [#7 Build the player and staff feature usage guide](https://github.com/itschase/OwlMTA-2026/issues/7)
+- [#8 Remove the embedded BMX score endpoint credential](https://github.com/itschase/OwlMTA-2026/issues/8)
 
 ## Discord role integration direction
 

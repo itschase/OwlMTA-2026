@@ -8,7 +8,8 @@
 ]]
 
 function canAccessFactionManager( player )
-	return exports.integration:isPlayerTrialAdmin( player ) or exports.integration:isPlayerSupporter( player ) or exports.integration:isPlayerScripter( player ) or exports.integration:isPlayerFMTMember( player )
+	-- Donator status does not grant access to faction management tools.
+	return exports.integration:isPlayerTrialAdmin( player ) or exports.integration:isPlayerScripter( player ) or exports.integration:isPlayerFMTMember( player )
 end
 
 local factionTypes = {

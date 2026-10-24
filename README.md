@@ -24,6 +24,14 @@ Logs are written to `mods/deathmatch/resources/logs/logs` as they are created in
 * [Coding Conventions](coding_conventions.md)
 * [Useful Functions](useful_functions.md)
 
+## Rebuild and Development Notes
+
+* [Gamemode Architecture Guide](GAMEMODE_GUIDE.md)
+* [Feature Usage Guide](FEATURE_USAGE_GUIDE.md)
+* [Discord Identity and Permissions Design](DISCORD_AUTH_DESIGN.md)
+* [Codebase Review and Issue Tracker](CODEBASE_REVIEW.md)
+* [Resource Startup Inventory](RESOURCE_INVENTORY.csv)
+
 ## Docker Build Environment Variables
 
 ### MTASERVER.CONF

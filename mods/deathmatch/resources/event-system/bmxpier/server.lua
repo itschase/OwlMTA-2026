@@ -6,6 +6,7 @@ local startCoord = { 825.7197265625, -1921.798828125, 14.789143562317 }
 local veh = nil
 local ready = true
 local competitor = nil
+local scoreSubmissionDisabledLogged = false
 
 --[[addEventHandler("onResourceStart", resourceRoot, function()
 	local thePed = createPed(82, 844.2763671875, -1906.1259765625, 12.8671875)
@@ -63,7 +64,10 @@ function endTheRace(thePlayer, time, changeChar)
 		destroyElement(veh)
 		ready = true
 		if tonumber(time) and tonumber(time) > 10 then
-			fetchRemote("https://externet.website/tools/owl/supersecretadd.php?key=43q4LrGJ7CDvU6A&char="..getPlayerName(thePlayer).."&score="..time, function() end)
+			if not scoreSubmissionDisabledLogged then
+				outputDebugString("[EVENT][BMX] External score submission is disabled until its endpoint and credentials are reviewed.", 3)
+				scoreSubmissionDisabledLogged = true
+			end
 			outputChatBox("You have ended the race with a time of "..tostring(time).." seconds!", thePlayer)
 		end
 	end

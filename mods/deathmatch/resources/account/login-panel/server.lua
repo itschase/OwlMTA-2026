@@ -346,6 +346,16 @@ addEventHandler("accounts:playerFinishApps",getRootElement(),playerFinishApps)
 
 --local lastClient = nil
 function playerRegister(username,password,confirmPassword, email)
+	if not client or not isElement(client) or getElementType(client) ~= "player" then
+		outputDebugString("[ACCOUNT][REGISTER] rejected invalid event client", 2)
+		return false
+	end
+	if type(username) ~= "string" or type(password) ~= "string" or type(confirmPassword) ~= "string" or type(email) ~= "string"
+		or username == "" or password == "" or email == "" or password ~= confirmPassword then
+		outputDebugString("[ACCOUNT][REGISTER] rejected empty or mismatched registration fields", 2)
+		triggerClientEvent(client, "set_warning_text", client, "Register", "Please check your username, password confirmation, and email.")
+		return false
+	end
 	--CHECK FOR EXISTANCE OF USERNAME AND EMAIL ADDRESS / MAXIME
 	local preparedQuery1 = "SELECT `id` FROM `accounts` WHERE `username`=? OR `email`=? "
 	dbQuery(function(qh, username, password, confirmPassword, email, client)
@@ -354,16 +364,20 @@ function playerRegister(username,password,confirmPassword, email)
 			if #result == 0 then
 				--CHECK FOR EXISTANCE OF MTA SERIAL TO ENCOUNTER MULTIPLE ACCOUNTS PER USER / MAXIME.
 				local mtaSerial = getPlayerSerial(client)
-				local preparedQuery2 = "SELECT `mtaserial` FROM `account_details` WHERE `mtaserial`='".. toSQL(mtaSerial) .."' LIMIT 1"
+				local preparedQuery2 = "SELECT `account_id`, `mtaserial` FROM `account_details` WHERE `mtaserial`='".. toSQL(mtaSerial) .."' LIMIT 1"
 				local Q2 = mysql:query(preparedQuery2)
 				if not Q2 then
+					outputDebugString("[ACCOUNT][REGISTER] serial lookup failed", 1)
 					triggerClientEvent(client,"set_warning_text",client,"Register","Error code 0003 occurred.")
 					return false
 				end
 
-				local usernameExisted = mysql:fetch_assoc(Q2)
-				if (mysql:num_rows(Q2) > 0) and usernameExisted["id"] ~= "1" then
-					triggerClientEvent(client,"set_warning_text",client,"Register","Multiple Accounts is not allowed (Existed: "..tostring(usernameExisted["username"])..")")
+				local accountExisted = mysql:fetch_assoc(Q2)
+				local existingSerialCount = mysql:num_rows(Q2)
+				if (existingSerialCount > 0) and tonumber(accountExisted and accountExisted["account_id"]) ~= 1 then
+					mysql:free_result(Q2)
+					outputDebugString("[ACCOUNT][REGISTER] duplicate serial blocked account=" .. tostring(accountExisted and accountExisted["account_id"] or "unknown"), 2)
+					triggerClientEvent(client,"set_warning_text",client,"Register","Multiple Accounts is not allowed.")
 					return false
 				end
 				mysql:free_result(Q2)
@@ -374,6 +388,7 @@ function playerRegister(username,password,confirmPassword, email)
 				preparedQuery3 = "INSERT INTO `accounts` SET `username`=?, `password`=?, `email`=?, `registerdate`=NOW(), `ip`=?, `activated`='0' "
 				local userid = dbExec(exports.mysql:getConn("core"), preparedQuery3, username, encryptedPW, email, ipAddress)
 				if userid then
+					outputDebugString("[ACCOUNT][REGISTER] account row created; provisioning account details", 3)
 					triggerClientEvent(client,"accounts:register:complete",client, username, password)
 					dbQuery(function(qh, client)
 						local result = dbPoll(qh, 0)
@@ -387,6 +402,7 @@ function playerRegister(username,password,confirmPassword, email)
 									end,
 								{id=result[1].id})
 							else
+								outputDebugString("[ACCOUNT][REGISTER] account details insert failed account=" .. tostring(result[1].id), 1)
 								triggerClientEvent(client,"set_warning_text",client,"Register","Error code 0005 occurred.")
 							end
 						else

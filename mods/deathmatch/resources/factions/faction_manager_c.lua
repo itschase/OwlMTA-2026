@@ -150,7 +150,7 @@ addEvent( "showFactionList", true )
 addEventHandler( "showFactionList", resourceRoot, showFactionList )
 
 function showFactionListCmd()
-	if exports.integration:isPlayerTrialAdmin( localPlayer ) or exports.integration:isPlayerSupporter( localPlayer ) or exports.integration:isPlayerScripter( localPlayer ) or exports.integration:isPlayerFMTMember( localPlayer ) then
+	if exports.integration:isPlayerTrialAdmin( localPlayer ) or exports.integration:isPlayerScripter( localPlayer ) or exports.integration:isPlayerFMTMember( localPlayer ) then
 		showFactionList()
 	end
 end
