@@ -1,6 +1,6 @@
 # Codebase review: initial architecture map
 
-This is the first pass over the upstream `main` snapshot. It maps the major systems and records concrete findings for the full review; it is not a line-by-line audit of every resource yet.
+This is the first pass over the upstream `main` snapshot. It maps the major systems and records concrete findings for the full review; it is not a line-by-line audit of every resource yet. See [GAMEMODE_GUIDE.md](GAMEMODE_GUIDE.md) for the consolidated functional map, database ownership, account lifecycle, gameplay domains, UCP dependencies, and review queue.
 
 ## Repository scale and structure
 
@@ -41,6 +41,19 @@ This is the first pass over the upstream `main` snapshot. It maps the major syst
 - Inspect every server event that changes money, inventory, ownership, staff ranks, bans, faction membership, or character state for server-side authorization and validation.
 - Reproduce the container build and MTA resource startup against disposable databases, then triage the first blocking failures.
 - Inventory all hard-coded external services, URLs, API keys, forum assumptions, and operational endpoints before replacing the UCP.
+
+## Findings added during the architecture pass
+
+- The account registration path calls a localhost activation-mail endpoint that is not part of this repository. The forum login export is declared but no active implementation was located; account/character forum paths also query an `accounts` table through the MTA connection although the checked-in account table is in `core`.
+- `account/login-panel/server.lua` selects only `mtaserial` during registration duplicate checks but later reads `id` and `username` from that result.
+- `account/s_characters.lua` character switching leaves live cash set; upstream PR #57 proposes clearing it. `adminjail_s.lua` writes jail columns against `accounts` although the checked-in jail columns are in `mta.account_details`; upstream PR #46 proposes the correction.
+- The legacy UCP resource declares HTTP-callable management actions and provisions a `website` ACL account that belongs to the broad `Admin` group. The UCP web application itself is missing.
+- PRs #48/#49 (car shop purchase range), #54 (admin interior transfer), #55 (ammo scope), and #58 (elevator ID fallback) are review references only; none were imported. PR #67 is Discord Rich Presence, not role-based authorization.
+- A reference fork with broad gameplay changes and webhook notifications was inspected but not copied. Its Discord code does not establish role-based staff permissions.
+
+## Review status
+
+The account/data, gameplay-domain, and runtime/security architecture passes are complete at a map-and-triage level. The complete resource/event/query inventory, call-site authorization audit, dependency validation, disposable server boot, and runtime reproduction of reported issues remain outstanding. No tests or server boot were run during this documentation pass.
 
 ## Discord role integration direction
 
