@@ -4,7 +4,7 @@ This guide maps the active server as it exists in the imported upstream snapshot
 
 ## How to read the tree
 
-- `mods/deathmatch/mtaserver.conf` selects resources and their startup order. It currently has 135 `startup="1"` entries. Resource groups such as `[vehicle]` and `[interior]` are directories; the resource itself is usually a child directory containing `meta.xml`.
+- `mods/deathmatch/mtaserver.conf.bak` is the only server config snapshot in this checkout; it has 138 `startup="1"` entries for 136 unique resources. Resource groups such as `[vehicle]` and `[interior]` are directories; the resource itself is usually a child directory containing `meta.xml`.
 - `mods/deathmatch/resources/**/meta.xml` is the authoritative resource manifest: scripts, client/server side, exports, dependencies, and settings.
 - `mods/deathmatch/resources/**` contains active code. `mods/deathmatch/resource-archive/**` contains inactive historical code; do not assume it runs.
 - `mods/deathmatch/data/{core,mta,data}.sql` are bootstrap snapshots, not guaranteed to match any existing operator's live database.
@@ -14,7 +14,7 @@ When tracing a feature, start at its resource `meta.xml`, identify its server sc
 
 ## Boot and service graph
 
-The checked-in startup sequence begins with `mysql`, `data`, `pool`, `global`, `release-notes`, `resources`, `datetime`, `integration`, and `anticheat`, followed by shared UI, logging, bans, account, staff and gameplay services. The precise sequence is in `mtaserver.conf`; there are duplicate startup lines for `event-system` and `selfck-system` that should be removed after checking runtime dependencies.
+The checked-in startup sequence begins with `mysql`, `data`, `pool`, `global`, `release-notes`, `resources`, `datetime`, `integration`, and `anticheat`, followed by shared UI, logging, bans, account, staff and gameplay services. the precise sequence is in `mtaserver.conf.bak`; there are duplicate startup lines for `event-system` and `selfck-system` that should be removed after checking runtime dependencies.
 
 The first resources to understand are:
 
@@ -26,6 +26,8 @@ The first resources to understand are:
 | `account` | Authentication, account registration, character selection, spawn and character switching. Start with `account/login-panel/server.lua` and `account/s_characters.lua`. |
 | `saveplayer-system` | Periodic, quit and explicit `savePlayer` persistence of character state. Many resources listen to the same event to persist their owned state. |
 | `logs`, `bans`, `admin-system`, `donators` | Audit/logging, enforcement, staff tools and donor entitlements. These cross-cutting services need special attention during permission migration. |
+
+There are 144 resource manifests; eight are not startup-listed in the checked-in config snapshot: `elections`, `forums`, `guied`, `hardwaresurvey`, `object-browser`, and the `[dev]` tools `ipb`, `runcode`, and `sfxbrowser`. Confirm whether these are intentionally manual/dev-only before cleanup. `usercontrolpanel` is startup-listed despite its missing website service, which makes its ACL scope a deployment issue.
 
 Resource dependencies are declared partly in manifests and partly through runtime export calls. Startup order alone does not prove a dependency is correct. A full importability pass still needs an actual disposable server boot and log review.
 
@@ -98,12 +100,17 @@ The UCP website is absent. `resources/usercontrolpanel` exposes HTTP-callable op
 
 Other non-portable dependencies found include the localhost activation email endpoint, OwlGaming news/rules URLs, forums API settings and Imgur configuration. The Docker entrypoint also substitutes configuration values into XML using `sed`; values with XML or sed metacharacters can corrupt the output. It reads `WEBSITE_PASSWORD`, which is not listed in the README environment variables. The Dockerfile obtains an unpinned MTA server download, so builds are not reproducible yet.
 
+`event-system/bmxpier/server.lua` sends player names and scores to an external endpoint with a hard-coded key in the URL. Treat the key as exposed: remove it from source and rotate/disable the remote credential after confirming endpoint ownership. `acl.xml` also gives the `Everyone` group broad objects at first glance; verify effective permissions using MTA's ACL semantics before treating that entry as proven exposure. The `user.website` membership in `Admin`, however, is explicit and needs restriction.
+
 ## High-priority bug and upstream review queue
 
 These are source-level findings or upstream reports, not all reproduced runtime failures. Review each patch before applying it.
 
 | Finding | Evidence / next action |
 | --- | --- |
+| **Critical: remote staff rank editing lacks an authorization boundary** | `admin-system/staff_manager/staff_manager_s.lua:116-206` registers `staff:editStaff` remotely and its handler writes admin, supporter and specialty ranks without a staff check. Client-supplied rank values are concatenated into SQL update fragments without numeric/range validation. Treat as direct privilege escalation; disable or gate this path before any public server operation, then replace it with the central capability service. |
+| **High: remote faction administration lacks an authorization boundary** | `factions/faction_manager_s.lua:38-39,153-154` exposes faction edit/delete mutations with no apparent handler permission check. The faction list/member events are also remotely callable. Gate mutations and sensitive roster data server-side. |
+| **High: staff data events disclose protected information** | In the staff manager, `staff:getStaffInfo`, `staff:getTeamsData`, and `staff:getChangelogs` are remotely callable without apparent permission checks. Restrict them along with rank mutation. |
 | Character cash may survive a character switch | `account/s_characters.lua` clears character IDs and bank data but not live cash. Review [upstream PR #57](https://github.com/OwlGamingCommunity/MTA/pull/57) and validate the transition. |
 | Admin jail writes to the wrong table | `admin-system/Player/adminjail_s.lua` refers to `accounts`; jail columns are in `mta.account_details`, while `core.accounts` has no such fields. Review [PR #46](https://github.com/OwlGamingCommunity/MTA/pull/46). |
 | Forum login/account calls may target absent APIs/schema | Character scripts use `accounts` through the legacy MTA DB wrapper and call `logintoForumAccount`; the export is declared but its active implementation was not found. Trace before deciding whether to remove legacy UI. |
@@ -116,11 +123,13 @@ These are source-level findings or upstream reports, not all reproduced runtime 
 | Admin self-transfer is only warned | Review [PR #54](https://github.com/OwlGamingCommunity/MTA/pull/54) and decide whether policy should block or only warn. |
 | Discord Rich Presence is not role management | [PR #67](https://github.com/OwlGamingCommunity/MTA/pull/67) is a closed, unmerged Rich Presence change; it does not provide Discord OAuth, guild roles or authorization. |
 
+The staff and faction event findings are source-confirmed gaps in the sampled handlers, but have not been triggered against a running server. A broad search found 181 remotely-triggerable event declarations in active server script files; this is a rough declaration count and requires a handler-by-handler audit. A static inventory of resource manifests and startup status is in [RESOURCE_INVENTORY.csv](RESOURCE_INVENTORY.csv).
+
 Original forks were inspected as references. `starinjs/OwlGamingPlus` has broad divergences and webhook-oriented Discord code, not a verified role authorization system; do not transplant the fork wholesale. A separate fork contains suspicious launcher artifacts in its history; none were imported or executed. Fork content and PR patches require selective review.
 
 ## Suggested order for the full understanding pass
 
-1. Record every active resource, manifest, dependency, exported API, remote event and declared settings; reconcile that inventory against `mtaserver.conf`.
+1. Record every resource, manifest, dependency, exported API, remote event and declared setting; reconcile startup state against `mtaserver.conf.bak` and verify which omitted resources are intentionally manual.
 2. Trace authentication, registration, account linking, character create/select/switch/spawn, and every persistence listener end to end.
 3. Build a table-to-resource read/write map for all three schemas. Identify cross-schema joins, duplicate APIs, engine/collation assumptions and orphan risks.
 4. Trace money, item, vehicle, property and faction transactions from client event to server validation, export, database mutation and log record.
