@@ -43,6 +43,8 @@ Resource dependencies are declared partly in manifests and partly through runtim
 
 The current registration path inserts rows into both schemas, then calls `http://127.0.0.1:8000/api/send-activation-mail/`. That service is not included here. The legacy forum link path also calls `integration:logintoForumAccount`, which is declared as an export but has no active implementation located in this snapshot. Treat registration and forum linking as incomplete until external dependencies are replaced or made configurable.
 
+Additional account/character hardening candidates: `account/login-panel/server.lua:348+` receives `confirmPassword` but does not compare it server-side; account and `account_details` creation are separate writes with no transaction and can leave partial records. `account/s_create_character.lua` is remotely-triggerable and does not check login state or the `max_characters` quota before insertion, even though the UI performs a separate quota check. It also concatenates client-provided spawn `location` fields into the `characters` insert. Move authentication, quota, coordinate allowlisting, type/range validation and a per-account creation limit into the server handler; use a server-selected spawn location and prepared SQL parameters.
+
 ## Database ownership and model
 
 There are three schema snapshots:
@@ -84,6 +86,20 @@ The user's intended model is:
 - Discord linking must prove control of both identities. The MTA client cannot submit trusted Discord role lists or role IDs. The server should consume short-lived capabilities from a trusted service, fail closed on stale authorization, audit grants/revocations/actions, and retain a narrowly scoped owner recovery path.
 - Discord must remain optional for basic server boot and gameplay. If Discord is unavailable, ordinary players should continue to play; only protected staff actions need fresh grants.
 
+### Discord as an optional login method
+
+Treat identity authentication and staff authorization as separate decisions. Discord login proves which Discord account completed OAuth; a linked game account determines which game data is loaded; current guild roles determine staff capabilities. A successful OAuth login alone must never grant staff access.
+
+Recommended flow for the replacement account service:
+
+1. Use Discord's server-side OAuth2 Authorization Code Grant from the web service, with unpredictable `state`, an exact registered callback, short-lived sessions and the minimum scopes needed. Keep the client secret and access tokens on the web service; never ship them in MTA Lua or browser code. Discord documents `identify` for identity and `guilds.members.read` for the authenticated user's member data in a guild; role resolution can instead be performed by the trusted bot service. Recheck current scope behavior when implementation starts.
+2. Link an existing game account only after the user proves control of it (a current authenticated game session or existing password plus a one-time confirmation). Store an immutable Discord user ID mapped uniquely to the game account ID. Do not auto-merge on email, Discord username, display name or matching character name.
+3. For in-game Discord login, have the MTA server create a random, short-lived login challenge. The player completes OAuth in a browser and confirms that challenge through the account service; the service issues a one-use ticket bound to the challenge and linked account. The MTA server redeems the ticket server-to-server and receives only the game account ID and a success result. Expire and consume the ticket atomically; do not let the client submit a Discord ID, OAuth token, role list or account ID as proof.
+4. For first-time users, create the game account only after verified OAuth and explicit terms/email requirements are met. Keep local password recovery or an owner-managed recovery method for service outages and account-link disputes. Do not make Discord availability a boot or ordinary gameplay dependency.
+5. Audit link, unlink, login and recovery events. Require re-authentication and a cooldown or staff-reviewed recovery for unlinking an account with active staff grants. Default to one game account per Discord identity unless multi-account linking is explicitly designed.
+
+The web account portal can use browser OAuth directly; an in-game code-and-browser flow avoids embedding a Discord login page in the MTA client. Both should use the same identity-link record and one-use ticket contract.
+
 Before cutover, enumerate each call site of `isPlayerAdmin`, `isPlayerSupporter`, direct rank element-data reads, `account:gmlevel`, faction permissions, specialty team levels and duty checks. Classify the action it protects, then map it to a named capability. Do not globally redefine `isPlayerSupporter` until donor perks and staff checks have been separated.
 
 Concrete findings in this snapshot:
@@ -100,7 +116,7 @@ The UCP website is absent. `resources/usercontrolpanel` exposes HTTP-callable op
 
 Other non-portable dependencies found include the localhost activation email endpoint, OwlGaming news/rules URLs, forums API settings and Imgur configuration. The Docker entrypoint also substitutes configuration values into XML using `sed`; values with XML or sed metacharacters can corrupt the output. It reads `WEBSITE_PASSWORD`, which is not listed in the README environment variables. The Dockerfile obtains an unpinned MTA server download, so builds are not reproducible yet.
 
-`event-system/bmxpier/server.lua` sends player names and scores to an external endpoint with a hard-coded key in the URL. Treat the key as exposed: remove it from source and rotate/disable the remote credential after confirming endpoint ownership. `acl.xml` also gives the `Everyone` group broad objects at first glance; verify effective permissions using MTA's ACL semantics before treating that entry as proven exposure. The `user.website` membership in `Admin`, however, is explicit and needs restriction.
+`event-system/bmxpier/server.lua` sends player names and scores to an external endpoint with a hard-coded key in the URL. Treat the key as exposed: remove it from source and rotate/disable the remote credential after confirming endpoint ownership. `acl.xml` also gives the `Everyone` group broad objects at first glance; MTA's [ACL model](https://wiki.multitheftauto.com/wiki/Access_Control_List) applies the ACL lists assigned to wildcard groups, so evaluate the effective rights before treating this as an exploit. The `user.website` membership in `Admin`, however, is explicit and needs restriction.
 
 ## High-priority bug and upstream review queue
 
@@ -111,6 +127,10 @@ These are source-level findings or upstream reports, not all reproduced runtime 
 | **Critical: remote staff rank editing lacks an authorization boundary** | `admin-system/staff_manager/staff_manager_s.lua:116-206` registers `staff:editStaff` remotely and its handler writes admin, supporter and specialty ranks without a staff check. Client-supplied rank values are concatenated into SQL update fragments without numeric/range validation. Treat as direct privilege escalation; disable or gate this path before any public server operation, then replace it with the central capability service. |
 | **High: remote faction administration lacks an authorization boundary** | `factions/faction_manager_s.lua:38-39,153-154` exposes faction edit/delete mutations with no apparent handler permission check. The faction list/member events are also remotely callable. Gate mutations and sensitive roster data server-side. |
 | **High: staff data events disclose protected information** | In the staff manager, `staff:getStaffInfo`, `staff:getTeamsData`, and `staff:getChangelogs` are remotely callable without apparent permission checks. Restrict them along with rank mutation. |
+| **Critical: bank transfer handlers lack amount and faction authorization** | `bank/s_bank_system.lua:48-69` accepts negative personal withdrawals; the handler then increases saved bank balance while ignoring a failed cash-give result. Business withdrawal/transfer handlers at `:91-106` and `:128-216` accept client faction IDs without checking `manage_finance`. The UI filters choices but the server mutation paths do not repeat authorization. |
+| **High: insurance and inventory events trust client-selected targets** | `insurance/s_main.lua:60-68,161-227` allows faction-setting, purchase and cancellation paths without apparent field whitelist, ownership, consent, permission or premium-charge checks. `item-system/s_item_management.lua:98-121` lets clients request/subscribe to inventory views for arbitrary elements; unsubscribe is wired to the subscribe handler. |
+| **High: remotely writable bank history** | `bank/s_bank_system.lua:356-384` exposes a transaction-log writer that accepts caller-provided ledger data. Restrict to server-side callers and validate account/transaction ownership. |
+| Character creation trusts client state | `account/s_create_character.lua` does not enforce login/quota at mutation time and interpolates client location fields. Enforce server-side ownership, quota, allowed spawn, and parameterized writes. |
 | Character cash may survive a character switch | `account/s_characters.lua` clears character IDs and bank data but not live cash. Review [upstream PR #57](https://github.com/OwlGamingCommunity/MTA/pull/57) and validate the transition. |
 | Admin jail writes to the wrong table | `admin-system/Player/adminjail_s.lua` refers to `accounts`; jail columns are in `mta.account_details`, while `core.accounts` has no such fields. Review [PR #46](https://github.com/OwlGamingCommunity/MTA/pull/46). |
 | Forum login/account calls may target absent APIs/schema | Character scripts use `accounts` through the legacy MTA DB wrapper and call `logintoForumAccount`; the export is declared but its active implementation was not found. Trace before deciding whether to remove legacy UI. |
@@ -118,12 +138,12 @@ These are source-level findings or upstream reports, not all reproduced runtime 
 | UCP identity has broad ACL access | `usercontrolpanel` website account is in `Admin`; scope the identity down or remove the legacy endpoint before deployment. |
 | Public event validation needs audit | Many resources register remotely triggerable events. Review authorization and input validation for money, inventory, ownership, staff ranks, bans, faction membership and character state. |
 | Ammo visibility bug reported upstream | Review [PR #55](https://github.com/OwlGamingCommunity/MTA/pull/55) and verify the affected `ammo` resource call. |
-| Car shop purchase location issue reported upstream | Review [PR #48](https://github.com/OwlGamingCommunity/MTA/pull/48) and [PR #49](https://github.com/OwlGamingCommunity/MTA/pull/49); independently audit the server-side flag/freeze flow before adopting. |
+| **High: car purchase can charge before stock is confirmed** | `[vehicle]/carshop-system/s_shop.lua` charges before checking stock, and the server handler lacks explicit distance validation. Review [PR #48](https://github.com/OwlGamingCommunity/MTA/pull/48) and [PR #49](https://github.com/OwlGamingCommunity/MTA/pull/49); independently audit the server-side flag/freeze flow before adopting. |
 | Elevator empty-table fallback may miss SQL NULL | Review [PR #58](https://github.com/OwlGamingCommunity/MTA/pull/58); `MIN()` can return a result row whose value is NULL, so a truthy result object may not mean a next ID exists. |
 | Admin self-transfer is only warned | Review [PR #54](https://github.com/OwlGamingCommunity/MTA/pull/54) and decide whether policy should block or only warn. |
 | Discord Rich Presence is not role management | [PR #67](https://github.com/OwlGamingCommunity/MTA/pull/67) is a closed, unmerged Rich Presence change; it does not provide Discord OAuth, guild roles or authorization. |
 
-The staff and faction event findings are source-confirmed gaps in the sampled handlers, but have not been triggered against a running server. A broad search found 181 remotely-triggerable event declarations in active server script files; this is a rough declaration count and requires a handler-by-handler audit. A static inventory of resource manifests and startup status is in [RESOURCE_INVENTORY.csv](RESOURCE_INVENTORY.csv).
+These are source-level findings from sampled handlers, not runtime exploit demonstrations; no server was started and no event was triggered. A broad search found 181 remotely-triggerable event declarations in active server script files; this is a rough declaration count and requires a handler-by-handler audit. A static inventory of resource manifests and startup status is in [RESOURCE_INVENTORY.csv](RESOURCE_INVENTORY.csv).
 
 Original forks were inspected as references. `starinjs/OwlGamingPlus` has broad divergences and webhook-oriented Discord code, not a verified role authorization system; do not transplant the fork wholesale. A separate fork contains suspicious launcher artifacts in its history; none were imported or executed. Fork content and PR patches require selective review.
 
@@ -137,4 +157,4 @@ Original forks were inspected as references. `starinjs/OwlGamingPlus` has broad 
 6. Review each high-risk event and each upstream PR against current source. Reproduce only in a disposable environment once a runnable MTA/MySQL setup is available.
 7. Document import prerequisites, disabled legacy integrations, clean configuration defaults and a reversible migration path before broad gameplay rewrites.
 
-The initial quantitative inventory and additional first-pass findings are in [CODEBASE_REVIEW.md](CODEBASE_REVIEW.md); sequencing decisions are in [REBUILD_PLAN.md](REBUILD_PLAN.md).
+The initial quantitative inventory and additional first-pass findings are in [CODEBASE_REVIEW.md](CODEBASE_REVIEW.md); sequencing decisions are in [REBUILD_PLAN.md](REBUILD_PLAN.md); the detailed Discord identity, login and capability migration proposal is in [DISCORD_AUTH_DESIGN.md](DISCORD_AUTH_DESIGN.md).
