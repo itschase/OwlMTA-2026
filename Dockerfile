@@ -23,7 +23,6 @@ RUN wget -O mta.tar.gz https://linux.mtasa.com/dl/multitheftauto_linux_x64.tar.g
 	&& tar xfz mta.tar.gz \
 	&& mv multitheftauto_linux_* server \
 	&& rm mta.tar.gz \
-	&& adduser -h /home/mtasa -D -S mtasa \
 	&& chown -R mtasa server
 
 # Copy our source code over
