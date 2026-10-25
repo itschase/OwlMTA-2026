@@ -33,6 +33,7 @@ These checks must move to action-specific named capabilities; supporter/donor st
 ## Known risks and next work
 
 - [Issue #129](https://github.com/itschase/OwlMTA-2026/issues/129) covers remote restricted-frequency actor binding, staff capability, bounds, persistence, rate limits, and audit.
+- [Issue #140](https://github.com/itschase/OwlMTA-2026/issues/140) tracks the active business-chat code's dependency on the archive-only `business` export and the decision to restore or retire that contract.
 - [Issue #1](https://github.com/itschase/OwlMTA-2026/issues/1) remains the parent remote-event audit.
 - A shared message-rate and abuse-control policy is not apparent across the command surface.
 

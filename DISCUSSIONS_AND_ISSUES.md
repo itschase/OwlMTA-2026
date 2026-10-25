@@ -81,6 +81,11 @@ The Markdown files in the root are the maintained reference set. Update them in 
 - [Script Resource #126: integration](https://github.com/itschase/OwlMTA-2026/discussions/126)
 - [Script Resource #127: cache](https://github.com/itschase/OwlMTA-2026/discussions/127)
 - [Script Resource #128: logs](https://github.com/itschase/OwlMTA-2026/discussions/128)
+- [Script Resource #135: phone](https://github.com/itschase/OwlMTA-2026/discussions/135)
+- [Script Resource #136: chat-system](https://github.com/itschase/OwlMTA-2026/discussions/136)
+- [Script Resource #137: advertisements](https://github.com/itschase/OwlMTA-2026/discussions/137)
+- [Script Resource #138: social](https://github.com/itschase/OwlMTA-2026/discussions/138)
+- [Script Resource #139: announcement](https://github.com/itschase/OwlMTA-2026/discussions/139)
 
 ## Issues added 2026-10-24
 
@@ -119,4 +124,14 @@ Issues #52 (MDC) and #55 (phone) were updated with the additional read, mutation
 - [#120: Make audit-log rotation, retention, and write failure safe](https://github.com/itschase/OwlMTA-2026/issues/120)
 - [#121: Make MySQL bootstrap and legacy database support reproducible](https://github.com/itschase/OwlMTA-2026/issues/121)
 - [#122: Retire or isolate the legacy OwlGaming forum bridge](https://github.com/itschase/OwlMTA-2026/issues/122)
+
+## Issues added 2026-10-25
+
+- [#129: Bind restricted-frequency administration to the server caller](https://github.com/itschase/OwlMTA-2026/issues/129)
+- [#130: Validate classified creation and faction attribution](https://github.com/itschase/OwlMTA-2026/issues/130)
+- [#131: Make vehicle auction bidding and settlement atomic](https://github.com/itschase/OwlMTA-2026/issues/131)
+- [#132: Authorize social physical interactions and item returns](https://github.com/itschase/OwlMTA-2026/issues/132)
+- [#133: Enforce MOTD and notification authority server-side](https://github.com/itschase/OwlMTA-2026/issues/133)
+- [#134: Derive offline private-message pricing server-side](https://github.com/itschase/OwlMTA-2026/issues/134)
+- [#140: Restore or retire the chat-system business dependency](https://github.com/itschase/OwlMTA-2026/issues/140)
 

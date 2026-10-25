@@ -10,6 +10,8 @@ Detailed vehicle-domain dossiers now cover `vehicle`, `vehicle_fuel`, `vehicle-i
 
 The first operator-infrastructure batch covers `mysql`, `data`, `pool`, `integration`, `cache`, and `logs`, including their implicit startup/data-flow contract and runtime-unverified failure paths.
 
+The communication and social batch covers `phone`, `chat-system`, `advertisements`, `social`, and `announcement` with full manifest-script source reviews and matching `Script Resources` Discussions. The reviews distinguish client-presented prerequisites from server-enforced invariants, identify the archive-only `business` dependency exposed by active chat code, and remain runtime-unverified.
+
 ## Every resource manifest
 
 | Group | Resource | Tree status | Server scripts | Client scripts | Manifest purpose | Manifest |
