@@ -6,6 +6,8 @@ Generated from every checked-in manifest under the active resource tree and `res
 
 Audience guides: [Player Wiki](PLAYER_WIKI.md), [Staff and Admin](STAFF_ADMIN_GUIDE.md), and [Server Operator](SERVER_OPERATOR_GUIDE.md). Detailed reviews are collected in the [resource dossier index](docs/resources/README.md). Each resource needs separate player, staff, operator, source-review, and runtime-validation statuses. `Active tree` means present under resources, not necessarily configured to start; `Archived` means stored outside the active tree.
 
+The first detailed domain batch covers `vehicle`, `vehicle_fuel`, `vehicle-interiors`, `vehicle_load`, and `vehicle_manager`; each dossier links its matching `Script Resources` Discussion. Earlier individual topics cover `global`, `account`, `bank`, `factions`, and `item-system`. Coverage remains incomplete and is tracked by [Issue #95](https://github.com/itschase/OwlMTA-2026/issues/95).
+
 ## Every resource manifest
 
 | Group | Resource | Tree status | Server scripts | Client scripts | Manifest purpose | Manifest |

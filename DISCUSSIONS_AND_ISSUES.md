@@ -66,6 +66,11 @@ The Markdown files in the root are the maintained reference set. Update them in 
 - [Discussion #104: Jobs, businesses, and player production](https://github.com/itschase/OwlMTA-2026/discussions/104)
 - [Discussion #105: Operator observability and optional adapters](https://github.com/itschase/OwlMTA-2026/discussions/105)
 - [Discussion #106: Staff control center, command discovery, and audit history](https://github.com/itschase/OwlMTA-2026/discussions/106)
+- [Script Resource #107: vehicle](https://github.com/itschase/OwlMTA-2026/discussions/107)
+- [Script Resource #108: vehicle_fuel](https://github.com/itschase/OwlMTA-2026/discussions/108)
+- [Script Resource #109: vehicle-interiors](https://github.com/itschase/OwlMTA-2026/discussions/109)
+- [Script Resource #110: vehicle_load](https://github.com/itschase/OwlMTA-2026/discussions/110)
+- [Script Resource #111: vehicle_manager](https://github.com/itschase/OwlMTA-2026/discussions/111)
 
 ## Issues added 2026-10-24
 
