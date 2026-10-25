@@ -75,6 +75,12 @@ The Markdown files in the root are the maintained reference set. Update them in 
 - [Script Resource #115: carradio](https://github.com/itschase/OwlMTA-2026/discussions/115)
 - [Script Resource #116: carshop-system](https://github.com/itschase/OwlMTA-2026/discussions/116)
 - [Script Resource #117: vehicleplate](https://github.com/itschase/OwlMTA-2026/discussions/117)
+- [Script Resource #123: mysql](https://github.com/itschase/OwlMTA-2026/discussions/123)
+- [Script Resource #124: data](https://github.com/itschase/OwlMTA-2026/discussions/124)
+- [Script Resource #125: pool](https://github.com/itschase/OwlMTA-2026/discussions/125)
+- [Script Resource #126: integration](https://github.com/itschase/OwlMTA-2026/discussions/126)
+- [Script Resource #127: cache](https://github.com/itschase/OwlMTA-2026/discussions/127)
+- [Script Resource #128: logs](https://github.com/itschase/OwlMTA-2026/discussions/128)
 
 ## Issues added 2026-10-24
 
@@ -108,4 +114,9 @@ Issues #52 (MDC) and #55 (phone) were updated with the additional read, mutation
 - [#112: Authorize radio station management and validate radio state requests](https://github.com/itschase/OwlMTA-2026/issues/112)
 - [#113: Revalidate vehicle crusher deletion and payout at confirmation](https://github.com/itschase/OwlMTA-2026/issues/113)
 - [#114: Bind DMV plate, registration, and sale-paper transactions to the caller](https://github.com/itschase/OwlMTA-2026/issues/114)
+- [#118: Secure remotely triggered non-image cache lookups](https://github.com/itschase/OwlMTA-2026/issues/118)
+- [#119: Make data and pool restart state explicit and recoverable](https://github.com/itschase/OwlMTA-2026/issues/119)
+- [#120: Make audit-log rotation, retention, and write failure safe](https://github.com/itschase/OwlMTA-2026/issues/120)
+- [#121: Make MySQL bootstrap and legacy database support reproducible](https://github.com/itschase/OwlMTA-2026/issues/121)
+- [#122: Retire or isolate the legacy OwlGaming forum bridge](https://github.com/itschase/OwlMTA-2026/issues/122)
 

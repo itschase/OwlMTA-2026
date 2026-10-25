@@ -8,6 +8,8 @@ Audience guides: [Player Wiki](PLAYER_WIKI.md), [Staff and Admin](STAFF_ADMIN_GU
 
 Detailed vehicle-domain dossiers now cover `vehicle`, `vehicle_fuel`, `vehicle-interiors`, `vehicle_load`, `vehicle_manager`, `carradio`, `carshop-system`, and `vehicleplate`; each links its matching `Script Resources` Discussion. Earlier individual topics cover `global`, `account`, `bank`, `factions`, and `item-system`. Coverage remains incomplete and is tracked by [Issue #95](https://github.com/itschase/OwlMTA-2026/issues/95).
 
+The first operator-infrastructure batch covers `mysql`, `data`, `pool`, `integration`, `cache`, and `logs`, including their implicit startup/data-flow contract and runtime-unverified failure paths.
+
 ## Every resource manifest
 
 | Group | Resource | Tree status | Server scripts | Client scripts | Manifest purpose | Manifest |
