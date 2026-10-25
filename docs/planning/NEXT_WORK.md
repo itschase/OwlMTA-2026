@@ -21,7 +21,7 @@ Six completed audits are now maintained as versioned dossiers and consistently n
 5. `item-world` — persistent object lifecycle, permissions, deletion, retention, and evidence/storage boundaries.
 6. `rightclick` — client presentation boundary and migration input for the contextual-action registry.
 
-Discussions #247-#252 use the standardized `Script Resource: <resource>` format. Issues #240-#246 record the non-duplicate implementation units found by this batch.
+Discussions #247-#252 use the standardized `Script Resource: <resource>` format. Issues #240-#246 and #253 record the non-duplicate implementation units found by this batch.
 
 ## Cross-cutting tracker follow-up
 

@@ -58,12 +58,14 @@ These are source-confirmed findings. No correction in this dossier is fixed in s
 
 [Issue #244](https://github.com/itschase/OwlMTA-2026/issues/244) owns permission read/mutation authority, [Issue #245](https://github.com/itschase/OwlMTA-2026/issues/245) owns durable table-correct deletion, and [Issue #246](https://github.com/itschase/OwlMTA-2026/issues/246) owns configured retention and protected/evidence object handling.
 
+[Issue #253](https://github.com/itschase/OwlMTA-2026/issues/253) owns load readiness, quarantine, retry, and reconciliation when a persisted row cannot be materialized as an MTA object.
+
 Published non-duplicate work from this audit is to:
 
 - authorize and validate world-item property reads and permission mutations server-side, including retiring or tightly isolating query-string permissions;
 - make single/bulk deletion durable, table-correct, idempotent, and restart-safe;
 - honor the configured retention mode, reconcile documented exemptions, and add explicit evidence/legal-hold retention classes; and
-- expose loading readiness and quarantine invalid rows instead of deleting durable state after an object-construction failure.
+- expose loading readiness and quarantine invalid rows instead of deleting durable state after an object-construction failure (Issue #253).
 
 The target is a typed, versioned world-item instance with immutable identity and provenance; server-issued placement/use/move/pickup context; typed access-control entries for characters, organizations, property roles, and staff capabilities; transactional or idempotent database/element lifecycle; explicit retention policy; and observable recovery. Existing exports and element data remain compatibility contracts while callers migrate.
 
