@@ -4,11 +4,11 @@ param(
 )
 
 $published = @{
-    "global" = @{ Number = 73; Dossier = "" }
-    "account" = @{ Number = 99; Dossier = "" }
-    "bank" = @{ Number = 100; Dossier = "" }
-    "factions" = @{ Number = 101; Dossier = "" }
-    "item-system" = @{ Number = 102; Dossier = "" }
+    "global" = @{ Number = 73; Dossier = "docs/resources/global.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "account" = @{ Number = 99; Dossier = "docs/resources/account.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "bank" = @{ Number = 100; Dossier = "docs/resources/bank.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "factions" = @{ Number = 101; Dossier = "docs/resources/factions.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "item-system" = @{ Number = 102; Dossier = "docs/resources/item-system.md"; State = "Full manifest-script source review; individual Discussion published" }
     "vehicle" = @{ Number = 107; Dossier = "docs/resources/vehicle.md" }
     "vehicle_fuel" = @{ Number = 108; Dossier = "docs/resources/vehicle_fuel.md" }
     "vehicle-interiors" = @{ Number = 109; Dossier = "docs/resources/vehicle-interiors.md" }

@@ -2,6 +2,8 @@
 
 This directory contains the maintained, source-grounded dossier for each audited MTA resource. GitHub Discussions provide an approachable topic and discussion history; these files remain the versioned reference.
 
+Every individual resource Discussion uses the title format `Script Resource: <resource>` in the `Script Resources` category.
+
 Every dossier distinguishes source evidence from runtime verification. Presence under `mods/deathmatch/resources` means the code is in the active tree. It does not by itself prove that a deployed server starts the resource successfully.
 
 ## Published batches
@@ -14,6 +16,7 @@ Every dossier distinguishes source evidence from runtime verification. Presence 
 | Player communications and social systems | [`phone`](phone.md) ([Discussion #135](https://github.com/itschase/OwlMTA-2026/discussions/135)), [`chat-system`](chat-system.md) ([#136](https://github.com/itschase/OwlMTA-2026/discussions/136)), [`advertisements`](advertisements.md) ([#137](https://github.com/itschase/OwlMTA-2026/discussions/137)), [`social`](social.md) ([#138](https://github.com/itschase/OwlMTA-2026/discussions/138)), [`announcement`](announcement.md) ([#139](https://github.com/itschase/OwlMTA-2026/discussions/139)) | Full manifest-script source review; runtime unverified |
 | Security, enforcement, and administration | [`anticheat`](anticheat.md) ([Discussion #174](https://github.com/itschase/OwlMTA-2026/discussions/174)), [`anti-cmdspam`](anti-cmdspam.md) ([#175](https://github.com/itschase/OwlMTA-2026/discussions/175)), [`serialwhitelist`](serialwhitelist.md) ([#176](https://github.com/itschase/OwlMTA-2026/discussions/176)), [`bans`](bans.md) ([#177](https://github.com/itschase/OwlMTA-2026/discussions/177)), [`admin-system`](admin-system.md) ([#178](https://github.com/itschase/OwlMTA-2026/discussions/178)) | Four full manifest-script reviews; `admin-system` server-focused partial review; runtime unverified |
 | Economy, premises, custody, and public-safety data | [`payday`](payday.md) ([Discussion #196](https://github.com/itschase/OwlMTA-2026/discussions/196)), [`business-system`](business-system.md) ([#197](https://github.com/itschase/OwlMTA-2026/discussions/197)), [`prison-system`](prison-system.md) ([#198](https://github.com/itschase/OwlMTA-2026/discussions/198)), [`camera-system`](camera-system.md) ([#199](https://github.com/itschase/OwlMTA-2026/discussions/199)), [`mdc`](mdc.md) ([#200](https://github.com/itschase/OwlMTA-2026/discussions/200)) | Full manifest-script source review; runtime unverified |
+| Core identity, authority, economy, and inventory | [`global`](global.md) ([Discussion #73](https://github.com/itschase/OwlMTA-2026/discussions/73)), [`account`](account.md) ([#99](https://github.com/itschase/OwlMTA-2026/discussions/99)), [`bank`](bank.md) ([#100](https://github.com/itschase/OwlMTA-2026/discussions/100)), [`factions`](factions.md) ([#101](https://github.com/itschase/OwlMTA-2026/discussions/101)), [`item-system`](item-system.md) ([#102](https://github.com/itschase/OwlMTA-2026/discussions/102)) | Full manifest-script source review; runtime unverified |
 
 The complete manifest census remains in [`RESOURCE_CATALOG.md`](../reference/RESOURCE_CATALOG.md). The required review fields and completion states are defined in [`RESOURCE_AUDIT_PLAYBOOK.md`](../planning/RESOURCE_AUDIT_PLAYBOOK.md).
 

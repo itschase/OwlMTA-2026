@@ -56,7 +56,7 @@ The organized [`docs/`](../README.md) tree is the maintained reference set; the 
 - [Milestone: MTA Compatibility & Diagnostics Baseline](https://github.com/itschase/OwlMTA-2026/milestone/5)
 - [Issue #71: Source-grounded MTA release compatibility baseline](https://github.com/itschase/OwlMTA-2026/issues/71)
 - [Discussion #70: Discord account linking and capability grants](https://github.com/itschase/OwlMTA-2026/discussions/70)
-- [Resource Discussion #73: global](https://github.com/itschase/OwlMTA-2026/discussions/73)
+- [Script Resource #73: global](https://github.com/itschase/OwlMTA-2026/discussions/73)
 - [Discussion #97: Resource audit standard for real users and operators](https://github.com/itschase/OwlMTA-2026/discussions/97)
 - [Discussion #98: Discord-first sign-in, legacy account migration, and session revocation](https://github.com/itschase/OwlMTA-2026/discussions/98)
 - [Script Resource #99: account](https://github.com/itschase/OwlMTA-2026/discussions/99)
@@ -104,6 +104,7 @@ The organized [`docs/`](../README.md) tree is the maintained reference set; the 
 - [Script Resource #198: prison-system](https://github.com/itschase/OwlMTA-2026/discussions/198)
 - [Script Resource #199: camera-system](https://github.com/itschase/OwlMTA-2026/discussions/199)
 - [Script Resource #200: mdc](https://github.com/itschase/OwlMTA-2026/discussions/200)
+- [Server Operators #215: Safe-start preflight](https://github.com/itschase/OwlMTA-2026/discussions/215)
 
 ## Issues added 2026-10-24
 
@@ -194,6 +195,20 @@ Issues #52 (MDC) and #55 (phone) were updated with the additional read, mutation
 - [#193: Correct MDC account level mapping and organization uniqueness](https://github.com/itschase/OwlMTA-2026/issues/193)
 - [#194: Repair MDC orphan cleanup and empty permission-cache handling](https://github.com/itschase/OwlMTA-2026/issues/194)
 - [#195: Fix MDC search result correctness and DB handle lifecycle](https://github.com/itschase/OwlMTA-2026/issues/195)
+- [#201: Remove client-shipped account hash constants and rotate dependent schemes](https://github.com/itschase/OwlMTA-2026/issues/201)
+- [#202: Make character creation quota and name allocation atomic](https://github.com/itschase/OwlMTA-2026/issues/202)
+- [#203: Stage and recover character spawn hydration](https://github.com/itschase/OwlMTA-2026/issues/203)
+- [#204: Derive character spawn correction from server-owned state](https://github.com/itschase/OwlMTA-2026/issues/204)
+- [#205: Bind ATM operations to the caller and a server-owned session](https://github.com/itschase/OwlMTA-2026/issues/205)
+- [#206: Repair ATM card lifecycle, PIN, limits, and restart safety](https://github.com/itschase/OwlMTA-2026/issues/206)
+- [#207: Make ATM and bank settlement idempotent and reconcilable](https://github.com/itschase/OwlMTA-2026/issues/207)
+- [#208: Version and test the global export contract](https://github.com/itschase/OwlMTA-2026/issues/208)
+- [#209: Replace direct global money mutation with ledger-backed settlement](https://github.com/itschase/OwlMTA-2026/issues/209)
+- [#210: Bind and constrain global chat and sound remote events](https://github.com/itschase/OwlMTA-2026/issues/210)
+- [#211: Add factions readiness and restart-safe cache hydration](https://github.com/itschase/OwlMTA-2026/issues/211)
+- [#212: Make faction finance reads request-scoped and nonblocking](https://github.com/itschase/OwlMTA-2026/issues/212)
+- [#213: Bind item-system remote mutations to the authenticated client](https://github.com/itschase/OwlMTA-2026/issues/213)
+- [#214: Make item transfers atomic and restart-recoverable](https://github.com/itschase/OwlMTA-2026/issues/214)
 
 Milestone [M4 — Organizations & Living Roleplay](https://github.com/itschase/OwlMTA-2026/milestone/6) groups the compatibility-first organization, contextual interaction, criminal opportunity, evidence, and connected-roleplay foundation work. M0/M1 portability and security gates remain prerequisites.
 
