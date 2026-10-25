@@ -1,15 +1,23 @@
 # Next work record
 
-Last updated: 2026-10-25 after publishing the elevator-system audit.
+Last updated: 2026-10-25 after publishing the computers-system, interior_load, achievement, and apps audit batch.
 
 ## Verified project state
 
 - `main` was synchronized with `origin/main` before this batch.
 - The manifest census remains 179 resources: 144 active-tree and 35 archived.
-- 57 resources have individual Discussions and versioned dossiers: 51 full manifest-script reviews and 6 partial reviews.
+- 61 resources have individual Discussions and versioned dossiers: 55 full manifest-script reviews and 6 partial reviews.
 - Source review, proposed design, fixed-in-source behavior, and runtime verification remain distinct. All resource dossiers are runtime-unverified.
 - The MTA server has not been started. Static review and safe-start preparation remain the gate.
 
+
+## Latest published batch — 2026-10-25
+
+Four source-audited resources now have maintained dossiers and standardized Script Resource Discussions: `computers-system` #283, `interior_load` #284, `achievement` #285, and `apps` #286. These bring resource documentation to 61/179: 55 full and 6 partial; all remain runtime-unverified.
+
+New milestone #2 issues #273-#278 cover computer email ownership/passwords, IPPC authorization, computer-service reliability, flight validation, and interior loader readiness. Issue #279 covers report reward milestone idempotency. Issues #280-#282 cover application manager authorization, application lifecycle integrity, and question-bank readiness. Each issue is assigned to `itschase`; dossiers, Discussions, and issues are cross-linked. Existing ownership for GameCoin settlement, general remote hardening, and donor/staff separation was retained.
+
+The completed `apps` audit also confirmed legacy supporter access in manager/login-bypass and force-application paths. Keep that as evidence for existing role-separation Issue #3 rather than creating a duplicate authorization-policy issue.
 ## Completed publication batch
 
 The active `elevator-system` resource now has a full manifest/direct-caller source dossier and standardized [Script Resource Discussion #272](https://github.com/itschase/OwlMTA-2026/discussions/272). Issues #268-#271 track lift-state loading, interior lock lookup, administration mutation integrity, and the remote roleplay-action event. Door and lift travel were added to existing interaction-context Issue #228; empty-table ID allocation remains in #17 and property cleanup in #231. No duplicate travel issue was opened. Runtime remains unverified.
@@ -45,7 +53,7 @@ Discussions #247-#252 use the standardized `Script Resource: <resource>` format.
 - Update Issues #47/#77/#181 with the job selection, bus, fishing, and photography evidence; link service-work Issue #241.
 - Update Issue #151 with the `rightclick` compatibility-adapter and context descriptor requirements.
 - Cross-link `item-world` Issues #244-#246 with contextual-action Issue #151 and evidence/provenance Issues #153/#184.
-- Update documentation tracker Issue #95 with the 46-topic, 40-full, 6-partial coverage counts.
+- Update documentation tracker Issue #95 with the 61-topic, 55-full, 6-partial coverage counts.
 
 ## Active audit wave
 
