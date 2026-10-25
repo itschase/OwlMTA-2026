@@ -49,6 +49,7 @@ The Markdown files in the root are the maintained reference set. Update them in 
 - [Discord integration plan](DISCORD_INTEGRATION_PLAN.md)
 - [Enhancement register](ENHANCEMENT_REGISTER.md)
 - [Resource and script audit playbook](RESOURCE_AUDIT_PLAYBOOK.md)
+- [Resource documentation status ledger](RESOURCE_DOCUMENTATION_STATUS.csv)
 - [Resource startup inventory](RESOURCE_INVENTORY.csv)
 - [GitHub Issues](https://github.com/itschase/OwlMTA-2026/issues)
 - [GitHub Discussions](https://github.com/itschase/OwlMTA-2026/discussions)

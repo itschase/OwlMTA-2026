@@ -4,6 +4,8 @@
 
 Use this playbook to build a trustworthy explanation of every active and archived resource, its scripts, and the systems it connects. A manifest inventory is the census; it is not proof that the resource's code, user workflows, permissions, or runtime behavior have been understood.
 
+Track row-by-row progress in `RESOURCE_DOCUMENTATION_STATUS.csv`. Regenerate it with `tools/generate-resource-documentation-status.ps1` whenever a resource Discussion or maintained dossier is added, then review the changed rows before committing.
+
 ## Scope and evidence
 
 For every resource, begin with `meta.xml`, startup configuration, and every declared client/shared/server script. Follow each important script into its internal callers, remote events, commands, exports, timers, callbacks, data files, SQL tables, and external services. Mark whether a file is active, archived, disabled, development-only, or uncertain. Treat comments and manifest descriptions as clues; confirm behavior in code.

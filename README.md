@@ -28,7 +28,7 @@ Start with these guides, which are being expanded alongside the source review:
 
 - [Rebuild plan](REBUILD_PLAN.md) — phases, priorities, and readiness work.
 - [Gamemode architecture guide](GAMEMODE_GUIDE.md) — major systems and resource relationships.
-- [Resource catalog](RESOURCE_CATALOG.md), [resource dossiers](docs/resources/README.md), and [resource startup inventory](RESOURCE_INVENTORY.csv) — manifest coverage, maintained source reviews, and startup inventory.
+- [Resource catalog](RESOURCE_CATALOG.md), [resource dossiers](docs/resources/README.md), [documentation status ledger](RESOURCE_DOCUMENTATION_STATUS.csv), and [resource startup inventory](RESOURCE_INVENTORY.csv) — manifest coverage, maintained source reviews, row-by-row documentation progress, and startup inventory.
 - [Resource and script audit playbook](RESOURCE_AUDIT_PLAYBOOK.md) — documentation coverage, evidence standards, and completion gates.
 - [Feature usage guide](FEATURE_USAGE_GUIDE.md) — feature discovery and usage notes.
 - [Player wiki](PLAYER_WIKI.md) — player-facing workflows and questions.

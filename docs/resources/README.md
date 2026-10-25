@@ -11,3 +11,5 @@ Every dossier distinguishes source evidence from runtime verification. Presence 
 | Vehicle foundation | [`vehicle`](vehicle.md) ([Discussion #107](https://github.com/itschase/OwlMTA-2026/discussions/107)), [`vehicle_fuel`](vehicle_fuel.md) ([#108](https://github.com/itschase/OwlMTA-2026/discussions/108)), [`vehicle-interiors`](vehicle-interiors.md) ([#109](https://github.com/itschase/OwlMTA-2026/discussions/109)), [`vehicle_load`](vehicle_load.md) ([#110](https://github.com/itschase/OwlMTA-2026/discussions/110)), [`vehicle_manager`](vehicle_manager.md) ([#111](https://github.com/itschase/OwlMTA-2026/discussions/111)) | Partial source review; runtime unverified |
 
 The complete manifest census remains in [`RESOURCE_CATALOG.md`](../../RESOURCE_CATALOG.md). The required review fields and completion states are defined in [`RESOURCE_AUDIT_PLAYBOOK.md`](../../RESOURCE_AUDIT_PLAYBOOK.md).
+
+Row-by-row progress across all 179 active-tree and archived manifests is recorded in [`RESOURCE_DOCUMENTATION_STATUS.csv`](../../RESOURCE_DOCUMENTATION_STATUS.csv).
