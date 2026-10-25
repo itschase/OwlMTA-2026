@@ -1,6 +1,6 @@
 # Next work record
 
-Last updated: 2026-10-25 after publishing the computers-system, interior_load, achievement, and apps audit batch.
+Last updated: 2026-10-25 after publishing the weapon audit.
 
 ## Verified project state
 
