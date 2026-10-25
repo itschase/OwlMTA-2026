@@ -58,6 +58,9 @@ MTA server-side `fetchRemote` is asynchronous. External identity checks therefor
 - [Organizations framework](ORGANIZATIONS_FRAMEWORK.md): source-grounded legacy boundary, target organization service, capabilities, lifecycle, persistence, and migration.
 - [Criminal roleplay framework](CRIMINAL_ROLEPLAY_FRAMEWORK.md): proposed opportunity, market, evidence, investigation, justice, organization, and operator systems.
 - [Living roleplay systems blueprint](ROLEPLAY_SYSTEMS_BLUEPRINT.md): connected roleplay domains and reusable platform primitives beyond isolated scripts.
+- [Economy, jobs, payday, and business current state](ECONOMY_AND_BUSINESS_CURRENT_STATE.md): source-reviewed money, obligation, work, supply, and business boundaries.
+- [Criminal, investigation, justice, and corrections current state](CRIMINAL_JUSTICE_CURRENT_STATE.md): inherited enforcement primitives, trust gaps, and missing connected domains.
+- [Administration current state](ADMINISTRATION_CURRENT_STATE.md): privileged command/event surface, sensitive data, failure behavior, and modernization boundary.
 - [Documentation and planning program](../planning/DOCUMENTATION_PROGRAM.md): publishing system, artifact ownership, quality gates, batch workflow, and focus controls.
 - [Complete resource manifest catalog](../reference/RESOURCE_CATALOG.md): every active-tree and archived resource manifest with its declared purpose and client/server script counts.
 - [Maintained resource dossiers](../resources/README.md): player, staff, operator, technical, connection, risk, and verification views for resources that have entered detailed review.
