@@ -105,6 +105,12 @@ The organized [`docs/`](../README.md) tree is the maintained reference set; the 
 - [Script Resource #199: camera-system](https://github.com/itschase/OwlMTA-2026/discussions/199)
 - [Script Resource #200: mdc](https://github.com/itschase/OwlMTA-2026/discussions/200)
 - [Server Operators #215: Safe-start preflight](https://github.com/itschase/OwlMTA-2026/discussions/215)
+- [Script Resource #232: saveplayer-system](https://github.com/itschase/OwlMTA-2026/discussions/232)
+- [Script Resource #233: resources](https://github.com/itschase/OwlMTA-2026/discussions/233)
+- [Script Resource #234: duty](https://github.com/itschase/OwlMTA-2026/discussions/234)
+- [Script Resource #235: donators](https://github.com/itschase/OwlMTA-2026/discussions/235)
+- [Script Resource #236: pd-system](https://github.com/itschase/OwlMTA-2026/discussions/236)
+- [Script Resource #237: interior_system](https://github.com/itschase/OwlMTA-2026/discussions/237)
 
 ## Issues added 2026-10-24
 
@@ -209,6 +215,22 @@ Issues #52 (MDC) and #55 (phone) were updated with the additional read, mutation
 - [#212: Make faction finance reads request-scoped and nonblocking](https://github.com/itschase/OwlMTA-2026/issues/212)
 - [#213: Bind item-system remote mutations to the authenticated client](https://github.com/itschase/OwlMTA-2026/issues/213)
 - [#214: Make item transfers atomic and restart-recoverable](https://github.com/itschase/OwlMTA-2026/issues/214)
+- [#216: Bound and deduplicate periodic character saves](https://github.com/itschase/OwlMTA-2026/issues/216)
+- [#217: Make character save failures observable and recoverable](https://github.com/itschase/OwlMTA-2026/issues/217)
+- [#218: Remove synthetic vehicle-exit side effects from character saving](https://github.com/itschase/OwlMTA-2026/issues/218)
+- [#219: Restore or remove the missing shared weapon attachment definition](https://github.com/itschase/OwlMTA-2026/issues/219)
+- [#220: Make duty issuance recoverable and provenance-based](https://github.com/itschase/OwlMTA-2026/issues/220)
+- [#221: Bind donor remote events and prevent GameCoin minting](https://github.com/itschase/OwlMTA-2026/issues/221)
+- [#222: Make GameCoin purchases atomic, auditable, and recoverable](https://github.com/itschase/OwlMTA-2026/issues/222)
+- [#223: Normalize donor entitlement identity, duration, and expiry](https://github.com/itschase/OwlMTA-2026/issues/223)
+- [#224: Authorize PD K9 roster mutations](https://github.com/itschase/OwlMTA-2026/issues/224)
+- [#225: Validate PD tactical mobility and vehicle attachment requests](https://github.com/itschase/OwlMTA-2026/issues/225)
+- [#226: Repair PD manifest exports and lifecycle cleanup](https://github.com/itschase/OwlMTA-2026/issues/226)
+- [#227: Bind PD equipment and sensor remotes to authoritative operators](https://github.com/itschase/OwlMTA-2026/issues/227)
+- [#228: Require proximity and server interaction context for interior entry and preview](https://github.com/itschase/OwlMTA-2026/issues/228)
+- [#229: Authorize and validate interior settings writes](https://github.com/itschase/OwlMTA-2026/issues/229)
+- [#230: Repair interior eviction bookkeeping for online and offline occupants](https://github.com/itschase/OwlMTA-2026/issues/230)
+- [#231: Make property purchase, transfer, sale, and cleanup recoverable](https://github.com/itschase/OwlMTA-2026/issues/231)
 
 Milestone [M4 — Organizations & Living Roleplay](https://github.com/itschase/OwlMTA-2026/milestone/6) groups the compatibility-first organization, contextual interaction, criminal opportunity, evidence, and connected-roleplay foundation work. M0/M1 portability and security gates remain prerequisites.
 

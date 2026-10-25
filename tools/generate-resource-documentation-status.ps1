@@ -38,6 +38,12 @@ $published = @{
     "prison-system" = @{ Number = 198; Dossier = "docs/resources/prison-system.md"; State = "Full manifest-script source review; individual Discussion published" }
     "camera-system" = @{ Number = 199; Dossier = "docs/resources/camera-system.md"; State = "Full manifest-script source review; individual Discussion published" }
     "mdc" = @{ Number = 200; Dossier = "docs/resources/mdc.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "saveplayer-system" = @{ Number = 232; Dossier = "docs/resources/saveplayer-system.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "resources" = @{ Number = 233; Dossier = "docs/resources/resources.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "duty" = @{ Number = 234; Dossier = "docs/resources/duty.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "donators" = @{ Number = 235; Dossier = "docs/resources/donators.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "pd-system" = @{ Number = 236; Dossier = "docs/resources/pd-system.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "interior_system" = @{ Number = 237; Dossier = "docs/resources/interior_system.md"; State = "Full manifest-script source review; individual Discussion published" }
 }
 
 $inventoryByPath = @{}

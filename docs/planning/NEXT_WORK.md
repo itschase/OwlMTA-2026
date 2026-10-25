@@ -6,7 +6,7 @@ Last updated: 2026-10-25 after the core identity, authority, economy, and invent
 
 - `main` was synchronized with `origin/main` before this batch.
 - The manifest census remains 179 resources: 144 active-tree and 35 archived.
-- 34 resources have individual Discussions and versioned dossiers: 28 full manifest-script reviews and 6 partial reviews.
+- 40 resources have individual Discussions and versioned dossiers: 34 full manifest-script reviews and 6 partial reviews.
 - Source review, proposed design, fixed-in-source behavior, and runtime verification remain distinct. All resource dossiers are runtime-unverified.
 - The MTA server has not been started. Static review and safe-start preparation remain the gate.
 
@@ -33,7 +33,7 @@ Discussions #99-#102 and #73 are updated in place rather than duplicated. Every 
 
 ## Next publication wave
 
-Full source audits are complete for `saveplayer-system` + `resources`, `duty` + `donators`, and `pd-system` + `interior_system`. Convert those reports into six dossiers, six consistently named resource Discussions, non-duplicate Issues, and parent-Issue evidence updates. A follow-on compact wave should cover `usercontrolpanel` + `insurance`, `job-system` + `tow-system`, and `item-world` + `rightclick`.
+The `saveplayer-system` + `resources`, `duty` + `donators`, and `pd-system` + `interior_system` reports are now published as six dossiers and consistently named resource Discussions. Full source audits are complete for the follow-on wave: `usercontrolpanel` + `insurance`, `job-system` + `tow-system`, and `item-world` + `rightclick`. Convert those six reports into maintained dossiers, resource Discussions, non-duplicate Issues, and parent-Issue evidence updates.
 
 ## Safe-start gate after static review
 

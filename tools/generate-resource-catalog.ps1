@@ -65,6 +65,8 @@ $lines.Add('The economy, premises, custody, and public-safety data batch covers 
 $lines.Add('')
 $lines.Add('The core identity, authority, economy, and inventory batch covers `account`, `bank`, `factions`, `item-system`, and `global`. Full reviews map their broad caller contracts, cross-schema/session boundaries, settlement and organization state, item ownership, client/server authority, restart risks, and planned compatibility migrations. All remain runtime-unverified.')
 $lines.Add('')
+$lines.Add('The durability, shared-assets, entitlement, duty, public-safety, and property batch covers `saveplayer-system`, `resources`, `duty`, `donators`, `pd-system`, and `interior_system`. Full reviews preserve ownership boundaries between character saves, static assets, paid entitlements, faction duty, public-safety tools, and property state. All remain runtime-unverified.')
+$lines.Add('')
 $lines.Add('## Every resource manifest')
 $lines.Add('')
 $lines.Add('| Group | Resource | Tree status | Server scripts | Client scripts | Manifest purpose | Manifest |')
