@@ -1,39 +1,42 @@
 # Next work record
 
-Last updated: 2026-10-25 after the core identity, authority, economy, and inventory publication batch.
+Last updated: 2026-10-25 after the external-management, jobs, towing, and contextual-item publication batch.
 
 ## Verified project state
 
 - `main` was synchronized with `origin/main` before this batch.
 - The manifest census remains 179 resources: 144 active-tree and 35 archived.
-- 40 resources have individual Discussions and versioned dossiers: 34 full manifest-script reviews and 6 partial reviews.
+- 46 resources have individual Discussions and versioned dossiers: 40 full manifest-script reviews and 6 partial reviews.
 - Source review, proposed design, fixed-in-source behavior, and runtime verification remain distinct. All resource dossiers are runtime-unverified.
 - The MTA server has not been started. Static review and safe-start preparation remain the gate.
 
-## Completed core audit batch
+## Completed publication batch
 
-The five resources that already had early individual Discussions now have full versioned dossiers:
+Six completed audits are now maintained as versioned dossiers and consistently named Script Resource Discussions:
 
-1. `account` — registration/login/character entry, session state, database and Discord migration boundaries.
-2. `bank` — transfers, ATMs, journals, ownership, balance authority, and failure/reconciliation behavior.
-3. `factions` — legacy organization membership, ranks, duty, wages, policy, permissions, and compatibility API inputs.
-4. `item-system` — inventory authority, item definitions/metadata, transfers, world items, persistence, and cross-resource contracts.
-5. `global` — shared exports, money/items/notifications/permissions helpers, caller assumptions, and blast radius.
+1. `usercontrolpanel` — legacy website RPC and broad shared website ACL boundary.
+2. `insurance` — vehicle policy, quote, claim, cancellation, accounting, privacy, and reconciliation flows.
+3. `job-system` — civic-job selection, work sessions, rewards, service jobs, and progression.
+4. `tow-system` — conventional towing, law-enforcement seizure, impound lanes, release, cleanup, and settlement.
+5. `item-world` — persistent object lifecycle, permissions, deletion, retention, and evidence/storage boundaries.
+6. `rightclick` — client presentation boundary and migration input for the contextual-action registry.
 
-Discussions #99-#102 and #73 are updated in place rather than duplicated. Every resource discussion now uses the standardized `Script Resource: <resource>` format.
+Discussions #247-#252 use the standardized `Script Resource: <resource>` format. Issues #240-#246 record the non-duplicate implementation units found by this batch.
 
 ## Cross-cutting tracker follow-up
 
-- Keep Issues #41/#52 as the parent MDC authorization/privacy units and add the complete remote-event matrix from the `mdc` dossier.
-- Keep Issue #40 as the prison direct-event parent and add gate, roster-duty, offline-manager, and automatic-release evidence.
-- Keep Issue #48 as the payday/shop event parent and link settlement Issues #179/#180.
-- Add the source-confirmed bus-fare debit/recipient problem to Issue #77.
-- Update Issue #95 with the current coverage counts and the five new resource Discussions.
-- Keep camera Issues #191/#192 and MDC Issues #193-#195 bounded; do not split implementation until source ownership and acceptance overlap are reassessed.
+- Update Issues #4/#22 with the complete legacy UCP HTTP-export and ACL evidence.
+- Update Issues #15/#45 with the insurance actor/privacy, quote, claim, cancellation, and settlement matrix; link durability Issue #240.
+- Update Issues #47/#77/#181 with the job selection, bus, fishing, and photography evidence; link service-work Issue #241.
+- Update Issue #151 with the `rightclick` compatibility-adapter and context descriptor requirements.
+- Cross-link `item-world` Issues #244-#246 with contextual-action Issue #151 and evidence/provenance Issues #153/#184.
+- Update documentation tracker Issue #95 with the 46-topic, 40-full, 6-partial coverage counts.
 
-## Next publication wave
+## Active audit wave
 
-The `saveplayer-system` + `resources`, `duty` + `donators`, and `pd-system` + `interior_system` reports are now published as six dossiers and consistently named resource Discussions. Full source audits are complete for the follow-on wave: `usercontrolpanel` + `insurance`, `job-system` + `tow-system`, and `item-world` + `rightclick`. Convert those six reports into maintained dossiers, resource Discussions, non-duplicate Issues, and parent-Issue evidence updates.
+Three bounded, non-overlapping reviews are in progress: `object-interaction` + `item-move`, `job-system-trucker` + `paynspray-system`, and `npc` + `object-system`. Consolidate each finished report into a maintained dossier, a consistently named resource Discussion, deduplicated implementation Issues, and parent-Issue evidence updates. Do not infer runtime success from static inspection.
+
+The reusable Discord/MTA identity service is now being developed in a separate project chat and repository boundary. OwlMTA remains one host adapter and consumer; its in-repository documents define integration contracts rather than embedding the standalone product.
 
 ## Safe-start gate after static review
 

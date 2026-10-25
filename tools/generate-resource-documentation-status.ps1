@@ -44,6 +44,12 @@ $published = @{
     "donators" = @{ Number = 235; Dossier = "docs/resources/donators.md"; State = "Full manifest-script source review; individual Discussion published" }
     "pd-system" = @{ Number = 236; Dossier = "docs/resources/pd-system.md"; State = "Full manifest-script source review; individual Discussion published" }
     "interior_system" = @{ Number = 237; Dossier = "docs/resources/interior_system.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "usercontrolpanel" = @{ Number = 247; Dossier = "docs/resources/usercontrolpanel.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "insurance" = @{ Number = 248; Dossier = "docs/resources/insurance.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "job-system" = @{ Number = 249; Dossier = "docs/resources/job-system.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "tow-system" = @{ Number = 250; Dossier = "docs/resources/tow-system.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "item-world" = @{ Number = 251; Dossier = "docs/resources/item-world.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "rightclick" = @{ Number = 252; Dossier = "docs/resources/rightclick.md"; State = "Full manifest-script source review; individual Discussion published" }
 }
 
 $inventoryByPath = @{}
