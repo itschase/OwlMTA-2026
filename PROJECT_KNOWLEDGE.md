@@ -56,6 +56,7 @@ MTA server-side `fetchRemote` is asynchronous. External identity checks therefor
 - [Enhancement register](ENHANCEMENT_REGISTER.md): architecture, player, security, integration, and documentation opportunities.
 - [Optional integration API contract](API_CONTRACT.md): self-hostable API boundary for Discord, websites, media storage, and operator-selected log search.
 - [Complete resource manifest catalog](RESOURCE_CATALOG.md): every active-tree and archived resource manifest with its declared purpose and client/server script counts.
+- [Maintained resource dossiers](docs/resources/README.md): player, staff, operator, technical, connection, risk, and verification views for resources that have entered detailed review.
 - [Resource and script audit playbook](RESOURCE_AUDIT_PLAYBOOK.md): required resource dossier, human/technical documentation views, coverage states, and audit/publishing workflow.
 - [Rebuild plan](REBUILD_PLAN.md): deployment, stabilization, schema, UCP, and Discord sequence.
 - [Issues and Discussions workflow](DISCUSSIONS_AND_ISSUES.md): where defects and durable explanations belong.

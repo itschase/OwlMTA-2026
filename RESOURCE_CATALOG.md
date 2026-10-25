@@ -4,7 +4,7 @@ Generated from every checked-in manifest under the active resource tree and `res
 
 ## Documentation status
 
-Audience guides: [Player Wiki](PLAYER_WIKI.md), [Staff and Admin](STAFF_ADMIN_GUIDE.md), and [Server Operator](SERVER_OPERATOR_GUIDE.md). Each resource needs separate player, staff, operator, source-review, and runtime-validation statuses. `Active tree` means present under resources, not necessarily configured to start; `Archived` means stored outside the active tree.
+Audience guides: [Player Wiki](PLAYER_WIKI.md), [Staff and Admin](STAFF_ADMIN_GUIDE.md), and [Server Operator](SERVER_OPERATOR_GUIDE.md). Detailed reviews are collected in the [resource dossier index](docs/resources/README.md). Each resource needs separate player, staff, operator, source-review, and runtime-validation statuses. `Active tree` means present under resources, not necessarily configured to start; `Archived` means stored outside the active tree.
 
 ## Every resource manifest
 
