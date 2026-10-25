@@ -13,6 +13,18 @@ Keep these authorities distinct:
 - **Faction rank/duty:** character-local rank and active duty state, independent of Discord global capabilities.
 - **MTA ACL:** host-managed resource/engine permissions, not gameplay grants.
 
+## Reusable standalone integration boundary
+
+The Discord integration should be developed as its own reusable, self-hostable project rather than embedded throughout OwlMTA. Its generic contract must not depend on Owl's tables, numeric staff ranks, faction resource, character schema, or UI.
+
+Use three layers:
+
+1. **Identity service and Discord application/bot.** Own OAuth, guild policy, link/login challenges, one-use tickets, per-installation credentials, configurable role-to-capability/donor mapping, bounded sessions, revocation, rate limits, and audit.
+2. **Reusable MTA adapter resource/SDK.** Own asynchronous `fetchRemote`, challenge/status flows, ticket redemption, grant/session caching, heartbeat/revocation, stale callback rejection, least-privilege ACL requests, errors, health, and stable server exports/events. It operates on opaque installation/account references supplied by an integration host.
+3. **OwlMTA integration layer.** Map Owl's authenticated internal account ID to the generic adapter; provision/link accounts through Owl's migration rules; translate named global capabilities into Owl action checks; and keep organization membership/rank/duty, property access, inventory ownership, donor commerce, and gameplay policy inside OwlMTA.
+
+Other MTA servers should be able to implement only the small host interface and use the same service/adapter without importing Owl resources or schemas. Publish the protocol, adapter contract, version compatibility, threat model, example integration, migrations, and conformance tests independently. Keep provider-specific Discord code behind the service boundary so the MTA adapter consumes a stable identity/grant API rather than Discord APIs or raw role IDs.
+
 ## Operator configuration
 
 Keep all role IDs blank by default and place actual values in operator-owned API deployment configuration. Do not ship Owl role IDs, guild IDs, Discord bot credentials, or API keys. Example configuration shape (values are intentionally blank):

@@ -6,6 +6,14 @@ Discord authorization is the planned primary identity path for production regist
 
 This is the proposed v1 contract, not an implemented service. No Owl-hosted endpoint, domain, Discord guild, role ID, or secret is shipped. The MTA process can boot without the service; production registration/login fails closed until the operator configures it. Existing sessions use bounded leases, and confirmed authorization revocation disconnects the linked session. Provide an explicit audited bootstrap/recovery procedure for setup and service failures; never silently switch to password-only login.
 
+## Product and repository boundary
+
+The protocol is intentionally reusable beyond OwlMTA. Implement the identity service/Discord application and a generic MTA adapter as a standalone, versioned project. The standalone project owns installation authentication, Discord verification, role mapping, challenge/ticket/session/revocation behavior, audit, and transport. It must not import Owl database schemas or encode Owl staff/faction rules.
+
+OwlMTA consumes that project through a thin game-specific integration resource. The Owl layer supplies a server-derived internal account reference, handles legacy-account proof and local provisioning, maps generic named capabilities into Owl action checks, and retains all character, organization rank/duty, asset, inventory, commerce, and gameplay authorization. A second MTA gamemode should be able to replace only this host adapter while keeping the service and generic MTA client unchanged.
+
+The standalone distribution should include a stable protocol/schema package, MTA resource/SDK, reference service/bot deployment, example host adapter, threat model, migration/version policy, conformance tests, and disabled-by-default sample configuration. Its license and release process must permit independent server operators to self-host and extend it without receiving any Owl secrets or identifiers.
+
 ## Conventions and authentication
 
 - Base path: `/api/v1`. Keep request/response schemas and error codes stable within v1.

@@ -111,6 +111,7 @@ The organized [`docs/`](../README.md) tree is the maintained reference set; the 
 - [Script Resource #235: donators](https://github.com/itschase/OwlMTA-2026/discussions/235)
 - [Script Resource #236: pd-system](https://github.com/itschase/OwlMTA-2026/discussions/236)
 - [Script Resource #237: interior_system](https://github.com/itschase/OwlMTA-2026/discussions/237)
+- [Discord & API #239: Reusable Discord identity service and generic MTA adapter](https://github.com/itschase/OwlMTA-2026/discussions/239)
 
 ## Issues added 2026-10-24
 
@@ -231,6 +232,7 @@ Issues #52 (MDC) and #55 (phone) were updated with the additional read, mutation
 - [#229: Authorize and validate interior settings writes](https://github.com/itschase/OwlMTA-2026/issues/229)
 - [#230: Repair interior eviction bookkeeping for online and offline occupants](https://github.com/itschase/OwlMTA-2026/issues/230)
 - [#231: Make property purchase, transfer, sale, and cleanup recoverable](https://github.com/itschase/OwlMTA-2026/issues/231)
+- [#238: Package the identity service and MTA adapter as a reusable standalone project](https://github.com/itschase/OwlMTA-2026/issues/238)
 
 Milestone [M4 — Organizations & Living Roleplay](https://github.com/itschase/OwlMTA-2026/milestone/6) groups the compatibility-first organization, contextual interaction, criminal opportunity, evidence, and connected-roleplay foundation work. M0/M1 portability and security gates remain prerequisites.
 
