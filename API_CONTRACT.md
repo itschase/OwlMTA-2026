@@ -1,10 +1,10 @@
-# Optional integration API contract
+# Authentication and optional integration API contract
 
 ## Purpose and boundary
 
-The MTA gamemode remains playable with its local account system and in-game management flows. A self-hosted, optional service provides a narrow, versioned API for Discord linking, server-side role mapping, and future website clients. MTA never listens publicly for website or Discord management calls. MTA handlers remain responsible for enforcing game rules; the API supplies bounded identity and grant data, not a replacement for gameplay authorization logic.
+Discord authorization is the planned primary identity path for production registration and login. A self-hosted, versioned service verifies Discord identity, resolves or provisions a game account, maps configured role IDs to capabilities, and supports session revocation. MTA never listens publicly for website or Discord management calls. MTA handlers remain responsible for enforcing game rules; the API supplies bounded identity and grant data, not a replacement for gameplay authorization logic. A website is an optional API client, not a requirement for login management or gameplay.
 
-This is the proposed v1 contract, not an implemented service. No Owl-hosted endpoint, domain, Discord guild, role ID, or secret is shipped. If the service is disabled or unavailable, local login and ordinary gameplay continue.
+This is the proposed v1 contract, not an implemented service. No Owl-hosted endpoint, domain, Discord guild, role ID, or secret is shipped. The MTA process can boot without the service; production registration/login fails closed until the operator configures it. Existing sessions use bounded leases, and confirmed authorization revocation disconnects the linked session. Provide an explicit audited bootstrap/recovery procedure for setup and service failures; never silently switch to password-only login.
 
 ## Conventions and authentication
 
@@ -26,16 +26,31 @@ This is the proposed v1 contract, not an implemented service. No Owl-hosted endp
 
 Challenge codes, challenge IDs, and Discord IDs are private server data. Store only a hash of the redeemable code. Apply per-installation, per-account, and per-Discord-user rate limits to creation, polling, and redemption. Audit link, unlink, recovery, and conflict outcomes without logging codes or credentials.
 
+## Registration and login challenge lifecycle
+
+1. MTA creates a random challenge bound to the current connection and installation. The challenge contains no client-supplied account ID or Discord identity.
+2. The player opens the authorization URL in a normal browser, authenticates with Discord, and confirms the one-time code. The identity service enforces OAuth state, callback, rate limits, and Discord membership policy.
+3. For an existing identity link, the API resolves the linked game account. For first-time registration, it provisions a new account only after consent, uniqueness, and operator policy checks.
+4. The API issues a short-lived, one-use ticket bound to the challenge. MTA redeems it server-to-server, then runs account status, ban, registration, and character-selection checks.
+5. Each active MTA session has a server-held session ID/version and expiry. MTA checks a bounded session-status/revocation feed. When the API reports authorization revoked, MTA clears grants and terminates that session. The maximum propagation delay and outage lease policy must be explicit and tested.
+
+New account login and legacy-account linking are distinct flows: new accounts are created after Discord verification; legacy account linking requires proof of control before the immutable Discord ID is attached.
+
 ## v1 routes
 
 | Method and path | Caller | Contract |
 |---|---|---|
+| `POST /api/v1/game/login-challenges` | Authenticated MTA installation | Creates a challenge bound to the current connection/installation. No account or Discord ID is accepted from the client. Returns an opaque challenge ID, short-lived one-time code, authorization URL, expiry, and poll interval. |
+| `GET /api/v1/game/login-challenges/{challenge_id}` | Authenticated MTA installation | Returns `pending|approved|expired|revoked`, expiry, and an opaque ticket reference only after Discord authorization and account resolution/provisioning. Challenge ownership is installation-bound. |
+| `POST /api/v1/game/login-challenges/{challenge_id}/redeem` | Authenticated MTA installation | Atomically returns and consumes a one-use, short-lived login ticket after verifying the challenge was approved and remains bound to this connection. |
 | `POST /api/v1/game/link-challenges` | Authenticated MTA | Body: `{ "account_id": 123 }`. Response: `{ "challenge_id": "opaque-id", "code": "one-time-code", "redeem_via": "bot", "expires_at": "RFC3339", "poll_after_seconds": 3 }`. Code is shown only to the authenticated player by MTA. |
 | `POST /api/v1/discord/redeem` | Trusted bot/service | Body: `{ "code": "one-time-code" }`. Discord user identity comes from the authenticated Discord interaction, not the request body. Response: `{ "status": "redeemed" }`. |
 | `GET /api/v1/game/link-challenges/{challenge_id}` | Authenticated MTA | Response: `{ "status": "pending|redeemed|expired|cancelled", "expires_at": "RFC3339", "discord_user_id": "immutable-id-or-null" }`. The ID is opaque and status is visible only to its owning installation and account. |
 | `DELETE /api/v1/game/link-challenges/{challenge_id}` | Authenticated MTA | Cancels an unredeemed challenge owned by this installation. Idempotent for already-cancelled or expired challenges; cannot undo a redeemed link. |
 | `POST /api/v1/game/accounts/{account_id}/unlink` | Authenticated MTA | MTA calls only after verifying the logged-in account owner explicitly confirmed in-game. Body: `{ "confirmation": true }`. Response: `{ "status": "unlinked", "policy_revision": "..." }`. Idempotent when already unlinked. |
 | `POST /api/v1/game/accounts/{account_id}/grants:refresh` | Authenticated MTA | Body: `{}`. Resolves current service-side guild membership and role mapping; never accepts a role list. Returns the grant shape below. |
+| `POST /api/v1/game/sessions/{session_id}/heartbeat` | Authenticated MTA installation | Renews a bounded session lease and returns `active|revoked|expired`, session version, and next check interval. If Discord authorization was revoked, MTA clears grants and disconnects the player. |
+| `POST /api/v1/game/accounts/{account_id}/sessions:revoke` | Trusted identity service | Marks all or selected sessions revoked after unlink, account authorization loss, or an explicit operator security action. MTA observes revocation through the session heartbeat/feed within the documented bound. |
 | `GET /api/v1/health` | Operator monitor | Returns liveness/readiness only; no settings, secrets, or user records. |
 
 Unlink requires an authenticated in-game account session and explicit confirmation. MTA clears that session's cached grants immediately when the player confirms, before the request; if the API is unavailable, keep those grants cleared and retry the idempotent unlink request with its original idempotency key. If Discord access is lost, recovery is an operator-mediated, step-up-authenticated action with audit logging and conflict checks. Recovery must not allow a Discord identity to be attached to multiple accounts.
@@ -57,7 +72,7 @@ Unlink requires an authenticated in-game account session and explicit confirmati
 
 Use only named, configured capabilities and a separate `donor_tier` (`null`, `supporter.level_1`, or `supporter.level_2`). Example initial capabilities may cover moderation, GameMaster event operations, or faction application review. Donor/supporter tiers never imply staff, GameMaster, faction rank, duty, or MTA ACL authority. Return no role IDs or role names.
 
-Grant lifetime is at most 10 minutes. MTA may use a cached grant only until its `expires_at`; refresh after link completion and asynchronously on login or near expiry. High-impact actions require a fresh grant within that same TTL. Once expired, API-derived sensitive actions fail closed until a successful refresh. API outage never blocks local login or ordinary gameplay. Unlink clears the local grant immediately; service-side unlink invalidates subsequent refreshes. Role removal takes effect no later than grant expiry, with earlier effect on a successful refresh.
+Grant lifetime is at most 10 minutes. MTA may use a cached grant only until its `expires_at`; refresh asynchronously on login or near expiry. High-impact actions require a fresh grant within that same TTL. Once expired, API-derived sensitive actions fail closed until a successful refresh. New registration/login fails closed during API outages; the process can still boot and existing sessions remain valid only until their bounded session lease expires. Unlink clears local grants and revokes affected sessions; confirmed account authorization revocation disconnects the linked session when observed, within the documented heartbeat/feed bound. Role removal revokes mapped capabilities promptly; whether it also ends the session is an explicit operator policy.
 
 ## Errors
 
@@ -81,7 +96,7 @@ Minimum v1 codes: `invalid_request`, `unauthorized_installation`, `account_not_f
 - Use server-side `fetchRemote` callbacks. Never wait in join, login, or gameplay handlers.
 - Set explicit `connectionAttempts` (1 or 2), `connectTimeout` (for example 3000 ms), a bounded in-resource concurrency limit, rate limits, and bounded retry/backoff. Do not use an unbounded request queue.
 - MTA serializes requests sharing a `queueName`; separate bounded queues for link polling and grant refresh where needed to avoid one flow delaying the other.
-- Use HTTPS, disable redirects for authenticated API calls (`maxRedirects = 0` where supported), and handle transport failures—including DNS, certificate, and disallowed-destination errors—as an optional-service outage. `fetchRemote` exposes no documented TLS-verification toggle; validate certificate-chain behavior, CA availability, HTTPS options, redirect behavior, and the target server build before release. Restrict outbound network access to the configured API host where the operator's firewall permits.
+- Use HTTPS, disable redirects for authenticated API calls (`maxRedirects = 0` where supported), and handle transport failures—including DNS, certificate, and disallowed-destination errors—as an identity-service outage. Such failure must not prevent process boot, but new production registration/login fails closed and existing sessions are bounded by their lease. `fetchRemote` exposes no documented TLS-verification toggle; validate certificate-chain behavior, CA availability, HTTPS options, redirect behavior, and the target server build before release. Restrict outbound network access to the configured API host where the operator's firewall permits.
 - Declare the narrow `function.fetchRemote` right in the adapter resource's `<aclrequest>` and require an operator to approve that resource-specific request. Do not grant the adapter `Admin`, `general.ModifyOtherObjects`, or a broad HTTP export. The `<export http="true">` attribute enables inbound HTTP calls to an MTA export; it is not needed for outbound API requests.
 - Pass callback arguments for `request_id`, `account_id`, player element, operation, and a server-maintained session generation. In the callback, verify the player element still exists, remains logged in to the same account, and the pending request/session generation still matches. Ignore stale callbacks after disconnect, relogin, unlink, a newer refresh, or adapter resource restart.
 - Track each returned remote-request handle. On resource stop/restart, invalidate the resource generation, cancel outstanding requests with `abortRemoteRequest` where possible, and reject any callback that still arrives with an old generation. `fetchRemote` cannot be launched from inside another `fetchRemote` callback; defer follow-on calls such as status-poll → grant-refresh through a timer/event after the callback returns.

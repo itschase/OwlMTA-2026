@@ -9,7 +9,7 @@ This guide separates staff operations from player features and server operation.
 | Moderation staff | Numeric account fields such as admin; legacy integration helpers | Explicit named capabilities resolved from configured Discord role IDs |
 | GameMaster | Legacy `getGameMasters()` and chat predicates overlap with supporter status | Separate `gamemaster.*` capabilities, unrelated to donations |
 | Supporter/donor | `supporter` and `supporter_level` fields; supporter tiers represent donation levels | Non-staff donor entitlements; configurable tiers, no moderation grant |
-| Faction authority | Character faction, faction rank, stored rank permissions, duty state | Remain separate from server staff; optional Discord link must not replace faction-specific authority |
+| Faction authority | Character faction, faction rank, stored rank permissions, duty state | Remain separate from server staff; Discord account authentication must not replace faction-specific authority |
 | MTA ACL | Resource/user rights for engine operations and exports | Narrow host-level security boundary, never a mirror of all gameplay roles |
 
 ## Staff workflows found in source

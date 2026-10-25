@@ -24,13 +24,13 @@ See [GAMEMODE_GUIDE.md](GAMEMODE_GUIDE.md) for the larger resource and table map
 
 The current account path loads numeric legacy fields such as `admin`, `supporter`, VCT, mapper, scripter, and FMT. `supporter_level` is donor tier, not staff rank. Existing code nevertheless mixes supporter checks into staff-like access, while `getGameMasters()` currently selects supporters. Several server handlers also trust old element data or scattered numeric checks. This makes “who logged in,” “what a Discord role grants,” “what faction rank permits,” and “whether the character is on duty” separate policy questions.
 
-Target direction: link a verified immutable Discord user ID to an existing game account; resolve configured Discord role IDs into explicit named capabilities on a trusted backend; keep `Support`/donor tiers separate from moderation; and have game server handlers authorize by account and current server-side grant. Operators receive blank role-ID slots and configure their own guild. Detailed flows and migration stages are in [DISCORD_AUTH_DESIGN.md](DISCORD_AUTH_DESIGN.md).
+Target direction: use verified Discord authorization as the primary production identity for registration and login; migrate existing accounts through a proof-of-control link; resolve configured Discord role IDs into explicit named capabilities on a trusted backend; keep `Support`/donor tiers separate from moderation; and have game server handlers authorize by account and current server-side grant. Operators receive blank role-ID slots and configure their own guild. Detailed flows and migration stages are in [DISCORD_AUTH_DESIGN.md](DISCORD_AUTH_DESIGN.md).
 
 ## Website-free operation and API boundary
 
-The primary product is the in-game gamemode. Local account login, character creation, normal player features, and routine staff administration must not need a UCP or a website. A future website should be an optional client of a versioned API contract owned by the project, so its implementation can be chosen by the server operator without reimplementing core account, permission, or gameplay rules. Discord linking/role verification can use the same narrow service boundary; it must not be conflated with a website or become a server boot dependency.
+The primary product is the in-game gamemode. Discord authorization is the planned production registration/login path; character creation, normal player features, and routine staff administration must not need a UCP or management website. A future website should be an optional client of a versioned API contract owned by the project, so its implementation can be chosen by the server operator without reimplementing core account, permission, or gameplay rules. The identity service is a production login dependency, but not a process boot dependency.
 
-MTA server-side `fetchRemote` is asynchronous. External identity checks therefore need a pending state and callback-driven result, not a synchronous join/login dependency. Ordinary local account access remains available when the API or Discord is unavailable; sensitive API-derived capabilities fail closed. Source-level API availability is not runtime verified against the target server build.
+MTA server-side `fetchRemote` is asynchronous. External identity checks therefore need a pending state and callback-driven result, not a synchronous join/login dependency. New registration/login fails closed when the API or Discord cannot authorize the user. Active sessions use bounded leases, and a verified authorization revocation ends the associated session; outage and lease expiry behavior must be explicit. Source-level API availability is not runtime verified against the target server build.
 
 ## Findings and known boundaries
 
@@ -51,10 +51,11 @@ MTA server-side `fetchRemote` is asynchronous. External identity checks therefor
 - [Staff and Admin Guide](STAFF_ADMIN_GUIDE.md): staff authority boundaries, workflows, and Discord capability direction.
 - [Server Operator Guide](SERVER_OPERATOR_GUIDE.md): install, configure, operate, recover, and integrate the server.
 - [Codebase review](CODEBASE_REVIEW.md): findings, evidence, priorities, and review status.
-- [Discord design](DISCORD_AUTH_DESIGN.md): identity, optional login, role mapping, capabilities, and cutover.
+- [Discord design](DISCORD_AUTH_DESIGN.md): primary login identity, role mapping, capabilities, revocation, and cutover.
 - [Discord integration plan](DISCORD_INTEGRATION_PLAN.md): pairing, API contract boundary, grants, outage behavior, and migration sequence.
 - [Enhancement register](ENHANCEMENT_REGISTER.md): architecture, player, security, integration, and documentation opportunities.
 - [Optional integration API contract](API_CONTRACT.md): self-hostable API boundary for Discord, websites, media storage, and operator-selected log search.
 - [Complete resource manifest catalog](RESOURCE_CATALOG.md): every active-tree and archived resource manifest with its declared purpose and client/server script counts.
+- [Resource and script audit playbook](RESOURCE_AUDIT_PLAYBOOK.md): required resource dossier, human/technical documentation views, coverage states, and audit/publishing workflow.
 - [Rebuild plan](REBUILD_PLAN.md): deployment, stabilization, schema, UCP, and Discord sequence.
 - [Issues and Discussions workflow](DISCUSSIONS_AND_ISSUES.md): where defects and durable explanations belong.

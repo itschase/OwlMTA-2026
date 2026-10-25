@@ -2,7 +2,7 @@
 
 ## Goal
 
-Restore this repository as a maintainable, deployable OwlGaming roleplay server, then modernize its database and account-management integrations without losing existing player data. Discord should be an optional identity and staff-management integration, not a dependency for starting the game server.
+Restore this repository as a maintainable, deployable OwlGaming roleplay server, then modernize its database and account-management integrations without losing existing player data. Discord authorization is the planned primary identity source for production registration and login. The MTA process should start independently of the identity service; production login should fail closed when Discord authorization cannot be verified.
 
 ## What the repository currently contains
 
@@ -39,11 +39,12 @@ Restore this repository as a maintainable, deployable OwlGaming roleplay server,
 
 ### 4. Keep account and server management website-free
 
-- No UCP website is available. Keep local account login, account recovery, character management, staff/faction tools, moderation and routine operator workflows in authenticated MTA interfaces and server-side resources.
+- No UCP website is available. Keep character management, staff/faction tools, moderation and routine operator workflows in authenticated MTA interfaces and server-side resources. Discord is the planned production identity provider; the website is optional.
 - Retire or narrowly secure legacy HTTP endpoints and remove the broad website ACL identity; do not assume a replacement management site exists.
-- A website may be built later as an optional companion, but must not be needed for server startup, local login, gameplay or routine management.
-- If Discord OAuth is implemented, use only a narrowly scoped callback/identity API for the browser authorization step. This is not a UCP website and must not replace in-game operations.
+- A website may be built later as an optional companion, but must not be needed for server startup or in-game management. The authorization API is needed for production registration/login and is not a UCP.
+- Use a narrowly scoped OAuth callback/identity API for browser authorization. This is not a management website and must not replace in-game operations.
 - Use unique immutable Discord account links, short-lived sessions/tickets, rate limits, CSRF protection on browser flows and audit records. Never silently merge accounts by username or email.
+- Maintain a revocation feed or bounded session-status check so a Discord authorization revoke invalidates the linked MTA session promptly. Define outage and lease-expiry behavior; never leave a revoked session authorized indefinitely.
 
 ### 5. Add Discord-focused operations
 
@@ -54,7 +55,7 @@ Restore this repository as a maintainable, deployable OwlGaming roleplay server,
 - Preserve existing gameplay checks behind a single server-side authorization service during migration. Translate calls such as `isPlayerAdmin` and `isPlayerSupporter` into capability checks first, then migrate callers in groups while keeping permission behavior explicit and auditable.
 - Keep GameMaster distinct from administrator and donator permissions. Role revocation must invalidate cached capabilities and in-game sessions promptly.
 - Add staff workflows only after authorization mapping is documented. Enforce permissions server-side and log every staff action.
-- Queue outbound notifications and make retries idempotent; Discord outages must not block login or gameplay.
+- Queue outbound notifications and make retries idempotent. An identity-service outage must not stop process boot; new production registrations/logins fail closed, and existing sessions remain valid only through a bounded, documented lease.
 
 ## Initial priorities
 
@@ -62,7 +63,7 @@ Restore this repository as a maintainable, deployable OwlGaming roleplay server,
 2. Agree on the account and character data model; inventory schema readers/writers and define a reversible migration.
 3. Make container/config generation portable and pin the MTA server artifact.
 4. Prepare a disposable environment and boot only after source review, then capture startup errors and validate resource loading.
-5. Keep the gamemode manageable in-game without a website; add Discord account linking and role capabilities as optional integrations.
+5. Keep the gamemode manageable in-game without a website; stage Discord-primary registration/login, verified legacy-account linking, revocation handling, then role capabilities.
 
 ## Safety constraints for schema work
 

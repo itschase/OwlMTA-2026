@@ -48,6 +48,7 @@ The Markdown files in the root are the maintained reference set. Update them in 
 - [Server Operator Guide](SERVER_OPERATOR_GUIDE.md)
 - [Discord integration plan](DISCORD_INTEGRATION_PLAN.md)
 - [Enhancement register](ENHANCEMENT_REGISTER.md)
+- [Resource and script audit playbook](RESOURCE_AUDIT_PLAYBOOK.md)
 - [Resource startup inventory](RESOURCE_INVENTORY.csv)
 - [GitHub Issues](https://github.com/itschase/OwlMTA-2026/issues)
 - [GitHub Discussions](https://github.com/itschase/OwlMTA-2026/discussions)
@@ -55,6 +56,16 @@ The Markdown files in the root are the maintained reference set. Update them in 
 - [Issue #71: Source-grounded MTA release compatibility baseline](https://github.com/itschase/OwlMTA-2026/issues/71)
 - [Discussion #70: Discord account linking and capability grants](https://github.com/itschase/OwlMTA-2026/discussions/70)
 - [Resource Discussion #73: global](https://github.com/itschase/OwlMTA-2026/discussions/73)
+- [Discussion #97: Resource audit standard for real users and operators](https://github.com/itschase/OwlMTA-2026/discussions/97)
+- [Discussion #98: Discord-first sign-in, legacy account migration, and session revocation](https://github.com/itschase/OwlMTA-2026/discussions/98)
+- [Script Resource #99: account](https://github.com/itschase/OwlMTA-2026/discussions/99)
+- [Script Resource #100: bank](https://github.com/itschase/OwlMTA-2026/discussions/100)
+- [Script Resource #101: factions](https://github.com/itschase/OwlMTA-2026/discussions/101)
+- [Script Resource #102: item-system](https://github.com/itschase/OwlMTA-2026/discussions/102)
+- [Discussion #103: Contextual interaction and proximity voice](https://github.com/itschase/OwlMTA-2026/discussions/103)
+- [Discussion #104: Jobs, businesses, and player production](https://github.com/itschase/OwlMTA-2026/discussions/104)
+- [Discussion #105: Operator observability and optional adapters](https://github.com/itschase/OwlMTA-2026/discussions/105)
+- [Discussion #106: Staff control center, command discovery, and audit history](https://github.com/itschase/OwlMTA-2026/discussions/106)
 
 ## Issues added 2026-10-24
 
@@ -65,6 +76,7 @@ The Markdown files in the root are the maintained reference set. Update them in 
 - [#79: Restrict remote account and character settings writes](https://github.com/itschase/OwlMTA-2026/issues/79)
 
 Issue #3 was updated with source-confirmed donor-to-moderation command examples to inform the capability migration.
+- Issues #2, #4, #7, and #68 were updated to align the production identity target with Discord-first login and the complete resource documentation scope.
 - [#80: Require an active tutorial before advancing the account flow](https://github.com/itschase/OwlMTA-2026/issues/80)
 - [#81: Restore persisted interior settings when properties load](https://github.com/itschase/OwlMTA-2026/issues/81)
 - [#82: Authorize faction duty-skin lookup requests](https://github.com/itschase/OwlMTA-2026/issues/82)
@@ -82,4 +94,6 @@ Issues #52 (MDC) and #55 (phone) were updated with the additional read, mutation
 - [#92: Bind engine control and vehicle keys to the caller](https://github.com/itschase/OwlMTA-2026/issues/92)
 - [#93: Bind vehicle parking requests to the actual actor](https://github.com/itschase/OwlMTA-2026/issues/93)
 - [#94: Require proximity for vehicle interior entry](https://github.com/itschase/OwlMTA-2026/issues/94)
+- [#95: Create one Script Resources discussion for each resource](https://github.com/itschase/OwlMTA-2026/issues/95)
+- [#96: Revoke and disconnect active MTA sessions after Discord authorization loss](https://github.com/itschase/OwlMTA-2026/issues/96)
 

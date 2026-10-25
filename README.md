@@ -8,19 +8,19 @@ This repository is an active overhaul of the OwlGaming roleplay gamemode for Mul
 
 - Keep the gamemode self-hostable and suitable for importing into another operator's server.
 - Make account, character, gameplay, and routine staff workflows usable in game without requiring a website.
-- Keep Discord identity, login, and role-based authorization optional. Role IDs and integration settings will be operator-configured; no particular Discord server or role set is assumed.
+- Use Discord authorization as the planned primary identity path for registration and future logins. Operators configure their own authorization service and guild; role IDs ship blank, and unmapped roles grant no staff or donor access. A management website is not required.
 - Separate staff authority from supporter/donor levels. Supporter levels represent donor benefits and must not grant staff permissions.
 - Provide a documented API boundary so an independently built website or service can integrate without coupling core gameplay to that website.
 - Make external services such as media storage and metrics/log search optional adapters that can be enabled by an operator.
 - Document what resources do, how players and staff use them, how operators configure them, and how they depend on one another.
 
-These are project goals, not claims that each integration or workflow is already implemented.
+These are project goals, not claims that each integration or workflow is already implemented. The Discord authentication service and MTA adapter are not implemented. The server process should be able to start without them, while user registration and login in production require a successful Discord authorization result. Development and owner recovery must use an explicit, audited setup path rather than silently falling back to password-only login.
 
 ## Current state
 
 The repository is in source-review and hardening work. The existing resource tree, account and character flows, staff/faction systems, vehicle and property features, and data model are being documented and reviewed incrementally. Some source-level defects and authorization boundaries have been corrected, and findings are tracked in GitHub Issues. Runtime behavior remains unverified until the project is brought up in a controlled MTA and database environment.
 
-The inherited database and configuration still reflect the legacy gamemode. Schema restructuring, compatibility, deployment requirements, and upgrade/migration behavior are open work. No Discord role IDs, bot credentials, API secrets, or server-specific settings are supplied by this repository.
+The inherited database and configuration still reflect the legacy gamemode. Schema restructuring, compatibility, deployment requirements, and upgrade/migration behavior are open work. No Discord role IDs, bot credentials, API secrets, or server-specific settings are supplied by this repository. Discord identity can be configured independently of role mapping; until role IDs are filled in, no Discord role-based staff or donor capabilities are granted.
 
 ## Documentation and project tracking
 
@@ -29,6 +29,7 @@ Start with these guides, which are being expanded alongside the source review:
 - [Rebuild plan](REBUILD_PLAN.md) — phases, priorities, and readiness work.
 - [Gamemode architecture guide](GAMEMODE_GUIDE.md) — major systems and resource relationships.
 - [Resource catalog](RESOURCE_CATALOG.md) and [resource startup inventory](RESOURCE_INVENTORY.csv) — manifest coverage and startup inventory.
+- [Resource and script audit playbook](RESOURCE_AUDIT_PLAYBOOK.md) — documentation coverage, evidence standards, and completion gates.
 - [Feature usage guide](FEATURE_USAGE_GUIDE.md) — feature discovery and usage notes.
 - [Player wiki](PLAYER_WIKI.md) — player-facing workflows and questions.
 - [Staff and admin guide](STAFF_ADMIN_GUIDE.md) — staff capabilities and operational procedures.
@@ -45,7 +46,7 @@ Use [GitHub Issues](https://github.com/itschase/OwlMTA-2026/issues) for actionab
 
 ## Development status and contributions
 
-Changes should preserve existing player workflows where possible, validate remote event callers and server-owned state, and make authority decisions using explicit capabilities rather than trusting client-supplied values. Discord role mappings should remain configurable and optional, with supporter tiers modeled separately from staff access.
+Changes should preserve existing player workflows where possible, validate remote event callers and server-owned state, and make authority decisions using explicit capabilities rather than trusting client-supplied values. Discord role mappings remain operator-configured, with supporter tiers modeled separately from staff access. Existing local credentials are a migration concern; production login must follow the configured Discord authorization policy.
 
 Before proposing a behavior change, identify the resource, its metadata and dependencies, the client/server event flow, related data tables, and the operator-facing configuration. For each new or changed feature, document player use, staff use, operator setup, and known limitations as applicable. Runtime validation should be recorded separately from static source review.
 

@@ -5,8 +5,8 @@ Source-based operational notes for a clean import. This is not yet a validated d
 ## Operating model
 
 - The core roleplay gamemode should run and be managed in-game without an Owl website or UCP.
-- Discord integration is optional at bootstrap. It may provide identity linking and role verification through an operator-configured service, but gameplay must still start when Discord is not configured. Protected Discord-gated actions fail closed if grants cannot be verified.
-- A future website is optional and must not be a dependency for registration, login, character creation, routine staff work, or core gameplay.
+- Discord authorization is the planned production identity source for registration and login. The MTA process may start before the authorization API is configured, but production users cannot register or log in without successful verification. Use an explicit, audited operator bootstrap/recovery flow during setup and outages.
+- A future website is optional and must not be required for server startup, character management, routine staff work, or gameplay operations. Discord OAuth may use a browser authorization page served by the API; this is not a UCP.
 - MTA ACL remains the engine-level boundary. Game roles are application policy and should not be written into broad MTA ACL groups.
 
 ## Current packaging and configuration
@@ -49,18 +49,17 @@ Inventory all integrations before enabling them: activation email, legacy forum 
 
 ## MTA and Discord connectivity
 
-MTA's server-side `fetchRemote` supports outbound HTTP(S) request options and invokes a callback asynchronously. Therefore resource code must not block a join/login handler waiting for Discord. Use a short-lived pairing code and perform Discord exchange/role resolution asynchronously; retain a pending/limited state until a verified response arrives. Store Discord bot credentials only on the trusted service or protected server configuration, never in client files or source.
+MTA's server-side `fetchRemote` supports outbound HTTP(S) request options and invokes a callback asynchronously. Therefore resource code must not block a join/login handler waiting for Discord. Use a short-lived challenge and one-use ticket for registration/login; perform Discord exchange and role resolution asynchronously. New logins fail closed without a verified result. Track session leases and a revocation feed/status check so an authorization revoke ends the linked session within a documented bound. Store Discord bot credentials only on the trusted service or protected server configuration, never in client files or source.
 
 The preferred topology is:
 
 ```text
-MTA client -> MTA account authentication -> in-game link-code UI
-                                      -> trusted identity/authorization service
-Discord account -> bot or OAuth verification -> trusted service
-MTA server <- signed/minimal grant response over HTTPS <- service
+MTA client -> in-game login challenge -> trusted identity/authorization service
+Discord account -> browser OAuth -> trusted service -> linked/provisioned account
+MTA server <- one-use login ticket, grants, revocation state over HTTPS <- service
 ```
 
-Do not call Discord's privileged APIs directly from clients. A narrow adapter avoids leaking bot tokens and decouples core gamemode uptime from Discord API changes. The service must bind game-account ID to immutable Discord user ID, validate guild membership, resolve configured role IDs, return a bounded grant result, and support revocation/audit. The exact MTA 1.6 compatibility and network/ACL request settings must be confirmed in a disposable deployment.
+Do not call Discord's privileged APIs directly from clients. A narrow adapter avoids leaking bot tokens and decouples core gamemode uptime from Discord API changes. The service must bind game-account ID to immutable Discord user ID, validate guild membership, resolve configured role IDs, return a bounded grant result, and support active-session revocation/audit. Blank role IDs grant no staff/donor capabilities. The exact MTA 1.6 compatibility and network/ACL request settings must be confirmed in a disposable deployment.
 
 ## Minimum pre-production checklist
 

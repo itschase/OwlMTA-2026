@@ -2,7 +2,7 @@
 
 ## Goal and boundaries
 
-Discord linking and role-based entitlements are optional. The gamemode remains importable and playable with its existing local account path, without a website, Discord bot, or pre-existing role IDs. The self-hosted API defined in [`API_CONTRACT.md`](API_CONTRACT.md) owns Discord verification and role mapping. MTA receives only a linked identity and minimal named grants through authenticated server-to-server calls.
+Discord authorization is the planned primary identity path for production registration and login. The gamemode remains manageable in-game and does not require a UCP website. Operators self-host or select the documented authorization service and configure their own guild. Role IDs ship blank; identity authentication and role-based staff/donor grants are separate, so unmapped roles grant no elevated access. The API defined in [`API_CONTRACT.md`](API_CONTRACT.md) owns Discord verification, account resolution, and role mapping. MTA receives only minimal identity and named-grant results through authenticated server-to-server calls.
 
 Keep these authorities distinct:
 
@@ -46,7 +46,7 @@ The service validates Discord Snowflake strings, rejects duplicate or conflictin
 
 ## Link and unlink flow
 
-1. A player logs in through the existing local account flow and explicitly requests linking in-game. MTA verifies the player and gets the account ID from server-side session state.
+1. For an existing legacy account, the player proves account control through the controlled migration flow and explicitly requests linking. MTA derives the account ID from a validated server session. New accounts start with Discord authorization and are provisioned after identity and consent checks.
 2. MTA asynchronously creates a challenge with `POST /api/v1/game/link-challenges`. The API binds it to the authenticated installation and account, stores only a hash of a cryptographically random code, expires it within 10 minutes, and allows only one pending challenge per account.
 3. The player redeems the code through an operator-controlled Discord bot interaction. The trusted bot/service derives the immutable Discord user ID from the authenticated interaction and verifies guild membership against the service's configured guild. A website consent page is optional and is not a UCP.
 4. The service atomically consumes the code and commits the link, enforcing one account per Discord identity and one Discord identity per account within that installation. A conflicting link requires unlink or audited recovery; it is never overwritten silently.
@@ -59,7 +59,7 @@ Challenge creation and redemption are idempotent and rate-limited. Repeating the
 
 - The service resolves configured role IDs into named capabilities and the separate donor tier. Never pass raw Discord roles to MTA. Never accept client-supplied role IDs, account IDs, or authority data.
 - MTA authorizes in server-side handlers from current account/session and server-owned grant state. Do not put API-derived capabilities in client-synchronized element data.
-- Grants have a maximum 10-minute lifetime with an explicit `expires_at` and policy revision. Refresh asynchronously after linking and on login/near expiry. Sensitive API-derived actions fail closed after expiry; ordinary login and gameplay continue through API or Discord outages.
+- Grants have a maximum 10-minute lifetime with an explicit `expires_at` and policy revision. Refresh asynchronously after linking and on login/near expiry. Sensitive API-derived actions fail closed after expiry. New production login fails closed during identity-service outages; existing sessions are accepted only under their bounded lease, after which the operator recovery procedure applies.
 - Do not fall back to supporter, forum group text, client data, or stale numeric admin flags when Discord refresh fails. Existing legacy authority remains unmigrated until each call site has an explicit migration and rollback plan.
 - Unlink clears local session grants immediately. Role removal takes effect on the next successful refresh, no later than grant expiry. Log refresh age, request ID, and outcome without bearer credentials. Audit links, unlink/recovery, grant decisions, targets, results, timestamps, and trace IDs with data minimization.
 
@@ -73,12 +73,12 @@ The adapter resource must request only `function.fetchRemote` through its `<aclr
 
 ## Minimal first slice
 
-1. Implement the self-hosted API's per-install authentication and account scoping, challenge create/redeem/status, unlink/recovery audit, and grant-refresh contract. This is the scope of [issue #68](https://github.com/itschase/OwlMTA-2026/issues/68); include ACL approval, installation secret provisioning, and target-release transport/callback lifecycle checks in its acceptance checklist.
-2. Add one MTA server adapter for an explicit link command, async status polling, and async grant refresh. Keep it disabled by default and leave local account login unchanged.
-3. Configure no role IDs by default. Test the link, conflict, expiry, unlink, and API-outage behavior in a disposable server before migrating existing predicates.
+1. Implement the self-hosted API's per-install authentication and account scoping, registration/login and legacy-link challenge create/redeem/status, unlink/recovery audit, session revocation, and grant-refresh contract. This is the scope of [issue #68](https://github.com/itschase/OwlMTA-2026/issues/68); include ACL approval, installation secret provisioning, and target-release transport/callback lifecycle checks in its acceptance checklist.
+2. Add one MTA server adapter for Discord registration/login challenges, one-use ticket redemption, legacy-account linking, session status/revocation, and async grant refresh. The MTA process may boot in setup mode without service credentials; production registration/login must fail closed until the operator configures the authorization service.
+3. Configure no role IDs by default. Discord identity authentication can be tested without staff/donor grants; no role-based capability is granted until mapped. Test linking, conflict, expiry, unlink, session revocation, recovery, and API-outage behavior in a disposable server before migrating existing predicates.
 4. Inventory admin, supporter, GameMaster, auxiliary staff, faction rank/duty, and MTA ACL predicates. Migrate separately by capability and retain rollback; do not combine donor tiers with staff authority. Capability migration is tracked separately by [issue #3](https://github.com/itschase/OwlMTA-2026/issues/3).
 
-Discord website OAuth/login is a separate scope from linking a player who already authenticated with the local game account. [Issue #2](https://github.com/itschase/OwlMTA-2026/issues/2) currently includes optional MTA login and OAuth; keep that distinct from the account-link/API slice unless login scope is deliberately changed.
+Discord login is part of the target identity flow, while legacy-account linking and role-capability migration remain separately testable stages. [Issue #2](https://github.com/itschase/OwlMTA-2026/issues/2) tracks primary production authentication; [issue #96](https://github.com/itschase/OwlMTA-2026/issues/96) tracks active-session revocation so a revoked Discord authorization cannot leave a player connected indefinitely.
 
 FiveManage media storage and Grafana log search are separate optional adapters described in `API_CONTRACT.md`; neither is required for this first slice.
 

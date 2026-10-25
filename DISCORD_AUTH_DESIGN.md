@@ -1,10 +1,10 @@
 # Discord identity and permissions design notes
 
-This is a proposed target design based on the current source review and the user's requirements. It does not implement an OAuth client, Discord bot, API, or database migration. Role IDs remain blank until each server operator creates their own Discord roles.
+This is the proposed target design based on source review and project requirements. It does not implement an OAuth client, Discord bot, API, or database migration. Discord authorization is intended to be the primary registration and login identity in production. Role IDs remain blank until each server operator creates and maps their own Discord roles; identity login may work without staff or donor grants configured.
 
 ## Keep three decisions separate
 
-1. **Authentication:** who completed login? A narrowly scoped, versioned identity API verifies Discord identity and resolves the linked game account. A website, bot, or OAuth callback is an optional client of this API, not a required management portal.
+1. **Authentication:** who completed login? A self-hosted, versioned identity API verifies Discord identity and resolves or provisions the game account. Discord authorization is required for production registration and login. A website is not required; OAuth is the browser authorization step, and a bot or web client may be an adapter to the API.
 2. **Account selection:** which `core.accounts` identity and characters does that person control? A verified Discord ID is linked explicitly to one existing account.
 3. **Authorization:** may this logged-in account perform a particular action now? A trusted role resolver produces named, short-lived capabilities from the configured guild's current role IDs.
 
@@ -81,9 +81,9 @@ Do not store the complete Discord role list as a long-lived privilege snapshot. 
 
 ## Login and account-link flows
 
-### Optional browser OAuth callback
+### Discord browser authorization
 
-If Discord login/linking is implemented, use Discord's server-side OAuth2 Authorization Code Grant with a random `state`, exact callback URL validation, short-lived server session and minimum scopes. This callback/API handles only the browser authorization step; it is not a UCP or required control panel. The Discord access token and client secret stay on the backend. `identify` is sufficient to establish the immutable Discord user ID; Discord also documents `guilds.members.read` for the user's member record in a guild if the implementation chooses user-token role resolution. A bot-backed role resolver may be simpler for continuous current-role checks; evaluate current official scopes and gateway/API requirements at implementation time.
+Use Discord's server-side OAuth2 Authorization Code Grant with a random `state`, exact callback URL validation, short-lived server session and minimum scopes. The self-hosted API handles browser authorization; it is not a UCP or management portal. The Discord access token and client secret stay on the backend. `identify` establishes the immutable Discord user ID; role resolution should use the trusted service's configured guild and bot-backed resolver. Recheck official scopes and API behavior when implementation starts.
 
 ### Link an existing game account
 
@@ -91,12 +91,12 @@ Require proof of the existing game account through an authenticated in-game sess
 
 ### Log into MTA with Discord
 
-1. Player chooses Discord login in the MTA login UI. The MTA server requests a cryptographically random, short-lived challenge from the account service and associates it with that connection.
+1. Player chooses Discord login or registration in the MTA UI. The MTA server requests a cryptographically random, short-lived challenge from the account service and associates it with that connection.
 2. The game displays a URL and one-time code. The player completes Discord OAuth in a normal browser and confirms the code while authenticated to the identity service.
-3. The service verifies the OAuth user, resolves the unique linked `account_id`, and atomically marks the challenge consumed while issuing a short-lived one-use login ticket.
+3. The service verifies the OAuth user. For an existing link, it resolves the unique `account_id`; for a new user, it provisions an account only after required consent and uniqueness checks. It atomically consumes the challenge and issues a short-lived, one-use login ticket.
 4. The MTA server redeems the ticket over a server-to-server authenticated channel. The service returns the account ID and minimal identity result; MTA then runs its normal ban, activation and account checks before character selection.
 
-Bind the challenge to the pending MTA connection, expire it quickly, rate-limit attempts, and make ticket redemption one-use. The client must never supply the Discord ID, role IDs, role list, target account ID, OAuth token, or ticket result as authority. Do not require OAuth in an embedded game browser. If the identity API is down, keep boot and ordinary already-authenticated gameplay operating, and provide a documented recovery/login route for the operator.
+Bind the challenge to the pending MTA connection, expire it quickly, rate-limit attempts, and make ticket redemption one-use. The client must never supply the Discord ID, role IDs, role list, target account ID, OAuth token, or ticket result as authority. Do not require OAuth in an embedded game browser. The MTA process can boot when the identity API is unavailable, but new registrations and logins fail closed until Discord authorization succeeds. Existing sessions use bounded authorization leases; an explicit account authorization revocation must invalidate the lease and disconnect the player. Operator recovery is a separate, audited path and must not become a silent password-only login.
 
 ## Authorization flow in the game
 
@@ -108,9 +108,9 @@ Never authorize from client-side element data, Discord role names, a `triggerSer
 
 1. Inventory and classify every legacy permission call: admin levels, supporter checks, GameMaster, scripter/mapper/VCT/FMT, faction ranks, duty and ACL. Record the exact action each call protects.
 2. Add the capability API while it still delegates to existing server-side policy. Fix the bad player type guards and high-risk unauthenticated mutation paths before changing role sources.
-3. Implement identity linking and optional Discord login separately from role authorization. Migrate one account-link cohort and verify duplicate/unlink/recovery handling.
+3. Implement Discord registration/login and legacy-account linking before role cutover. Migrate verified existing accounts, verify duplicate/unlink/recovery handling, and define the owner bootstrap path.
 4. Run Discord role resolution in **shadow mode**: record what capabilities would be granted and compare with legacy results, but do not allow shadow grants. Resolve mismatches with server operators.
-5. Enable configured roles for a small staff group, with an owner recovery route and auditable rollback. Revoke cached grants promptly when roles change or accounts unlink.
+5. Enable configured roles for a small staff group, with an owner recovery route and auditable rollback. Revoke cached grants promptly when roles change or accounts unlink; invalidate active sessions when Discord account authorization itself is revoked.
 6. Migrate each admin tier, GameMaster and specialty team explicitly. Migrate donor tiers only to donor capabilities. Remove forum-rank and legacy numeric authorization only after all call sites and account records are reconciled.
 7. Remove UCP website ACL access and old rank mutation endpoints after replacement workflows are live. Keep the original schema and a reversible account/data backup until the new model is validated.
 

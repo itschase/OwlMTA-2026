@@ -30,13 +30,29 @@ This is a living design backlog. Items are opportunities, not claims that work h
 - Remove browser/client authority for prices, item IDs, vehicle IDs, account/character IDs, faction IDs, payer IDs, and status fields.
 - Inventory HTTP-callable exports and apply deny-by-default ACL/network exposure; distinguish internal exports from public HTTP APIs.
 
-## Discord and optional web integration
+## Discord authentication, authorization, and optional web integration
 
-- Treat Discord as optional identity and capability infrastructure, not a boot dependency.
+- Make Discord authorization the primary production identity path for registration and login. Keep the MTA process boot independent of the API and define an explicit operator setup/recovery path; do not silently fall back to password-only login.
 - Use one-time game-account pairing, explicit consent, immutable Discord IDs, role-ID placeholders, bot/API secrets on trusted server side, and revocation/audit.
-- Preserve local account login as an emergency/independent path; do not require a UCP or OAuth website for ordinary play.
+- Migrate legacy accounts by proof of control. Track active MTA sessions so a verified Discord authorization revocation disconnects the related session; bound lease and outage behavior.
+- Keep admin levels, GameMaster/moderation, faction authority, and donor/supporter tiers distinct. Blank/unmapped role IDs grant no capabilities.
 - Keep any future UCP/API as an optional adapter with a narrow authenticated contract and no duplicated business rules.
 - Give website builders a self-hostable, versioned project API so they can choose their web stack and presentation without recreating account, role, or moderation policy. See `API_CONTRACT.md`.
+
+## Businesses, jobs, and production
+
+- Build a shared business/job framework for staffing, payroll, inventory, contracts, supply orders, maintenance, demand, and financial ledgers.
+- Add bounded background operations for businesses, with stock, upkeep, staffing, demand, and catch-up caps. Active player work should remain valuable and predictable.
+- Connect legal supply chains across jobs and businesses, starting with existing resources that can prove the order/delivery/payment path.
+- Consider a configurable fictional illicit-production system using abstract recipes, risk, quality, distribution, evidence, and law-enforcement counterplay. Keep its content separate from real-world manufacturing instructions.
+- Record every payout and stock change through authoritative, auditable domain services; define transaction and persistence guarantees before enabling automated money generation.
+
+## Immersive interaction and voice
+
+- Prototype a shared contextual interaction registry for nearby vehicles, doors, interiors, NPCs, businesses, and service points; filter choices by current capability and world state.
+- Add a configurable proximity-voice experience with whisper/normal/shout, radio, phone, and vehicle contexts, while retaining a controlled transition for existing text roleplay.
+- Build a discoverable command/feature catalog that powers in-game help, examples, access descriptions, and staff command search.
+- Add role-gated player/staff/operator dashboards as focused views over shared systems, including map-based interiors and operational status.
 
 ## Optional media and asset providers
 
