@@ -3,6 +3,8 @@ param(
     [string] $OutputPath = "RESOURCE_DOCUMENTATION_STATUS.csv"
 )
 
+$ErrorActionPreference = "Stop"
+
 $published = @{
     "global" = @{ Number = 73; Dossier = "docs/resources/global.md"; State = "Full manifest-script source review; individual Discussion published" }
     "account" = @{ Number = 99; Dossier = "docs/resources/account.md"; State = "Full manifest-script source review; individual Discussion published" }
@@ -60,6 +62,7 @@ $published = @{
     "interior_keypad" = @{ Number = 265; Dossier = "docs/resources/interior_keypad.md"; State = "Full manifest-script source review; individual Discussion published" }
     "map_manager" = @{ Number = 266; Dossier = "docs/resources/map_manager.md"; State = "Full manifest-script source review; individual Discussion published" }
     "map_load" = @{ Number = 267; Dossier = "docs/resources/map_load.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "elevator-system" = @{ Number = 272; Dossier = "docs/resources/elevator-system.md"; State = "Full manifest-script and direct-caller source review; individual Discussion published" }
 }
 
 $inventoryByPath = @{}
@@ -71,8 +74,10 @@ $manifestFiles = foreach ($resourceRoot in @('mods/deathmatch/resources', 'mods/
     Get-ChildItem -LiteralPath $resourceRoot -Recurse -Filter 'meta.xml' -File
 }
 
+$repositoryRootUri = [Uri]::new(((Resolve-Path -LiteralPath '.').Path.TrimEnd('\') + '\'))
 $statusRows = foreach ($manifest in ($manifestFiles | Sort-Object FullName)) {
-    $manifestPath = [IO.Path]::GetRelativePath((Get-Location).Path, $manifest.FullName).Replace('\', '/')
+    $manifestUri = [Uri]::new($manifest.FullName)
+    $manifestPath = [Uri]::UnescapeDataString($repositoryRootUri.MakeRelativeUri($manifestUri).ToString()).Replace('\', '/')
     $resource = Split-Path -Leaf (Split-Path -Parent $manifest.FullName)
     $record = $published[$resource]
     $isArchived = $manifestPath -like "*resource-archive*"

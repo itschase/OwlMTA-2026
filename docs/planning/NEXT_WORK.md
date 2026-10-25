@@ -1,16 +1,18 @@
 # Next work record
 
-Last updated: 2026-10-25 after the external-management, jobs, towing, and contextual-item publication batch.
+Last updated: 2026-10-25 after publishing the elevator-system audit.
 
 ## Verified project state
 
 - `main` was synchronized with `origin/main` before this batch.
 - The manifest census remains 179 resources: 144 active-tree and 35 archived.
-- 56 resources have individual Discussions and versioned dossiers: 50 full manifest-script reviews and 6 partial reviews.
+- 57 resources have individual Discussions and versioned dossiers: 51 full manifest-script reviews and 6 partial reviews.
 - Source review, proposed design, fixed-in-source behavior, and runtime verification remain distinct. All resource dossiers are runtime-unverified.
 - The MTA server has not been started. Static review and safe-start preparation remain the gate.
 
 ## Completed publication batch
+
+The active `elevator-system` resource now has a full manifest/direct-caller source dossier and standardized [Script Resource Discussion #272](https://github.com/itschase/OwlMTA-2026/discussions/272). Issues #268-#271 track lift-state loading, interior lock lookup, administration mutation integrity, and the remote roleplay-action event. Door and lift travel were added to existing interaction-context Issue #228; empty-table ID allocation remains in #17 and property cleanup in #231. No duplicate travel issue was opened. Runtime remains unverified.
 
 Four interior and map resources now have maintained dossiers and consistently named Discussions #264-#267. Issues #46/#62/#64/#231 retain ownership of the keypad, map-review, staff-management, and property-lifecycle findings; no duplicate issue was opened.
 

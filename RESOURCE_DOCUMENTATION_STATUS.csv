@@ -91,7 +91,7 @@
 "dynamic_lighting_vehicles","mods/deathmatch/resources/dynamic_lighting_vehicles/meta.xml","Active tree","True","","","","Cataloged only","Unverified","Complete dossier and publish Script Resources topic"
 "dynamic_lighting","mods/deathmatch/resources/dynamic_lighting/meta.xml","Active tree","True","","","","Cataloged only","Unverified","Complete dossier and publish Script Resources topic"
 "elections","mods/deathmatch/resources/elections/meta.xml","Active tree","False","","","","Cataloged only","Unverified","Complete dossier and publish Script Resources topic"
-"elevator-system","mods/deathmatch/resources/elevator-system/meta.xml","Active tree","True","","","","Cataloged only","Unverified","Complete dossier and publish Script Resources topic"
+"elevator-system","mods/deathmatch/resources/elevator-system/meta.xml","Active tree","True","272","https://github.com/itschase/OwlMTA-2026/discussions/272","docs/resources/elevator-system.md","Full manifest-script and direct-caller source review; individual Discussion published","Unverified","Complete remaining source review and runtime gate"
 "es-system","mods/deathmatch/resources/es-system/meta.xml","Active tree","True","","","","Cataloged only","Unverified","Complete dossier and publish Script Resources topic"
 "event-system","mods/deathmatch/resources/event-system/meta.xml","Active tree","True","","","","Cataloged only","Unverified","Complete dossier and publish Script Resources topic"
 "factions","mods/deathmatch/resources/factions/meta.xml","Active tree","True","101","https://github.com/itschase/OwlMTA-2026/discussions/101","docs/resources/factions.md","Full manifest-script source review; individual Discussion published","Unverified","Complete remaining source review and runtime gate"
