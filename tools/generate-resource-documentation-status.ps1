@@ -28,6 +28,11 @@ $published = @{
     "advertisements" = @{ Number = 137; Dossier = "docs/resources/advertisements.md"; State = "Full manifest-script source review; individual Discussion published" }
     "social" = @{ Number = 138; Dossier = "docs/resources/social.md"; State = "Full manifest-script source review; individual Discussion published" }
     "announcement" = @{ Number = 139; Dossier = "docs/resources/announcement.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "anticheat" = @{ Number = 174; Dossier = "docs/resources/anticheat.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "anti-cmdspam" = @{ Number = 175; Dossier = "docs/resources/anti-cmdspam.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "serialwhitelist" = @{ Number = 176; Dossier = "docs/resources/serialwhitelist.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "bans" = @{ Number = 177; Dossier = "docs/resources/bans.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "admin-system" = @{ Number = 178; Dossier = "docs/resources/admin-system.md" }
 }
 
 $inventoryByPath = @{}

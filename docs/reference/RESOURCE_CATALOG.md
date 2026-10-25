@@ -12,6 +12,8 @@ The first operator-infrastructure batch covers `mysql`, `data`, `pool`, `integra
 
 The communication and social batch covers `phone`, `chat-system`, `advertisements`, `social`, and `announcement` with full manifest-script source reviews and matching `Script Resources` Discussions. The reviews distinguish client-presented prerequisites from server-enforced invariants, identify the archive-only `business` dependency exposed by active chat code, and remain runtime-unverified.
 
+The security, enforcement, and administration batch covers `anticheat`, `anti-cmdspam`, `serialwhitelist`, `bans`, and `admin-system`. The first four received full manifest-script reviews; `admin-system` received a full server-script and remote-boundary pass with client presentation still partial. All remain runtime-unverified.
+
 ## Every resource manifest
 
 | Group | Resource | Tree status | Server scripts | Client scripts | Manifest purpose | Manifest |

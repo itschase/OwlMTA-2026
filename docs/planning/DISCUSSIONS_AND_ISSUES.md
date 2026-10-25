@@ -94,6 +94,11 @@ The organized [`docs/`](../README.md) tree is the maintained reference set; the 
 - [Discussion #171: Current economy, jobs, payday, and business architecture](https://github.com/itschase/OwlMTA-2026/discussions/171)
 - [Discussion #172: Current criminal, investigation, justice, and corrections architecture](https://github.com/itschase/OwlMTA-2026/discussions/172)
 - [Discussion #173: Administration system architecture, authority, and recovery](https://github.com/itschase/OwlMTA-2026/discussions/173)
+- [Script Resource #174: anticheat](https://github.com/itschase/OwlMTA-2026/discussions/174)
+- [Script Resource #175: anti-cmdspam](https://github.com/itschase/OwlMTA-2026/discussions/175)
+- [Script Resource #176: serialwhitelist](https://github.com/itschase/OwlMTA-2026/discussions/176)
+- [Script Resource #177: bans](https://github.com/itschase/OwlMTA-2026/discussions/177)
+- [Script Resource #178: admin-system](https://github.com/itschase/OwlMTA-2026/discussions/178)
 
 ## Issues added 2026-10-24
 
