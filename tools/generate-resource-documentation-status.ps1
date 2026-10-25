@@ -50,6 +50,10 @@ $published = @{
     "tow-system" = @{ Number = 250; Dossier = "docs/resources/tow-system.md"; State = "Full manifest-script source review; individual Discussion published" }
     "item-world" = @{ Number = 251; Dossier = "docs/resources/item-world.md"; State = "Full manifest-script source review; individual Discussion published" }
     "rightclick" = @{ Number = 252; Dossier = "docs/resources/rightclick.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "job-system-trucker" = @{ Number = 256; Dossier = "docs/resources/job-system-trucker.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "paynspray-system" = @{ Number = 257; Dossier = "docs/resources/paynspray-system.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "object-interaction" = @{ Number = 258; Dossier = "docs/resources/object-interaction.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "item-move" = @{ Number = 259; Dossier = "docs/resources/item-move.md"; State = "Full manifest-script source review; individual Discussion published" }
 }
 
 $inventoryByPath = @{}
