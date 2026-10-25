@@ -72,6 +72,9 @@ The Markdown files in the root are the maintained reference set. Update them in 
 - [Script Resource #109: vehicle-interiors](https://github.com/itschase/OwlMTA-2026/discussions/109)
 - [Script Resource #110: vehicle_load](https://github.com/itschase/OwlMTA-2026/discussions/110)
 - [Script Resource #111: vehicle_manager](https://github.com/itschase/OwlMTA-2026/discussions/111)
+- [Script Resource #115: carradio](https://github.com/itschase/OwlMTA-2026/discussions/115)
+- [Script Resource #116: carshop-system](https://github.com/itschase/OwlMTA-2026/discussions/116)
+- [Script Resource #117: vehicleplate](https://github.com/itschase/OwlMTA-2026/discussions/117)
 
 ## Issues added 2026-10-24
 
@@ -102,4 +105,7 @@ Issues #52 (MDC) and #55 (phone) were updated with the additional read, mutation
 - [#94: Require proximity for vehicle interior entry](https://github.com/itschase/OwlMTA-2026/issues/94)
 - [#95: Create one Script Resources discussion for each resource](https://github.com/itschase/OwlMTA-2026/issues/95)
 - [#96: Revoke and disconnect active MTA sessions after Discord authorization loss](https://github.com/itschase/OwlMTA-2026/issues/96)
+- [#112: Authorize radio station management and validate radio state requests](https://github.com/itschase/OwlMTA-2026/issues/112)
+- [#113: Revalidate vehicle crusher deletion and payout at confirmation](https://github.com/itschase/OwlMTA-2026/issues/113)
+- [#114: Bind DMV plate, registration, and sale-paper transactions to the caller](https://github.com/itschase/OwlMTA-2026/issues/114)
 

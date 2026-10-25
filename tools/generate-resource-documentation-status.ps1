@@ -14,6 +14,9 @@ $published = @{
     "vehicle-interiors" = @{ Number = 109; Dossier = "docs/resources/vehicle-interiors.md" }
     "vehicle_load" = @{ Number = 110; Dossier = "docs/resources/vehicle_load.md" }
     "vehicle_manager" = @{ Number = 111; Dossier = "docs/resources/vehicle_manager.md" }
+    "carradio" = @{ Number = 115; Dossier = "docs/resources/carradio.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "carshop-system" = @{ Number = 116; Dossier = "docs/resources/carshop-system.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "vehicleplate" = @{ Number = 117; Dossier = "docs/resources/vehicleplate.md"; State = "Full manifest-script source review; individual Discussion published" }
 }
 
 $inventoryByPath = @{}
@@ -41,7 +44,11 @@ $statusRows = foreach ($manifest in ($manifestFiles | Sort-Object FullName)) {
         DiscussionNumber = $discussionNumber
         DiscussionURL = if ($record) { "https://github.com/itschase/OwlMTA-2026/discussions/$discussionNumber" } else { "" }
         DossierPath = if ($record) { $record.Dossier } else { "" }
-        DocumentationState = if ($record) { "Partial source review; individual Discussion published" } else { "Cataloged only" }
+        DocumentationState = if ($record) {
+            if ($record.State) { $record.State } else { "Partial source review; individual Discussion published" }
+        } else {
+            "Cataloged only"
+        }
         RuntimeState = "Unverified"
         NextAction = if ($record) { "Complete remaining source review and runtime gate" } else { "Complete dossier and publish Script Resources topic" }
     }
