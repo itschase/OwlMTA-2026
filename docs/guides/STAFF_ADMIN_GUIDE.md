@@ -45,4 +45,4 @@ These are findings to track, not a claim that each issue has already been filed 
 
 ## Operator handoff
 
-Use `SERVER_OPERATOR_GUIDE.md` for deployment, ACL, external-service configuration, recovery, and incident handling. Routine player/staff management must be available in-game without a UCP.
+Use the [Server Operator Guide](SERVER_OPERATOR_GUIDE.md) for deployment, ACL, external-service configuration, recovery, and incident handling. Routine player/staff management must be available in-game without a UCP.

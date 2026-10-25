@@ -8,8 +8,8 @@ The rebuild needs broad documentation without losing architectural focus. This p
 
 | Layer | Purpose | Canonical location |
 |---|---|---|
-| Repository overview | Product direction, status, warnings, and entry points | `README.md` and `PROJECT_KNOWLEDGE.md` |
-| Current architecture | Source-grounded resource, lifecycle, database, permission, and data-flow understanding | `GAMEMODE_GUIDE.md`, `CODEBASE_REVIEW.md`, and resource dossiers |
+| Repository overview | Product direction, status, warnings, and entry points | Root `README.md`, `docs/README.md`, and `docs/architecture/PROJECT_KNOWLEDGE.md` |
+| Current architecture | Source-grounded resource, lifecycle, database, permission, and data-flow understanding | `docs/architecture/GAMEMODE_GUIDE.md`, `docs/architecture/CODEBASE_REVIEW.md`, and resource dossiers |
 | Target architecture | Proposed cross-resource frameworks and migration boundaries | Named framework/design Markdown files |
 | Audience guidance | What players, staff, and operators actually do | Player Wiki, Staff/Admin Guide, Server Operator Guide, and feature guides |
 | Resource record | One maintained technical and human explanation per manifest | `docs/resources/<resource>.md` and the coverage ledger |

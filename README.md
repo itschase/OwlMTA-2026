@@ -24,27 +24,27 @@ The inherited database and configuration still reflect the legacy gamemode. Sche
 
 ## Documentation and project tracking
 
-Start with these guides, which are being expanded alongside the source review:
+Start with the [documentation hub](docs/README.md). The principal guides are:
 
-- [Rebuild plan](REBUILD_PLAN.md) — phases, priorities, and readiness work.
-- [Gamemode architecture guide](GAMEMODE_GUIDE.md) — major systems and resource relationships.
-- [Resource catalog](RESOURCE_CATALOG.md), [resource dossiers](docs/resources/README.md), [documentation status ledger](RESOURCE_DOCUMENTATION_STATUS.csv), and [resource startup inventory](RESOURCE_INVENTORY.csv) — manifest coverage, maintained source reviews, row-by-row documentation progress, and startup inventory.
-- [Resource and script audit playbook](RESOURCE_AUDIT_PLAYBOOK.md) — documentation coverage, evidence standards, and completion gates.
-- [Feature usage guide](FEATURE_USAGE_GUIDE.md) — feature discovery and usage notes.
-- [Player wiki](PLAYER_WIKI.md) — player-facing workflows and questions.
-- [Staff and admin guide](STAFF_ADMIN_GUIDE.md) — staff capabilities and operational procedures.
-- [Server operator guide](SERVER_OPERATOR_GUIDE.md) — setup, configuration, dependencies, and hosting notes.
-- [Codebase review](CODEBASE_REVIEW.md) and [enhancement register](ENHANCEMENT_REGISTER.md) — findings and improvement opportunities.
-- [Project knowledge log](PROJECT_KNOWLEDGE.md) — consolidated discoveries and decisions.
-- [Discord identity and permissions design](DISCORD_AUTH_DESIGN.md) and [Discord integration plan](DISCORD_INTEGRATION_PLAN.md) — proposed identity linking and configurable role-to-capability mapping.
-- [Optional integration API contract](API_CONTRACT.md) — boundary for future external clients and services.
-- [In-game UI framework plan](UI_FRAMEWORK_PLAN.md) — a future direction for consistent in-game interfaces.
-- [Organizations framework](ORGANIZATIONS_FRAMEWORK.md) — compatibility-first migration from legacy factions to general organizations, capabilities, assets, finance, and lifecycle.
-- [Criminal roleplay framework](CRIMINAL_ROLEPLAY_FRAMEWORK.md) — connected opportunity, market, evidence, investigation, justice, and counterplay design.
-- [Living roleplay systems blueprint](ROLEPLAY_SYSTEMS_BLUEPRINT.md) — shared platform primitives and a complete connected-domain opportunity map.
-- [Documentation and planning program](DOCUMENTATION_PROGRAM.md) — artifact hierarchy, publishing lanes, quality gates, batch workflow, and focus controls.
-- [Issues and Discussions index](DISCUSSIONS_AND_ISSUES.md) — published tracker links and documentation workflow.
-- [Coding conventions](coding_conventions.md) and [useful functions](useful_functions.md) — inherited developer references under review.
+- [Rebuild plan](docs/planning/REBUILD_PLAN.md) — phases, priorities, and readiness work.
+- [Gamemode architecture guide](docs/architecture/GAMEMODE_GUIDE.md) — major systems and resource relationships.
+- [Resource catalog](docs/reference/RESOURCE_CATALOG.md), [resource dossiers](docs/resources/README.md), [documentation status ledger](RESOURCE_DOCUMENTATION_STATUS.csv), and [resource startup inventory](RESOURCE_INVENTORY.csv) — manifest coverage, maintained source reviews, row-by-row documentation progress, and startup inventory.
+- [Resource and script audit playbook](docs/planning/RESOURCE_AUDIT_PLAYBOOK.md) — documentation coverage, evidence standards, and completion gates.
+- [Feature usage guide](docs/guides/FEATURE_USAGE_GUIDE.md) — feature discovery and usage notes.
+- [Player wiki](docs/guides/PLAYER_WIKI.md) — player-facing workflows and questions.
+- [Staff and admin guide](docs/guides/STAFF_ADMIN_GUIDE.md) — staff capabilities and operational procedures.
+- [Server operator guide](docs/guides/SERVER_OPERATOR_GUIDE.md) — setup, configuration, dependencies, and hosting notes.
+- [Codebase review](docs/architecture/CODEBASE_REVIEW.md) and [enhancement register](docs/planning/ENHANCEMENT_REGISTER.md) — findings and improvement opportunities.
+- [Project knowledge log](docs/architecture/PROJECT_KNOWLEDGE.md) — consolidated discoveries and decisions.
+- [Discord identity and permissions design](docs/architecture/DISCORD_AUTH_DESIGN.md) and [Discord integration plan](docs/architecture/DISCORD_INTEGRATION_PLAN.md) — proposed identity linking and configurable role-to-capability mapping.
+- [Optional integration API contract](docs/architecture/API_CONTRACT.md) — boundary for future external clients and services.
+- [In-game UI framework plan](docs/architecture/UI_FRAMEWORK_PLAN.md) — a future direction for consistent in-game interfaces.
+- [Organizations framework](docs/architecture/ORGANIZATIONS_FRAMEWORK.md) — compatibility-first migration from legacy factions to general organizations, capabilities, assets, finance, and lifecycle.
+- [Criminal roleplay framework](docs/architecture/CRIMINAL_ROLEPLAY_FRAMEWORK.md) — connected opportunity, market, evidence, investigation, justice, and counterplay design.
+- [Living roleplay systems blueprint](docs/architecture/ROLEPLAY_SYSTEMS_BLUEPRINT.md) — shared platform primitives and a complete connected-domain opportunity map.
+- [Documentation and planning program](docs/planning/DOCUMENTATION_PROGRAM.md) — artifact hierarchy, publishing lanes, quality gates, batch workflow, and focus controls.
+- [Issues and Discussions index](docs/planning/DISCUSSIONS_AND_ISSUES.md) — published tracker links and documentation workflow.
+- [Coding conventions](docs/reference/coding_conventions.md) and [useful functions](docs/reference/useful_functions.md) — inherited developer references under review.
 
 Use [GitHub Issues](https://github.com/itschase/OwlMTA-2026/issues) for actionable defects and implementation tasks. Use [GitHub Discussions](https://github.com/itschase/OwlMTA-2026/discussions) for feature plans, resource documentation, gameplay and staff guidance, operator knowledge, and design questions. Record source findings as findings; mark runtime claims as unverified until tested on a server.
 
@@ -54,7 +54,7 @@ Changes should preserve existing player workflows where possible, validate remot
 
 Before proposing a behavior change, identify the resource, its metadata and dependencies, the client/server event flow, related data tables, and the operator-facing configuration. For each new or changed feature, document player use, staff use, operator setup, and known limitations as applicable. Runtime validation should be recorded separately from static source review.
 
-See [Rebuild plan](REBUILD_PLAN.md) for the current work sequence. Release and deployment steps are still being verified; the previous source README is preserved below for historical reference only.
+See [Rebuild plan](docs/planning/REBUILD_PLAN.md) for the current work sequence. Release and deployment steps are still being verified; the previous source README is preserved below for historical reference only.
 
 <details>
 <summary>Original source README</summary>
@@ -82,8 +82,8 @@ Logs are written to `mods/deathmatch/resources/logs/logs` as they are created in
 
 ## Quick Links
 
-* [Coding Conventions](coding_conventions.md)
-* [Useful Functions](useful_functions.md)
+* [Coding Conventions](docs/reference/coding_conventions.md)
+* [Useful Functions](docs/reference/useful_functions.md)
 
 ## Docker Build Environment Variables
 

@@ -10,14 +10,14 @@ This is a proposed target architecture grounded in the current `factions` source
 
 The current implementation is already a generic organization aggregate rather than a narrowly political faction system:
 
-- [`g_faction_exports.lua`](mods/deathmatch/resources/factions/g_faction_exports.lua) defines types for Gang, Mafia, Law, Government, Medical, Other, News, and Dealership. The manager UI separately calls type 7 Mechanic, showing that the duplicated numeric taxonomy has already drifted.
-- [`s_faction_system.lua`](mods/deathmatch/resources/factions/s_faction_system.lua) materializes organizations as MTA team elements and loads many-to-many character memberships.
-- [`ranks/s_permissions.lua`](mods/deathmatch/resources/factions/ranks/s_permissions.lua) assigns indexed rank permissions for members, ranks, vehicles, interiors, finance, chat, advertisements, MOTD, duty, and other actions. Membership, rank permission, leader state, and active duty are separate concepts.
-- `characters_faction`, `faction_ranks`, and `factions` persist membership and organization state in [`mta.sql`](mods/deathmatch/data/mta.sql). The current membership table has no unique `(character_id, faction_id)` constraint or foreign-key enforcement.
+- [`g_faction_exports.lua`](../../mods/deathmatch/resources/factions/g_faction_exports.lua) defines types for Gang, Mafia, Law, Government, Medical, Other, News, and Dealership. The manager UI separately calls type 7 Mechanic, showing that the duplicated numeric taxonomy has already drifted.
+- [`s_faction_system.lua`](../../mods/deathmatch/resources/factions/s_faction_system.lua) materializes organizations as MTA team elements and loads many-to-many character memberships.
+- [`ranks/s_permissions.lua`](../../mods/deathmatch/resources/factions/ranks/s_permissions.lua) assigns indexed rank permissions for members, ranks, vehicles, interiors, finance, chat, advertisements, MOTD, duty, and other actions. Membership, rank permission, leader state, and active duty are separate concepts.
+- `characters_faction`, `faction_ranks`, and `factions` persist membership and organization state in [`mta.sql`](../../mods/deathmatch/data/mta.sql). The current membership table has no unique `(character_id, faction_id)` constraint or foreign-key enforcement.
 - Vehicles, interiors, shops, insurance, MDC records, duty packages, phones, banking, and many other systems store faction IDs as implicit ownership or policy references.
 - Faction finance overloads negative IDs in `wiretransfers` to mean an organization account. This must be migrated deliberately rather than renamed.
 - More than one hundred active Lua files call `exports.factions`; a text replacement would break runtime contracts and could collide with unrelated uses of the word `organization`, including MDC schema fields.
-- Active [`business-system`](mods/deathmatch/resources/business-system/meta.xml) manages business-interior notes, not organization membership. Active `chat-system` business chat calls exports from the archive-only `business` resource. Business ownership, employment, and organization membership therefore need an explicit domain decision.
+- Active [`business-system`](../../mods/deathmatch/resources/business-system/meta.xml) manages business-interior notes, not organization membership. Active `chat-system` business chat calls exports from the archive-only `business` resource. Business ownership, employment, and organization membership therefore need an explicit domain decision.
 
 ## Vocabulary
 

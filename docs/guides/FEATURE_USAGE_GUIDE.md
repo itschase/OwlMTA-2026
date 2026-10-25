@@ -9,7 +9,7 @@ This guide records how features are reached and used from the code, not a claim 
 - **Entry point:** the login panel in `account/login-panel/client.lua`.
 - **Player action:** enter an account username and password, or use the registration form. The client submits `accounts:login:attempt` or `accounts:register:attempt` to the account server resource.
 - **Account effect:** successful login establishes `account:id` / `account:loggedin`, loads account-level ranks and then shows character selection. The account row is in `core.accounts`; the MTA-specific account row is in `mta.account_details`.
-- **Current integration limits:** registration still calls a missing localhost activation-mail API. Forum linking depends on a declared but unimplemented export. The login panel has legacy activation/rules/forum assumptions; see [GAMEMODE_GUIDE.md](GAMEMODE_GUIDE.md).
+- **Current integration limits:** registration still calls a missing localhost activation-mail API. Forum linking depends on a declared but unimplemented export. The login panel has legacy activation/rules/forum assumptions; see [GAMEMODE_GUIDE.md](../architecture/GAMEMODE_GUIDE.md).
 - **Source status:** server-side confirmation and serial handling are corrected in committed source; these paths still need disposable-environment runtime validation.
 
 ### Select, create, or switch character
@@ -28,7 +28,7 @@ This guide records how features are reached and used from the code, not a claim 
 - **Entry point:** `/staffs` opens the staff manager window (`admin-system/staff_manager/staff_manager_c.lua`). Search by account username, then use the staff/team/changelog tabs.
 - **Visible operations:** view a player's assigned admin, Supporter/donor and specialty-team ranks; authorized staff can edit ranks and review staff lists/changelogs.
 - **Server boundary:** the manager fetch/edit events are remotely triggered by the client. The server must independently authenticate and authorize each request. Current hardening adds server permission checks, validates rank inputs and logs denials. Donator status alone is not staff-manager access.
-- **Migration note:** displayed legacy `supporter` rank means donor tier. The replacement must not expose it as moderation authority. See [DISCORD_AUTH_DESIGN.md](DISCORD_AUTH_DESIGN.md) for the planned capability model.
+- **Migration note:** displayed legacy `supporter` rank means donor tier. The replacement must not expose it as moderation authority. See [DISCORD_AUTH_DESIGN.md](../architecture/DISCORD_AUTH_DESIGN.md) for the planned capability model.
 
 ### Faction manager
 

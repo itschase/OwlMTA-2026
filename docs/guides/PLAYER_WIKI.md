@@ -58,4 +58,4 @@ Discord authorization is planned as the primary way to register and log in. The 
 - No UCP or website is required by the target design; some legacy links and integrations remain in source.
 - Features described here are source-mapped, not runtime-tested.
 - Donor/supporter tiers are separate from moderation and game-master authority in the target permission design.
-- Detailed staff actions and server setup are documented separately in `STAFF_ADMIN_GUIDE.md` and `SERVER_OPERATOR_GUIDE.md`.
+- Detailed staff actions and server setup are documented separately in [Staff and Admin](STAFF_ADMIN_GUIDE.md) and [Server Operator](SERVER_OPERATOR_GUIDE.md).

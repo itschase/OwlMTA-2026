@@ -37,7 +37,7 @@ This is a living design backlog. Items are opportunities, not claims that work h
 - Migrate legacy accounts by proof of control. Track active MTA sessions so a verified Discord authorization revocation disconnects the related session; bound lease and outage behavior.
 - Keep admin levels, GameMaster/moderation, faction authority, and donor/supporter tiers distinct. Blank/unmapped role IDs grant no capabilities.
 - Keep any future UCP/API as an optional adapter with a narrow authenticated contract and no duplicated business rules.
-- Give website builders a self-hostable, versioned project API so they can choose their web stack and presentation without recreating account, role, or moderation policy. See `API_CONTRACT.md`.
+- Give website builders a self-hostable, versioned project API so they can choose their web stack and presentation without recreating account, role, or moderation policy. See [`API_CONTRACT.md`](../architecture/API_CONTRACT.md).
 
 ## Businesses, jobs, and production
 
@@ -58,7 +58,7 @@ This is a living design backlog. Items are opportunities, not claims that work h
 - Replace omniscient wanted markers with incident alerts, witness observations, evidence, authorized suspicion, warrants, and scoped case information.
 - Design influence as changing relationships, market access, presence, information, and institutional attention instead of permanent kill-count territory.
 
-Detailed direction lives in `ORGANIZATIONS_FRAMEWORK.md` and `CRIMINAL_ROLEPLAY_FRAMEWORK.md`.
+Detailed direction lives in [`ORGANIZATIONS_FRAMEWORK.md`](../architecture/ORGANIZATIONS_FRAMEWORK.md) and [`CRIMINAL_ROLEPLAY_FRAMEWORK.md`](../architecture/CRIMINAL_ROLEPLAY_FRAMEWORK.md).
 
 ## Immersive interaction and voice
 

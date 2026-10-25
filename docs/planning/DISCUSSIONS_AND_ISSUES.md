@@ -34,23 +34,23 @@ Start each thread with a concise scope, evidence links to repository docs/source
 
 ## Repository documentation
 
-The Markdown files in the root are the maintained reference set. Update them in the same change as a meaningful source fix or design decision. Label observations precisely: source-confirmed, inferred, proposed, fixed in source, or runtime verified. Keep secrets, live Discord role IDs, OAuth credentials, and personal data out of both the repository and Discussions.
+The organized [`docs/`](../README.md) tree is the maintained reference set; the repository root retains the GitHub entry-point README. Update the relevant document in the same change as a meaningful source fix or design decision. Label observations precisely: source-confirmed, inferred, proposed, fixed in source, or runtime verified. Keep secrets, live Discord role IDs, OAuth credentials, and personal data out of both the repository and Discussions.
 
 ## Current records
 
-- [Architecture and source findings](CODEBASE_REVIEW.md)
-- [Gamemode and data-flow guide](GAMEMODE_GUIDE.md)
-- [Feature usage guide](FEATURE_USAGE_GUIDE.md)
-- [Discord identity and capability design](DISCORD_AUTH_DESIGN.md)
+- [Architecture and source findings](../architecture/CODEBASE_REVIEW.md)
+- [Gamemode and data-flow guide](../architecture/GAMEMODE_GUIDE.md)
+- [Feature usage guide](../guides/FEATURE_USAGE_GUIDE.md)
+- [Discord identity and capability design](../architecture/DISCORD_AUTH_DESIGN.md)
 - [Rebuild plan](REBUILD_PLAN.md)
-- [Player Wiki](PLAYER_WIKI.md)
-- [Staff and Admin Guide](STAFF_ADMIN_GUIDE.md)
-- [Server Operator Guide](SERVER_OPERATOR_GUIDE.md)
-- [Discord integration plan](DISCORD_INTEGRATION_PLAN.md)
+- [Player Wiki](../guides/PLAYER_WIKI.md)
+- [Staff and Admin Guide](../guides/STAFF_ADMIN_GUIDE.md)
+- [Server Operator Guide](../guides/SERVER_OPERATOR_GUIDE.md)
+- [Discord integration plan](../architecture/DISCORD_INTEGRATION_PLAN.md)
 - [Enhancement register](ENHANCEMENT_REGISTER.md)
 - [Resource and script audit playbook](RESOURCE_AUDIT_PLAYBOOK.md)
-- [Resource documentation status ledger](RESOURCE_DOCUMENTATION_STATUS.csv)
-- [Resource startup inventory](RESOURCE_INVENTORY.csv)
+- [Resource documentation status ledger](../../RESOURCE_DOCUMENTATION_STATUS.csv)
+- [Resource startup inventory](../../RESOURCE_INVENTORY.csv)
 - [GitHub Issues](https://github.com/itschase/OwlMTA-2026/issues)
 - [GitHub Discussions](https://github.com/itschase/OwlMTA-2026/discussions)
 - [Milestone: MTA Compatibility & Diagnostics Baseline](https://github.com/itschase/OwlMTA-2026/milestone/5)

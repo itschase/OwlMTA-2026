@@ -4,7 +4,7 @@ Generated from every checked-in manifest under the active resource tree and `res
 
 ## Documentation status
 
-Audience guides: [Player Wiki](PLAYER_WIKI.md), [Staff and Admin](STAFF_ADMIN_GUIDE.md), and [Server Operator](SERVER_OPERATOR_GUIDE.md). Detailed reviews are collected in the [resource dossier index](docs/resources/README.md). Each resource needs separate player, staff, operator, source-review, and runtime-validation statuses. `Active tree` means present under resources, not necessarily configured to start; `Archived` means stored outside the active tree.
+Audience guides: [Player Wiki](../guides/PLAYER_WIKI.md), [Staff and Admin](../guides/STAFF_ADMIN_GUIDE.md), and [Server Operator](../guides/SERVER_OPERATOR_GUIDE.md). Detailed reviews are collected in the [resource dossier index](../resources/README.md). Each resource needs separate player, staff, operator, source-review, and runtime-validation statuses. `Active tree` means present under resources, not necessarily configured to start; `Archived` means stored outside the active tree.
 
 Detailed vehicle-domain dossiers now cover `vehicle`, `vehicle_fuel`, `vehicle-interiors`, `vehicle_load`, `vehicle_manager`, `carradio`, `carshop-system`, and `vehicleplate`; each links its matching `Script Resources` Discussion. Earlier individual topics cover `global`, `account`, `bank`, `factions`, and `item-system`. Coverage remains incomplete and is tracked by [Issue #95](https://github.com/itschase/OwlMTA-2026/issues/95).
 

@@ -18,7 +18,7 @@ The current inventory counted 1,093 Lua files in 144 active resource manifests a
 - `admin-system` includes staff tools, enforcement, reports, jail, and staff-rank management. Staff tools have high impact and need server-side permission checks at every event.
 - `payday` and job resources alter money and recurring gameplay state; police, medical, prison, licensing, and insurance resources cross character, faction, vehicle, and finance boundaries.
 
-See [GAMEMODE_GUIDE.md](GAMEMODE_GUIDE.md) for the larger resource and table map and [RESOURCE_INVENTORY.csv](RESOURCE_INVENTORY.csv) for startup/dependency detail.
+See [GAMEMODE_GUIDE.md](GAMEMODE_GUIDE.md) for the larger resource and table map and [RESOURCE_INVENTORY.csv](../../RESOURCE_INVENTORY.csv) for startup/dependency detail.
 
 ## Identity and permissions learned so far
 
@@ -43,25 +43,25 @@ MTA server-side `fetchRemote` is asynchronous. External identity checks therefor
 
 ## Documentation map
 
-- [README](README.md): repository entry point and quick links.
+- [README](../../README.md): repository entry point and quick links.
 - [Gamemode architecture guide](GAMEMODE_GUIDE.md): resource graph, lifecycle, schema ownership, permission model, and bug queue.
-- [Feature usage guide](FEATURE_USAGE_GUIDE.md): player/staff entry points and current behavior.
+- [Feature usage guide](../guides/FEATURE_USAGE_GUIDE.md): player/staff entry points and current behavior.
 - [In-game UI framework plan](UI_FRAMEWORK_PLAN.md): existing UI inventory, shared component proposal, MTA renderer choices, and rollout.
-- [Player Wiki](PLAYER_WIKI.md): simplified gameplay instructions and player perspective.
-- [Staff and Admin Guide](STAFF_ADMIN_GUIDE.md): staff authority boundaries, workflows, and Discord capability direction.
-- [Server Operator Guide](SERVER_OPERATOR_GUIDE.md): install, configure, operate, recover, and integrate the server.
+- [Player Wiki](../guides/PLAYER_WIKI.md): simplified gameplay instructions and player perspective.
+- [Staff and Admin Guide](../guides/STAFF_ADMIN_GUIDE.md): staff authority boundaries, workflows, and Discord capability direction.
+- [Server Operator Guide](../guides/SERVER_OPERATOR_GUIDE.md): install, configure, operate, recover, and integrate the server.
 - [Codebase review](CODEBASE_REVIEW.md): findings, evidence, priorities, and review status.
 - [Discord design](DISCORD_AUTH_DESIGN.md): primary login identity, role mapping, capabilities, revocation, and cutover.
 - [Discord integration plan](DISCORD_INTEGRATION_PLAN.md): pairing, API contract boundary, grants, outage behavior, and migration sequence.
-- [Enhancement register](ENHANCEMENT_REGISTER.md): architecture, player, security, integration, and documentation opportunities.
+- [Enhancement register](../planning/ENHANCEMENT_REGISTER.md): architecture, player, security, integration, and documentation opportunities.
 - [Optional integration API contract](API_CONTRACT.md): self-hostable API boundary for Discord, websites, media storage, and operator-selected log search.
 - [Organizations framework](ORGANIZATIONS_FRAMEWORK.md): source-grounded legacy boundary, target organization service, capabilities, lifecycle, persistence, and migration.
 - [Criminal roleplay framework](CRIMINAL_ROLEPLAY_FRAMEWORK.md): proposed opportunity, market, evidence, investigation, justice, organization, and operator systems.
 - [Living roleplay systems blueprint](ROLEPLAY_SYSTEMS_BLUEPRINT.md): connected roleplay domains and reusable platform primitives beyond isolated scripts.
-- [Documentation and planning program](DOCUMENTATION_PROGRAM.md): publishing system, artifact ownership, quality gates, batch workflow, and focus controls.
-- [Complete resource manifest catalog](RESOURCE_CATALOG.md): every active-tree and archived resource manifest with its declared purpose and client/server script counts.
-- [Maintained resource dossiers](docs/resources/README.md): player, staff, operator, technical, connection, risk, and verification views for resources that have entered detailed review.
-- [Resource documentation status ledger](RESOURCE_DOCUMENTATION_STATUS.csv): all 179 active-tree and archived manifest rows with tree/startup state, individual Discussion and dossier links, documentation state, runtime state, and next action.
-- [Resource and script audit playbook](RESOURCE_AUDIT_PLAYBOOK.md): required resource dossier, human/technical documentation views, coverage states, and audit/publishing workflow.
-- [Rebuild plan](REBUILD_PLAN.md): deployment, stabilization, schema, UCP, and Discord sequence.
-- [Issues and Discussions workflow](DISCUSSIONS_AND_ISSUES.md): where defects and durable explanations belong.
+- [Documentation and planning program](../planning/DOCUMENTATION_PROGRAM.md): publishing system, artifact ownership, quality gates, batch workflow, and focus controls.
+- [Complete resource manifest catalog](../reference/RESOURCE_CATALOG.md): every active-tree and archived resource manifest with its declared purpose and client/server script counts.
+- [Maintained resource dossiers](../resources/README.md): player, staff, operator, technical, connection, risk, and verification views for resources that have entered detailed review.
+- [Resource documentation status ledger](../../RESOURCE_DOCUMENTATION_STATUS.csv): all 179 active-tree and archived manifest rows with tree/startup state, individual Discussion and dossier links, documentation state, runtime state, and next action.
+- [Resource and script audit playbook](../planning/RESOURCE_AUDIT_PLAYBOOK.md): required resource dossier, human/technical documentation views, coverage states, and audit/publishing workflow.
+- [Rebuild plan](../planning/REBUILD_PLAN.md): deployment, stabilization, schema, UCP, and Discord sequence.
+- [Issues and Discussions workflow](../planning/DISCUSSIONS_AND_ISSUES.md): where defects and durable explanations belong.
