@@ -61,6 +61,8 @@ $lines.Add('The communication and social batch covers `phone`, `chat-system`, `a
 $lines.Add('')
 $lines.Add('The security, enforcement, and administration batch covers `anticheat`, `anti-cmdspam`, `serialwhitelist`, `bans`, and `admin-system`. The first four received full manifest-script reviews; `admin-system` received a full server-script and remote-boundary pass with client presentation still partial. All remain runtime-unverified.')
 $lines.Add('')
+$lines.Add('The economy, premises, custody, and public-safety data batch covers `payday`, `business-system`, `prison-system`, `camera-system`, and `mdc`. Each received a full manifest-script source review and an individual `Script Resources` Discussion. These reviews keep the active narrow business-note and speed-camera boundaries distinct from the archive-only business suite and proposed CCTV/case frameworks. All remain runtime-unverified.')
+$lines.Add('')
 $lines.Add('## Every resource manifest')
 $lines.Add('')
 $lines.Add('| Group | Resource | Tree status | Server scripts | Client scripts | Manifest purpose | Manifest |')

@@ -33,6 +33,8 @@ It does not contain a reusable criminal opportunity state machine, contacts/repu
 - MDC wanted/warrant state is boolean/free text; APBs exist in more than one model.
 - Raw fingerprint identity is exposed at close range without collection artifact, purpose, custody, quality, or audit.
 
+Bounded follow-up work is tracked by [Issue #184](https://github.com/itschase/OwlMTA-2026/issues/184) for casing provenance, [#185](https://github.com/itschase/OwlMTA-2026/issues/185) for drug transformation, [#186](https://github.com/itschase/OwlMTA-2026/issues/186) for custody reconciliation, [#187](https://github.com/itschase/OwlMTA-2026/issues/187) for warrant records, [#188](https://github.com/itschase/OwlMTA-2026/issues/188) for APB consolidation, [#189](https://github.com/itschase/OwlMTA-2026/issues/189) for justice-record separation, and [#190](https://github.com/itschase/OwlMTA-2026/issues/190) for in-world fingerprint identification.
+
 ## Target slices
 
 1. A server-owned theft-to-fence opportunity with victim recovery and investigation hooks ([Issue #152](https://github.com/itschase/OwlMTA-2026/issues/152)).
@@ -45,4 +47,4 @@ It does not contain a reusable criminal opportunity state machine, contacts/repu
 
 Cover civilian/off-duty/on-duty roles; every MDC permission; direct remote calls; APB/ANPR/stolen-state lifecycle; real versus forged shot/casing data; evidence pickup/transfer/seizure/retention; booking failure after every side effect; ticket/payment consistency; contraband replay/capacity/failure; camera boundaries; and operation with all legacy forum services absent.
 
-Related design: [Organizations Framework](ORGANIZATIONS_FRAMEWORK.md), [Criminal Roleplay Framework](CRIMINAL_ROLEPLAY_FRAMEWORK.md), Discussions #141-#143, and Issues #40-#41, #52, #84-#89, #132, #152-#153.
+Related design: [Organizations Framework](ORGANIZATIONS_FRAMEWORK.md), [Criminal Roleplay Framework](CRIMINAL_ROLEPLAY_FRAMEWORK.md), Discussions #141-#143, and Issues #40-#41, #52, #84-#89, #132, #152-#153, and #184-#190.

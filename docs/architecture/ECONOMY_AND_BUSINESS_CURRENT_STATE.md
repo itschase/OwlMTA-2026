@@ -28,6 +28,8 @@ This is one large timer-driven operation rather than a persisted obligation sche
 
 Source-confirmed defects include welfare credited before its balance cap is checked, wages credited without confirming employer debit, invalid faction-rental table handling, inconsistent tax/arrears behavior, and a remotely triggerable `payday:run` path that can reach shop accrual. Forced payday commands are repeatable high-value operations under legacy rank checks.
 
+Actionable work is split into [Issue #179](https://github.com/itschase/OwlMTA-2026/issues/179) for idempotent balance-backed payday, [#180](https://github.com/itschase/OwlMTA-2026/issues/180) for the server-only maintenance boundary, [#181](https://github.com/itschase/OwlMTA-2026/issues/181) for fishing/photography rewards, [#182](https://github.com/itschase/OwlMTA-2026/issues/182) for transactional truck orders, and [#183](https://github.com/itschase/OwlMTA-2026/issues/183) for the active business-note mutation and replacement boundary.
+
 ## Jobs and production
 
 `job-system` stores one selected civic job on the character and separate progression rows. Active modules include delivery/trucking, taxi, bus, fishing, photography, mechanic, locksmith, and related helpers; stale files not loaded by a manifest are not current gameplay.
@@ -49,4 +51,4 @@ Current risks include client-selected job IDs, fishing sale price/recipient, and
 
 The matrix must cover exact/repeated/restarted payday periods; welfare/interest/tax/rent/insurance boundaries; solvent/insolvent employers; forced runs; client attempts to trigger maintenance; every active job's eligibility and payout; tampered fish/photo/fare values; supply-order creation, claim, restart, concurrent drivers, delivery, refund, database failure, and reconciliation.
 
-Related: bank Discussion #100, jobs/business Discussion #104, Issues #6, #75-#77, #121, #140, #149, and the [Living Roleplay Systems Blueprint](ROLEPLAY_SYSTEMS_BLUEPRINT.md).
+Related: bank Discussion #100, jobs/business Discussion #104, Issues #6, #75-#77, #121, #140, #149, #179-#183, and the [Living Roleplay Systems Blueprint](ROLEPLAY_SYSTEMS_BLUEPRINT.md).

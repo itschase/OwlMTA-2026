@@ -33,6 +33,11 @@ $published = @{
     "serialwhitelist" = @{ Number = 176; Dossier = "docs/resources/serialwhitelist.md"; State = "Full manifest-script source review; individual Discussion published" }
     "bans" = @{ Number = 177; Dossier = "docs/resources/bans.md"; State = "Full manifest-script source review; individual Discussion published" }
     "admin-system" = @{ Number = 178; Dossier = "docs/resources/admin-system.md" }
+    "payday" = @{ Number = 196; Dossier = "docs/resources/payday.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "business-system" = @{ Number = 197; Dossier = "docs/resources/business-system.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "prison-system" = @{ Number = 198; Dossier = "docs/resources/prison-system.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "camera-system" = @{ Number = 199; Dossier = "docs/resources/camera-system.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "mdc" = @{ Number = 200; Dossier = "docs/resources/mdc.md"; State = "Full manifest-script source review; individual Discussion published" }
 }
 
 $inventoryByPath = @{}

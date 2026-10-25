@@ -33,6 +33,7 @@ All runtime behavior remains unverified unless a document explicitly records a c
 - [Documentation and Planning Program](planning/DOCUMENTATION_PROGRAM.md)
 - [Resource Audit Playbook](planning/RESOURCE_AUDIT_PLAYBOOK.md)
 - [Issues and Discussions workflow/index](planning/DISCUSSIONS_AND_ISSUES.md)
+- [Next work record](planning/NEXT_WORK.md) — current verified state, bounded next audit batch, tracker follow-up, and safe-start gate.
 
 ## Resource documentation
 

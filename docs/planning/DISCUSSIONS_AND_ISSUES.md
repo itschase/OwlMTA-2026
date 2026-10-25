@@ -99,6 +99,11 @@ The organized [`docs/`](../README.md) tree is the maintained reference set; the 
 - [Script Resource #176: serialwhitelist](https://github.com/itschase/OwlMTA-2026/discussions/176)
 - [Script Resource #177: bans](https://github.com/itschase/OwlMTA-2026/discussions/177)
 - [Script Resource #178: admin-system](https://github.com/itschase/OwlMTA-2026/discussions/178)
+- [Script Resource #196: payday](https://github.com/itschase/OwlMTA-2026/discussions/196)
+- [Script Resource #197: business-system](https://github.com/itschase/OwlMTA-2026/discussions/197)
+- [Script Resource #198: prison-system](https://github.com/itschase/OwlMTA-2026/discussions/198)
+- [Script Resource #199: camera-system](https://github.com/itschase/OwlMTA-2026/discussions/199)
+- [Script Resource #200: mdc](https://github.com/itschase/OwlMTA-2026/discussions/200)
 
 ## Issues added 2026-10-24
 
@@ -172,6 +177,23 @@ Issues #52 (MDC) and #55 (phone) were updated with the additional read, mutation
 - [#168: Replace recovery-secret disclosure and plaintext server-password broadcast](https://github.com/itschase/OwlMTA-2026/issues/168)
 - [#169: Make staff rank and destructive account mutations failure-safe](https://github.com/itschase/OwlMTA-2026/issues/169)
 - [#170: Restore admin observation state on stop, restart, and disconnect](https://github.com/itschase/OwlMTA-2026/issues/170)
+- [#179: Make hourly payday settlement idempotent and balance-backed](https://github.com/itschase/OwlMTA-2026/issues/179)
+- [#180: Make payday maintenance server-only and protect shop wage accrual](https://github.com/itschase/OwlMTA-2026/issues/180)
+- [#181: Bind fishing and photography rewards to server-owned work](https://github.com/itschase/OwlMTA-2026/issues/181)
+- [#182: Persist truck supply orders as transactional delivery contracts](https://github.com/itschase/OwlMTA-2026/issues/182)
+- [#183: Authorize business-note mutation and define the business replacement boundary](https://github.com/itschase/OwlMTA-2026/issues/183)
+- [#184: Bind shell-casing creation to authoritative weapon fire](https://github.com/itschase/OwlMTA-2026/issues/184)
+- [#185: Make drug transformations server-owned and failure-safe](https://github.com/itschase/OwlMTA-2026/issues/185)
+- [#186: Reconcile duplicate custody state and recover booking and release](https://github.com/itschase/OwlMTA-2026/issues/186)
+- [#187: Replace boolean wanted status with auditable warrant records](https://github.com/itschase/OwlMTA-2026/issues/187)
+- [#188: Consolidate legacy APB models into one incident-alert domain](https://github.com/itschase/OwlMTA-2026/issues/188)
+- [#189: Separate allegations, citations, charges, convictions, custody, and staff sanctions](https://github.com/itschase/OwlMTA-2026/issues/189)
+- [#190: Replace raw fingerprint disclosure with an in-world identification workflow](https://github.com/itschase/OwlMTA-2026/issues/190)
+- [#191: Repair speed-camera toggle and lifecycle persistence](https://github.com/itschase/OwlMTA-2026/issues/191)
+- [#192: Make speed-camera sampling deterministic and privacy-scoped](https://github.com/itschase/OwlMTA-2026/issues/192)
+- [#193: Correct MDC account level mapping and organization uniqueness](https://github.com/itschase/OwlMTA-2026/issues/193)
+- [#194: Repair MDC orphan cleanup and empty permission-cache handling](https://github.com/itschase/OwlMTA-2026/issues/194)
+- [#195: Fix MDC search result correctness and DB handle lifecycle](https://github.com/itschase/OwlMTA-2026/issues/195)
 
 Milestone [M4 — Organizations & Living Roleplay](https://github.com/itschase/OwlMTA-2026/milestone/6) groups the compatibility-first organization, contextual interaction, criminal opportunity, evidence, and connected-roleplay foundation work. M0/M1 portability and security gates remain prerequisites.
 
