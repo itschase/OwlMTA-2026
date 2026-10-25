@@ -42,6 +42,7 @@ Start with the [documentation hub](docs/README.md). The principal guides are:
 - [Organizations framework](docs/architecture/ORGANIZATIONS_FRAMEWORK.md) — compatibility-first migration from legacy factions to general organizations, capabilities, assets, finance, and lifecycle.
 - [Criminal roleplay framework](docs/architecture/CRIMINAL_ROLEPLAY_FRAMEWORK.md) — connected opportunity, market, evidence, investigation, justice, and counterplay design.
 - [Living roleplay systems blueprint](docs/architecture/ROLEPLAY_SYSTEMS_BLUEPRINT.md) — shared platform primitives and a complete connected-domain opportunity map.
+- [Current economy/business](docs/architecture/ECONOMY_AND_BUSINESS_CURRENT_STATE.md), [criminal justice](docs/architecture/CRIMINAL_JUSTICE_CURRENT_STATE.md), and [administration](docs/architecture/ADMINISTRATION_CURRENT_STATE.md) maps — source-reviewed inherited behavior and modernization boundaries.
 - [Documentation and planning program](docs/planning/DOCUMENTATION_PROGRAM.md) — artifact hierarchy, publishing lanes, quality gates, batch workflow, and focus controls.
 - [Issues and Discussions index](docs/planning/DISCUSSIONS_AND_ISSUES.md) — published tracker links and documentation workflow.
 - [Coding conventions](docs/reference/coding_conventions.md) and [useful functions](docs/reference/useful_functions.md) — inherited developer references under review.

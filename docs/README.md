@@ -15,6 +15,9 @@ All runtime behavior remains unverified unless a document explicitly records a c
 - [Organizations Framework](architecture/ORGANIZATIONS_FRAMEWORK.md) — compatibility-first migration from legacy factions.
 - [Criminal Roleplay Framework](architecture/CRIMINAL_ROLEPLAY_FRAMEWORK.md) — opportunity, markets, evidence, investigation, justice, and counterplay.
 - [Living Roleplay Systems Blueprint](architecture/ROLEPLAY_SYSTEMS_BLUEPRINT.md) — connected roleplay domains and reusable platform primitives.
+- [Economy, Jobs, Payday, and Business: Current State](architecture/ECONOMY_AND_BUSINESS_CURRENT_STATE.md) — inherited money, recurring obligation, job, supply, and business boundaries.
+- [Criminal Roleplay, Investigation, and Corrections: Current State](architecture/CRIMINAL_JUSTICE_CURRENT_STATE.md) — implemented enforcement primitives and missing connected domains.
+- [Administration System: Current State](architecture/ADMINISTRATION_CURRENT_STATE.md) — privileged command/event surface, dependencies, risks, and target boundary.
 
 ## Audience guides
 
