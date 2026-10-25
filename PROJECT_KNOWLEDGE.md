@@ -13,7 +13,7 @@ The current inventory counted 1,093 Lua files in 144 active resource manifests a
 - `account`, `login-panel`, and character resources authenticate an account and then load a character. Account identity and role data are account-level; cash, bank balance, faction, inventory, and other gameplay state attach to a character or game entity.
 - `mysql` exposes database connections and query helpers used across resources. `core` contains account and legacy forum/UCP data; `mta` contains character and gameplay records. Many consumers rely on shared exports, so schema and resource changes must be traced across callers.
 - `global` and `integration` expose shared helpers, rank checks, configuration, logging, and MTA-facing utilities. They form a natural migration seam for centralized capabilities, but many resources also read rank element data directly.
-- `factions` and `ranks` own faction membership and in-game faction permissions. Faction rank, staff authority, Discord role grants, and being on duty are separate states.
+- `factions` and `ranks` own the legacy generic organization aggregate, membership, and in-game rank permissions. Current numeric types include gangs, mafias, law, government, medical, other, news, and commercial groups; duplicated type labels have already drifted. Faction rank, staff authority, Discord role grants, and being on duty are separate states. New player-facing design uses organizations through a compatibility facade rather than a destructive global rename.
 - `item-system`, `vehicle`, `interior`, and `bank` own shared gameplay APIs for items, vehicles, property, and finance. Shops, jobs, public safety, and player-facing activities call into those domains.
 - `admin-system` includes staff tools, enforcement, reports, jail, and staff-rank management. Staff tools have high impact and need server-side permission checks at every event.
 - `payday` and job resources alter money and recurring gameplay state; police, medical, prison, licensing, and insurance resources cross character, faction, vehicle, and finance boundaries.
@@ -55,6 +55,10 @@ MTA server-side `fetchRemote` is asynchronous. External identity checks therefor
 - [Discord integration plan](DISCORD_INTEGRATION_PLAN.md): pairing, API contract boundary, grants, outage behavior, and migration sequence.
 - [Enhancement register](ENHANCEMENT_REGISTER.md): architecture, player, security, integration, and documentation opportunities.
 - [Optional integration API contract](API_CONTRACT.md): self-hostable API boundary for Discord, websites, media storage, and operator-selected log search.
+- [Organizations framework](ORGANIZATIONS_FRAMEWORK.md): source-grounded legacy boundary, target organization service, capabilities, lifecycle, persistence, and migration.
+- [Criminal roleplay framework](CRIMINAL_ROLEPLAY_FRAMEWORK.md): proposed opportunity, market, evidence, investigation, justice, organization, and operator systems.
+- [Living roleplay systems blueprint](ROLEPLAY_SYSTEMS_BLUEPRINT.md): connected roleplay domains and reusable platform primitives beyond isolated scripts.
+- [Documentation and planning program](DOCUMENTATION_PROGRAM.md): publishing system, artifact ownership, quality gates, batch workflow, and focus controls.
 - [Complete resource manifest catalog](RESOURCE_CATALOG.md): every active-tree and archived resource manifest with its declared purpose and client/server script counts.
 - [Maintained resource dossiers](docs/resources/README.md): player, staff, operator, technical, connection, risk, and verification views for resources that have entered detailed review.
 - [Resource documentation status ledger](RESOURCE_DOCUMENTATION_STATUS.csv): all 179 active-tree and archived manifest rows with tree/startup state, individual Discussion and dossier links, documentation state, runtime state, and next action.

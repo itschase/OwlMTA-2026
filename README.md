@@ -39,6 +39,10 @@ Start with these guides, which are being expanded alongside the source review:
 - [Discord identity and permissions design](DISCORD_AUTH_DESIGN.md) and [Discord integration plan](DISCORD_INTEGRATION_PLAN.md) — proposed identity linking and configurable role-to-capability mapping.
 - [Optional integration API contract](API_CONTRACT.md) — boundary for future external clients and services.
 - [In-game UI framework plan](UI_FRAMEWORK_PLAN.md) — a future direction for consistent in-game interfaces.
+- [Organizations framework](ORGANIZATIONS_FRAMEWORK.md) — compatibility-first migration from legacy factions to general organizations, capabilities, assets, finance, and lifecycle.
+- [Criminal roleplay framework](CRIMINAL_ROLEPLAY_FRAMEWORK.md) — connected opportunity, market, evidence, investigation, justice, and counterplay design.
+- [Living roleplay systems blueprint](ROLEPLAY_SYSTEMS_BLUEPRINT.md) — shared platform primitives and a complete connected-domain opportunity map.
+- [Documentation and planning program](DOCUMENTATION_PROGRAM.md) — artifact hierarchy, publishing lanes, quality gates, batch workflow, and focus controls.
 - [Issues and Discussions index](DISCUSSIONS_AND_ISSUES.md) — published tracker links and documentation workflow.
 - [Coding conventions](coding_conventions.md) and [useful functions](useful_functions.md) — inherited developer references under review.
 

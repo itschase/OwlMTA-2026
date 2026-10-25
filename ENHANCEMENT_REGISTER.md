@@ -47,6 +47,19 @@ This is a living design backlog. Items are opportunities, not claims that work h
 - Consider a configurable fictional illicit-production system using abstract recipes, risk, quality, distribution, evidence, and law-enforcement counterplay. Keep its content separate from real-world manufacturing instructions.
 - Record every payout and stock change through authoritative, auditable domain services; define transaction and persistence guarantees before enabling automated money generation.
 
+## Organizations and connected criminal roleplay
+
+- Treat the legacy `factions` resource as a compatibility-backed generic organization aggregate. Move player-facing language, new APIs, and dashboards toward organizations without renaming tables, exports, events, and element data blindly.
+- Define organization behavior through named capabilities and composable policies instead of duplicated numeric type branches. Keep Discord staff grants, donor tiers, organization roles, duty, and MTA ACL separate.
+- Support public services, government, companies, newsrooms, clubs, unions, community groups, crews, gangs, criminal enterprises, fronts, and temporary task forces through one extensible organization foundation.
+- Make recruitment, applications, relationships, units, assets, finance, succession, archival, and audit explicit lifecycle systems.
+- Build criminal roleplay from contacts, preparation, opportunity, provenance, markets, evidence, investigation, justice, victim recovery, and meaningful failure rather than isolated payout commands.
+- Use abstract fictional illicit recipes and configurable risk. Do not publish real harmful production instructions.
+- Replace omniscient wanted markers with incident alerts, witness observations, evidence, authorized suspicion, warrants, and scoped case information.
+- Design influence as changing relationships, market access, presence, information, and institutional attention instead of permanent kill-count territory.
+
+Detailed direction lives in `ORGANIZATIONS_FRAMEWORK.md` and `CRIMINAL_ROLEPLAY_FRAMEWORK.md`.
+
 ## Immersive interaction and voice
 
 - Prototype a shared contextual interaction registry for nearby vehicles, doors, interiors, NPCs, businesses, and service points; filter choices by current capability and world state.
