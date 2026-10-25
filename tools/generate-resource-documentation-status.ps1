@@ -54,6 +54,12 @@ $published = @{
     "paynspray-system" = @{ Number = 257; Dossier = "docs/resources/paynspray-system.md"; State = "Full manifest-script source review; individual Discussion published" }
     "object-interaction" = @{ Number = 258; Dossier = "docs/resources/object-interaction.md"; State = "Full manifest-script source review; individual Discussion published" }
     "item-move" = @{ Number = 259; Dossier = "docs/resources/item-move.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "npc" = @{ Number = 262; Dossier = "docs/resources/npc.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "object-system" = @{ Number = 263; Dossier = "docs/resources/object-system.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "interior-manager" = @{ Number = 264; Dossier = "docs/resources/interior-manager.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "interior_keypad" = @{ Number = 265; Dossier = "docs/resources/interior_keypad.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "map_manager" = @{ Number = 266; Dossier = "docs/resources/map_manager.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "map_load" = @{ Number = 267; Dossier = "docs/resources/map_load.md"; State = "Full manifest-script source review; individual Discussion published" }
 }
 
 $inventoryByPath = @{}
