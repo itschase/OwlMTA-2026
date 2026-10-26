@@ -26,8 +26,11 @@ Key integrations: `item-system` (inventory and persistence), `npc` (faction-drop
 
 ## Important source boundaries
 
-Some paths already derive state from server inventory: `weapon:reload` uses trusted MTA `client` and resolves weapon/ammo items from that player's inventory; `weapon:modify` also locates the requested item in the caller's inventory; `firemode` constrains values to supported modes; `canRetrieve` applies encoded duty/license policy to inventory movement. These are static source observations, not runtime validation.
+Some paths already derive state from server inventory: `weapon:reload` uses trusted MTA `client` and resolves weapon/ammo items from that player's inventory; `weapon:modify` now verifies the caller, active character, item DBID ownership/value, allowed name/lock fields, and current retrieval/edit policy before applying a change; `firemode` constrains values to supported modes; `canRetrieve` applies encoded duty/license policy to inventory movement. These are static source observations, not runtime validation.
 
+## Fixed in source — runtime-unverified
+
+Commit [`3a85580`](https://github.com/itschase/OwlMTA-2026/commit/3a85580) narrows the `weapon:modify` handler: it binds the caller to MTA `client`, checks login/character and item ownership against the database, allows only the UI name and lock fields, validates the weapon name, applies the existing duty/license/edit rules server-side, conditionally updates the persisted item value, verifies it, and only then refreshes the inventory cache/live weapons. `git diff --check` passed for this change; no MTA runtime or tests were run. Issue #288 remains open for satchel target binding and same-slot/rebuild event authority.
 ## Source-confirmed defects and tracking
 
 1. **Client-authoritative ammunition:** `weapon:syncAmmo` accepts client-supplied remaining rounds for owned DBIDs and stores them without a server-observed firing/capacity invariant. `weapon:unload` can convert that cached count to an ammo item. Reload/unload write weapon and ammo items separately and ignore persistence results. Tracked in [Issue #287](https://github.com/itschase/OwlMTA-2026/issues/287).

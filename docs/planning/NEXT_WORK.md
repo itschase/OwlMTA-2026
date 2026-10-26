@@ -1,12 +1,14 @@
 # Next work record
 
-Last updated: 2026-10-26 after publishing es-system, cargo, and event-system audits.
+Last updated: 2026-10-26 after publishing the weapon editor authority fix.
 
 ## Latest published batch — 2026-10-26
 
 Three audited resources now have maintained dossiers and standardized Script Resource Discussions: `es-system` #303, `cargo` #304, and `event-system` #305. Coverage is 65/179: 59 full source reviews and 6 partial; all remain runtime-unverified.
 
 Issues #292-#296 cover medical bill settlement, death/seizure authority, medical recovery custody, injury actions/control recovery, and hospital dispatch. Issues #297-#299 cover forklift transfer authorization, the incomplete shipping-order flow, and compiled client-source reproducibility. Issues #300-#302 cover paintball match authority, basketball/golf sessions, and skating/manifest reliability. Existing shared ownership was retained: stretcher paths update #132; cargo restart recovery links to #214; duplicate startup stays with #21; event remotes remain under #1; fall protection stays #260; item authorization remains #213.
+
+A focused `weapon:modify` server-side ownership/field validation fix is published in [commit `3a85580`](https://github.com/itschase/OwlMTA-2026/commit/3a85580). It covers only the weapon editor handler; Issue #288 remains open for satchel removal and switch/rebuild event authority, and the fix is runtime-unverified.
 ## Verified project state
 
 - `main` was synchronized with `origin/main` before this batch.
