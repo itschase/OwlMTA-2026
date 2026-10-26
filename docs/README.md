@@ -49,3 +49,5 @@ All runtime behavior remains unverified unless a document explicitly records a c
 - [Useful functions](reference/useful_functions.md)
 
 These references are inherited material under review; they do not override the current security, architecture, or documentation rules.
+
+- [MTA server event and outbound request notes](reference/MTA_SERVER_BOUNDARIES.md).

@@ -1,17 +1,22 @@
 # Next work record
 
-Last updated: 2026-10-25 after publishing the weapon audit.
+Last updated: 2026-10-26 after publishing es-system, cargo, and event-system audits.
 
+## Latest published batch — 2026-10-26
+
+Three audited resources now have maintained dossiers and standardized Script Resource Discussions: `es-system` #303, `cargo` #304, and `event-system` #305. Coverage is 65/179: 59 full source reviews and 6 partial; all remain runtime-unverified.
+
+Issues #292-#296 cover medical bill settlement, death/seizure authority, medical recovery custody, injury actions/control recovery, and hospital dispatch. Issues #297-#299 cover forklift transfer authorization, the incomplete shipping-order flow, and compiled client-source reproducibility. Issues #300-#302 cover paintball match authority, basketball/golf sessions, and skating/manifest reliability. Existing shared ownership was retained: stretcher paths update #132; cargo restart recovery links to #214; duplicate startup stays with #21; event remotes remain under #1; fall protection stays #260; item authorization remains #213.
 ## Verified project state
 
 - `main` was synchronized with `origin/main` before this batch.
 - The manifest census remains 179 resources: 144 active-tree and 35 archived.
-- 62 resources have individual Discussions and versioned dossiers: 56 full manifest-script reviews and 6 partial reviews.
+- 65 resources have individual Discussions and versioned dossiers: 59 full manifest-script reviews and 6 partial reviews.
 - Source review, proposed design, fixed-in-source behavior, and runtime verification remain distinct. All resource dossiers are runtime-unverified.
 - The MTA server has not been started. Static review and safe-start preparation remain the gate.
 
 
-## Latest published batch — 2026-10-25
+## Previous publication batch — 2026-10-25
 
 Five source-audited resources now have maintained dossiers and standardized Script Resource Discussions: `computers-system` #283, `interior_load` #284, `achievement` #285, `apps` #286, and `weapon` #291. These bring resource documentation to 62/179: 56 full and 6 partial; all remain runtime-unverified.
 
@@ -20,6 +25,7 @@ New milestone #2 issues #273-#278 cover computer email ownership/passwords, IPPC
 The completed `apps` audit also confirmed legacy supporter access in manager/login-bypass and force-application paths. Keep that as evidence for existing role-separation Issue #3 rather than creating a duplicate authorization-policy issue.
 
 The weapon audit added Issues #287-#290 for server-authoritative ammunition settlement, typed weapon metadata/destructive event ownership, attachment/utility authorization, and catalog integrity. Existing Issues #1/#3/#6/#18/#184/#208/#219/#220 remain linked as broader or exact sub-scope owners; the missing attachment file was not duplicated.
+
 ## Completed publication batch
 
 The active `elevator-system` resource now has a full manifest/direct-caller source dossier and standardized [Script Resource Discussion #272](https://github.com/itschase/OwlMTA-2026/discussions/272). Issues #268-#271 track lift-state loading, interior lock lookup, administration mutation integrity, and the remote roleplay-action event. Door and lift travel were added to existing interaction-context Issue #228; empty-table ID allocation remains in #17 and property cleanup in #231. No duplicate travel issue was opened. Runtime remains unverified.
