@@ -1,6 +1,16 @@
 # Next work record
 
-Last updated: 2026-10-26 after publishing the weapon editor authority fix.
+Last updated: 2026-10-26 during the next resource audit wave.
+
+## Current audit wave — 2026-10-26
+
+Four dossiers now record `activities`, `bone_attach`, `clothes`, and `official-interiors`. Their individual Discussions remain pending: the GitHub GraphQL credential available to this workspace returned a `CreateDiscussion` permission denial, and the available connector has no Discussion write operation. Dossiers and the status ledger keep that publication state explicit.
+
+`activities` source review found snowball creation and throw remotes trust actor/trajectory payload fields instead of binding them to MTA's authenticated caller; this maps to focused [Issue #306](https://github.com/itschase/OwlMTA-2026/issues/306) and umbrella Issue #1. The `clothes` audit retained existing authorization [Issue #58](https://github.com/itschase/OwlMTA-2026/issues/58) and created distinct issues #312-#315 for upload intake, shop settlement, manufacture/copies/resale, and texture streaming. `bone_attach` now has lifecycle/API [Issue #310](https://github.com/itschase/OwlMTA-2026/issues/310), and the independent phone object-key bug is [Issue #311](https://github.com/itschase/OwlMTA-2026/issues/311); existing weapon remote Issue #289 remains owner of the weapon caller path. `official-interiors` issues #307-#309 track authorized catalog repair, geometry defects, and measured on-demand loading.
+
+Issues #306-#315 are assigned to `itschase` and grouped under [Milestone #7: Resource Audit and Security Baseline](https://github.com/itschase/OwlMTA-2026/milestone/7). The milestone is an implementation tracker; it does not imply fixes or runtime checks are complete.
+
+The next publication batch should use consistent `Script Resource: <resource>` titles and link each completed dossier to deduplicated implementation issues. The current ledger tracks 69 maintained dossiers (63 full, 6 partial), of which 65 have individual Discussions. The four new dossiers are full static reviews and runtime-unverified.
 
 ## Latest published batch — 2026-10-26
 
@@ -13,7 +23,7 @@ A focused `weapon:modify` server-side ownership/field validation fix is publishe
 
 - `main` was synchronized with `origin/main` before this batch.
 - The manifest census remains 179 resources: 144 active-tree and 35 archived.
-- 65 resources have individual Discussions and versioned dossiers: 59 full manifest-script reviews and 6 partial reviews.
+- 65 resources have individual Discussions; the repository now has 69 maintained dossiers (63 full source reviews and 6 partial reviews). The four newest dossiers are awaiting individual Discussions.
 - Source review, proposed design, fixed-in-source behavior, and runtime verification remain distinct. All resource dossiers are runtime-unverified.
 - The MTA server has not been started. Static review and safe-start preparation remain the gate.
 

@@ -71,6 +71,10 @@ $published = @{
     "es-system" = @{ Number = 303; Dossier = "docs/resources/es-system.md"; State = "Full manifest-script and direct-caller source review; individual Discussion published" }
     "cargo" = @{ Number = 304; Dossier = "docs/resources/cargo.md"; State = "Full manifest-script and direct-caller source review; individual Discussion published" }
     "event-system" = @{ Number = 305; Dossier = "docs/resources/event-system.md"; State = "Full manifest-script and direct-caller source review; individual Discussion published" }
+    "activities" = @{ Number = ""; Dossier = "docs/resources/activities.md"; State = "Full manifest-script and direct-caller source review; Discussion pending" }
+    "bone_attach" = @{ Number = ""; Dossier = "docs/resources/bone_attach.md"; State = "Full manifest-script and direct-caller source review; Discussion pending" }
+    "clothes" = @{ Number = ""; Dossier = "docs/resources/clothes.md"; State = "Full manifest-script and direct-caller source review; Discussion pending" }
+    "official-interiors" = @{ Number = ""; Dossier = "docs/resources/official-interiors.md"; State = "Full manifest-script and direct-caller source review; Discussion pending" }
 }
 
 $inventoryByPath = @{}
@@ -90,7 +94,7 @@ $statusRows = foreach ($manifest in ($manifestFiles | Sort-Object FullName)) {
     $record = $published[$resource]
     $isArchived = $manifestPath -like "*resource-archive*"
     $inventoryRow = $inventoryByPath[$manifestPath]
-    $discussionNumber = if ($record) { [string] $record.Number } else { "" }
+    $discussionNumber = if ($record -and $record.Number) { [string] $record.Number } else { "" }
 
     [pscustomobject]@{
         Resource = $resource
@@ -98,7 +102,7 @@ $statusRows = foreach ($manifest in ($manifestFiles | Sort-Object FullName)) {
         TreeState = if ($isArchived) { "Archived" } else { "Active tree" }
         StartupSnapshot = if ($isArchived) { "Not applicable" } elseif ($inventoryRow) { $inventoryRow.Startup } else { "Unknown" }
         DiscussionNumber = $discussionNumber
-        DiscussionURL = if ($record) { "https://github.com/itschase/OwlMTA-2026/discussions/$discussionNumber" } else { "" }
+        DiscussionURL = if ($discussionNumber) { "https://github.com/itschase/OwlMTA-2026/discussions/$discussionNumber" } else { "" }
         DossierPath = if ($record) { $record.Dossier } else { "" }
         DocumentationState = if ($record) {
             if ($record.State) { $record.State } else { "Partial source review; individual Discussion published" }
@@ -106,7 +110,7 @@ $statusRows = foreach ($manifest in ($manifestFiles | Sort-Object FullName)) {
             "Cataloged only"
         }
         RuntimeState = "Unverified"
-        NextAction = if ($record) { "Complete remaining source review and runtime gate" } else { "Complete dossier and publish Script Resources topic" }
+        NextAction = if (-not $record) { "Complete dossier and publish Script Resources topic" } elseif (-not $discussionNumber) { "Publish standardized Script Resource Discussion and link implementation tracking" } else { "Complete remaining source review and runtime gate" }
     }
 }
 
