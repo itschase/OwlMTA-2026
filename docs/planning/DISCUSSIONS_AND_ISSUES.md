@@ -37,6 +37,14 @@
 - Discord grants have no clock-formatting role; any action timed by a feature stays authorized and validated by that feature's server logic.
 - Runtime remains unverified.
 
+## Current resource follow-up — `description`
+
+- Resource guide: [`docs/resources/description.md`](../resources/description.md); standardized [Script Resource: description Discussion #352](https://github.com/itschase/OwlMTA-2026/discussions/352).
+- [Issue #350](https://github.com/itschase/OwlMTA-2026/issues/350) records the server-side administrative vehicle-description authorization gap; source now checks authenticated caller, requested/occupied vehicle, payload type/length, and trial-admin status for the admin field.
+- [Issue #351](https://github.com/itschase/OwlMTA-2026/issues/351) tracks the undefined vehicle-owner variable corrected in the overlay activity branch.
+- The resource renders but does not own vehicle/interior/item state. Its vehicle admin description is currently displayed as shared overlay text; don't treat it as confidential.
+- Runtime remains unverified.
+
 Use both GitHub Issues and Discussions as the project's public working record. Write in the project's voice. Record source-backed findings and decisions without mentioning the tools or people that produced them.
 
 Keep GitHub surfaces audience-specific: Issues are the actionable defect/security backlog; Discussions are split into resource architecture, simplified player Q&A/wiki, staff/admin operations, server-operator runbooks, Discord/API design, and enhancement planning. Version-controlled Markdown remains the detailed source of truth. Where a category is unavailable, use the closest existing category and label the audience at the top of each post.

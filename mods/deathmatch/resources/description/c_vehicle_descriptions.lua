@@ -326,7 +326,7 @@ function showText()
 										lines = lines + 1
 									else
 										local active, details2, secs = exports.vehicle:isActive(theVehicle)
-										if active and (powner == getElementData(localPlayer, "dbid") or exports.integration:isPlayerStaff(localPlayer)) then
+										if active and (vowner == getElementData(localPlayer, "dbid") or exports.integration:isPlayerStaff(localPlayer)) then
 											--textColor = tocolor(150,150,150,255)
 											inactiveText = "[Active | "
 											local owner_last_login = getElementData(theVehicle, "owner_last_login")
