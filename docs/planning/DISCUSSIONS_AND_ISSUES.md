@@ -8,6 +8,20 @@
 - [Issue #343](https://github.com/itschase/OwlMTA-2026/issues/343) owns POS PIN caller/card binding, safe input/database lookup, throttling, and one-use authorization state.
 - A separate source fix normalizes absent fuel-shop links and prevents nil arithmetic in attendant/shop-income paths. It is not runtime verified; Issue #342 remains open for the larger settlement redesign.
 
+## Current authorization follow-up — factions and duty
+
+- Resource guides: [`factions`](../resources/factions.md) and [`duty`](../resources/duty.md).
+- [Issue #38](https://github.com/itschase/OwlMTA-2026/issues/38), [#39](https://github.com/itschase/OwlMTA-2026/issues/39), and [#53](https://github.com/itschase/OwlMTA-2026/issues/53) were reconciled against current source and assigned to Milestone #7. Several originally reported missing checks are present in source now; the open bodies specify residual roster privacy, offline membership, duty-package payload, and rank-event caller-boundary work.
+- [Issue #344](https://github.com/itschase/OwlMTA-2026/issues/344) tracks the distinct global `dutyAdmin:Save` event authorization and payload-validation gap.
+- Discord named capabilities may gate global staff tools through the future Owl host facade. Faction membership/rank/duty permissions remain local game authority; donor tiers remain separate.
+- All of these findings are source-only. No MTA runtime has been started.
+
+## Current API contract follow-up
+
+- Owl's [`API_CONTRACT.md`](../architecture/API_CONTRACT.md) is a target proposal; its `/api/v1` routes do not match the standalone identity service's implemented `/v1` routes.
+- [Issue #68](https://github.com/itschase/OwlMTA-2026/issues/68) now tracks route/schema reconciliation and the missing Owl host adapter, login integration, capability facade, and revocation handler.
+- The separate service's process-local state and unverified MTA adapter runtime are explicit limits. Do not claim end-to-end Discord login or role authorization exists in OwlMTA.
+
 Use both GitHub Issues and Discussions as the project's public working record. Write in the project's voice. Record source-backed findings and decisions without mentioning the tools or people that produced them.
 
 Keep GitHub surfaces audience-specific: Issues are the actionable defect/security backlog; Discussions are split into resource architecture, simplified player Q&A/wiki, staff/admin operations, server-operator runbooks, Discord/API design, and enhancement planning. Version-controlled Markdown remains the detailed source of truth. Where a category is unavailable, use the closest existing category and label the audience at the top of each post.

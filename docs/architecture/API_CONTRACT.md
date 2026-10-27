@@ -4,7 +4,25 @@
 
 Discord authorization is the planned primary identity path for production registration and login. A self-hosted, versioned service verifies Discord identity, resolves or provisions a game account, maps configured role IDs to capabilities, and supports session revocation. MTA never listens publicly for website or Discord management calls. MTA handlers remain responsible for enforcing game rules; the API supplies bounded identity and grant data, not a replacement for gameplay authorization logic. A website is an optional API client, not a requirement for login management or gameplay.
 
-This is the proposed v1 contract, not an implemented service. No Owl-hosted endpoint, domain, Discord guild, role ID, or secret is shipped. The MTA process can boot without the service; production registration/login fails closed until the operator configures it. Existing sessions use bounded leases, and confirmed authorization revocation disconnects the linked session. Provide an explicit audited bootstrap/recovery procedure for setup and service failures; never silently switch to password-only login.
+This file is the **proposed Owl host contract**, not a description of the current standalone service protocol. The private, reusable [`mta-discord-identity`](https://github.com/itschase/mta-discord-identity) project now implements a separate `/v1` link/session API and generic MTA adapter. This document's `/api/v1` login, grant-refresh, and heartbeat routes do not currently match that implementation. OwlMTA has no host adapter, account-login integration, local capability facade, or revocation disconnect handler yet. Treat the route table below as a target design only until the contract is reconciled against the standalone service and a versioned Owl adapter is implemented. See [Issue #68](https://github.com/itschase/OwlMTA-2026/issues/68).
+
+No Discord guild, role ID, or secret is configured in OwlMTA. The MTA process must remain bootable without the service; future production registration/login should fail closed until configured. Existing sessions should use bounded leases, and confirmed authorization revocation should disconnect the linked session once the host integration is implemented. Provide an explicit audited bootstrap/recovery procedure; never silently switch to password-only login.
+
+### Current standalone service snapshot (not Owl-integrated)
+
+The standalone repository currently documents these actual routes:
+
+| Method and path | Current behavior |
+|---|---|
+| `POST /v1/link-challenges` | Create an account-bound Discord-link challenge. |
+| `GET /v1/link-challenges/{id}?accountId=...` | Read challenge status for the owning account. |
+| `DELETE /v1/link-challenges/{id}` | Cancel a pending link challenge. |
+| `POST /v1/oauth/discord/start` and `GET /v1/oauth/discord/callback` | Start the browser OAuth flow and perform Discord verification with PKCE and current guild-member lookup. |
+| `POST /v1/sessions/exchange` | Consume an account-bound one-use ticket and issue a bounded session with named capabilities and a separate donor tier. |
+| `POST /v1/sessions/refresh` | Re-evaluate current policy using installation authentication plus the opaque session token; failed refresh requires the adapter to clear grants. |
+| `POST /v1/accounts/unlink` | Remove an account link and revoke its sessions. |
+
+The service returns no raw Discord role data to MTA. Its current lifecycle state is process-local; durable multi-instance storage and real MTA-runtime conformance remain future work in the separate repository. This snapshot is sourced from that project's [`docs/API.md`](https://github.com/itschase/mta-discord-identity/blob/main/docs/API.md) and [`docs/ARCHITECTURE.md`](https://github.com/itschase/mta-discord-identity/blob/main/docs/ARCHITECTURE.md). Reconcile route names, request schemas, errors, installation auth, session behavior, and capability refresh before implementing the target contract below.
 
 ## Product and repository boundary
 

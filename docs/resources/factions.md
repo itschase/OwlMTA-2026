@@ -17,7 +17,7 @@ A faction is materialized as an MTA team with extensive element data. Membership
 
 - `/faction` or F3 opens membership UI for roster, online/duty state, MOTD, notes, ranks/wages, invite/kick/quit, member phone/perks/rank, vehicles, properties, finance, and duty configuration where permitted.
 - Membership, leader status, rank permission, and active duty are separate authority inputs. Criminal types are structurally excluded from the current public-safety duty-package permission path; future criminal organization gameplay must not require public-service duty.
-- Staff manager aliases open faction creation/edit/delete/member tools. Server-side manager authorization has been consolidated and recent duty/rank handlers contain meaningful ownership, membership, permission, and payload hardening; existing Issues #38, #39, #78, #82, and #87 require source reconciliation and later runtime validation.
+- Staff manager aliases open faction creation/edit/delete/member tools. Server-side manager authorization has been consolidated and recent duty/rank handlers contain meaningful ownership, membership, permission, and payload hardening. Current residuals are tracked in Issues [#38](https://github.com/itschase/OwlMTA-2026/issues/38), [#39](https://github.com/itschase/OwlMTA-2026/issues/39), [#53](https://github.com/itschase/OwlMTA-2026/issues/53), [#78](https://github.com/itschase/OwlMTA-2026/issues/78), [#82](https://github.com/itschase/OwlMTA-2026/issues/82), and [#87](https://github.com/itschase/OwlMTA-2026/issues/87); global duty-allowlist editing has its own [Issue #344](https://github.com/itschase/OwlMTA-2026/issues/344).
 - Admin commands cover membership/leadership/rank/money, government tax/welfare/budget/license policy, respawn, duty administration, conversion, cleanup, and location tools.
 
 ## Operator and technical map
@@ -32,6 +32,10 @@ A faction is materialized as an MTA team with extensive element data. Membership
 
 ## Source-confirmed risks
 
+- `faction:loadFaction` now requires the requesting active character to belong to that faction, and invitations require `add_member`; however all faction members can still see sensitive roster fields and offline removal does not prove the target's faction row before deletion. See [Issue #38](https://github.com/itschase/OwlMTA-2026/issues/38).
+- `faction:perks:edit` checks `set_member_duty`, but offline target membership and each submitted package ID/layout are not fully validated. Other residual rank/duty paths (remote `getRankInfo` actor argument, duty-editor subscription refresh, and phone permission semantics) are tracked in [Issue #39](https://github.com/itschase/OwlMTA-2026/issues/39) and overlapping [Issue #53](https://github.com/itschase/OwlMTA-2026/issues/53).
+- Global `/dutyadmin` opens only for lead admin, scripter, or FMT leader, but its `dutyAdmin:Save` event does not repeat that authorization or validate client replacement tables. [Issue #344](https://github.com/itschase/OwlMTA-2026/issues/344) tracks the global staff allowlist boundary separately from faction rank/duty authority.
+
 - Type 7 is labeled both Dealership and Mechanic. [Issue #147](https://github.com/itschase/OwlMTA-2026/issues/147) owns the canonical type/policy registry.
 - Membership/rank tables lack strong uniqueness and foreign-key integrity. [Issue #148](https://github.com/itschase/OwlMTA-2026/issues/148).
 - Deletion spans faction, ranks, membership, duty, vehicles, and interiors without a transaction; vehicle deletion is invoked twice in succession. [Issue #150](https://github.com/itschase/OwlMTA-2026/issues/150).
@@ -43,5 +47,9 @@ A faction is materialized as an MTA team with extensive element data. Membership
 ## Target direction
 
 Preserve resource/table/export/event identifiers behind a compatibility adapter while presenting a player-facing Organization service. Add a canonical type/policy/capability registry, immutable membership IDs and DB constraints, server-resolved permissions independent of rank labels, typed accounts/assets, transactional archive workflows with outbox/reconciliation, versioned cache readiness, and immutable privileged-action audits. Criminal groups remain ordinary organizations with suitable policies, not a special global staff class.
+
+### Discord authorization boundary
+
+Discord named capabilities may eventually gate server-wide staff tools such as the faction manager and global duty allowlist editor through the Owl authorization facade. They must never replace the active character's faction membership, rank `mem_permissions`, leader/member relationships, duty package eligibility, or asset ownership/proximity checks. Supporter tiers remain donor entitlements. The standalone identity service is a separate dependency; no role IDs or production Discord mapping are configured in this resource.
 
 Runtime verification must cover outsiders/members/leaders/rank capabilities/staff duty; every organization type; online/offline targets; active/deleted/duplicate/orphan state; every remote with forged actor/org/rank/asset; each permission independently; DB failure at every mutation; provider restart and cache parity; concurrent membership/rank/finance; ledger boundaries; and deletion with loaded/unloaded/occupied assets.

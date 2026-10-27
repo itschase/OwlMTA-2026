@@ -1,6 +1,6 @@
 # Next work record
 
-Last updated: 2026-10-27 during the vehicle-fuel audit continuation.
+Last updated: 2026-10-27 during the vehicle-fuel and faction authorization documentation continuation.
 
 ## Current continuation — 2026-10-27
 
@@ -11,6 +11,10 @@ Published and verified Issue [#342](https://github.com/itschase/OwlMTA-2026/issu
 Fixed in source: absent fuel-shop links are normalized to `0` when attendants are created/listed, shop-income diagnostics tolerate unavailable peds/invalid charges, and missing shop links skip income settlement safely. This does not close the issues' wider state, trust, database, or transaction work.
 
 Next: review the issues against the repository's SQL wrapper/card schema before implementation; inspect sibling vehicle and bank callers; deduplicate findings against existing issues; then continue the next high-risk active resource and update its dossier/index/Discussion/Issues as one publishing batch. No MTA runtime was started and no automated tests were run; static diff/whitespace review is the only validation for this source adjustment.
+
+The faction/duty review from the concurrent project audit is now reflected in resource dossiers and GitHub Issues. Issues [#38](https://github.com/itschase/OwlMTA-2026/issues/38), [#39](https://github.com/itschase/OwlMTA-2026/issues/39), and [#53](https://github.com/itschase/OwlMTA-2026/issues/53) now distinguish older reported missing checks from current source coverage and remaining roster privacy, offline membership, package payload, and actor-binding tasks. [Issue #344](https://github.com/itschase/OwlMTA-2026/issues/344) separately tracks the global `dutyAdmin:Save` authorization/payload gap. Local faction rank/duty policy remains distinct from any future Discord global staff capability.
+
+The API review compared Owl's proposed `/api/v1` document with the published standalone service's implemented `/v1` contract. They differ; Owl still lacks its host adapter, login integration, local capability facade, and revocation disconnect handler. Updated [Issue #68](https://github.com/itschase/OwlMTA-2026/issues/68) to make contract reconciliation and the Owl host slice the actionable work. [`API_CONTRACT.md`](../architecture/API_CONTRACT.md) now clearly labels the target routes as proposed and records the actual separate-service route snapshot. The standalone service currently uses process-local state and has not been verified inside a real MTA server.
 
 Committed and pushed cache, prison, NPC/shop, truck-supply, tow, and map-manager source/dossier updates as [3d4fcc4](https://github.com/itschase/OwlMTA-2026/commit/3d4fcc4). The shop restock path calculates stock keys/prices from server catalog state, settles one-unit restocks without creating an empty delivery, preserves the existing owner/faction payer selection, commits local stock before settlement, and compensates local stock if trucker settlement fails. These writes still are not transactional across resources; a failed compensation is logged. Updated [Issue #182](https://github.com/itschase/OwlMTA-2026/issues/182) to capture this shared ledger boundary and runtime matrix. Updated [Issue #62](https://github.com/itschase/OwlMTA-2026/issues/62), assigned it to Milestone #7, and recorded map validation, actor/state checks, conditional transitions, and incomplete MyISAM rollback limits. Cache #63, prison #54/#341, and the six resource dossiers remain source-only; all need safe-start/runtime verification later. No MTA server was started and no tests were run.
 
@@ -73,7 +77,7 @@ A focused `weapon:modify` server-side ownership/field validation fix is publishe
 
 - `main` was synchronized with `origin/main` before this batch.
 - The manifest census remains 179 resources: 144 active-tree and 35 archived.
-- 71 resources have individual Discussions; the repository now has 71 maintained dossiers (65 full source reviews and 6 partial reviews). All maintained dossier and Discussion findings remain runtime-unverified.
+- 73 resources have individual Discussions; the repository now has 73 maintained dossiers (68 full source reviews and 5 partial reviews). The `vehicle_fuel` dossier is now a full manifest-script source review. All maintained dossier and Discussion findings remain runtime-unverified.
 - Source review, proposed design, fixed-in-source behavior, and runtime verification remain distinct. All resource dossiers are runtime-unverified.
 - The MTA server has not been started. Static review and safe-start preparation remain the gate.
 
