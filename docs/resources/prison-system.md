@@ -2,7 +2,7 @@
 
 ## Evidence status
 
-- Source state: reviewed from the current checkout, including the `s_prison.lua` hardening that awaits commit/runtime verification.
+- Source state: reviewed from the current checkout, including the `s_prison.lua` hardening committed in `3d4fcc4`; runtime verification remains open.
 - Loaded surface: `meta.xml` loads `s_gates.lua`, `c_gates.lua`, `c_prison.lua`, `s_prison.lua`, and shared `g_prison.lua`; it exports server function `checkForRelease`.
 - Runtime state: unverified. MTA was not started and no tests were run.
 - Startup state: any tracked startup configuration is static evidence only, not proof that the resource is live.
@@ -110,7 +110,7 @@ The capability decision should be made inside `getPrisonActorAccess(actor)` or a
 
 ## Current source findings
 
-- The current source hardening binds remote mutations to MTA `client`, re-resolves targets and records, validates server-owned fields, enforces existing law/admin/offline-manager policy, and separates automatic release from the remote release handler. It awaits commit/runtime verification.
+- The committed source hardening binds remote mutations to MTA `client`, re-resolves targets and records, validates server-owned fields, enforces existing law/admin/offline-manager policy, and separates automatic release from the remote release handler. Runtime verification remains open.
 - Offline-manager membership now uses the faction export rather than treating faction element data as a scalar ID.
 - The booking restraint return and `/jailtime` timer lookup now use the correct acting/player variables.
 - Gate events remain remotely callable without authoritative server permission or location checks.

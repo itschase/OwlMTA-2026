@@ -3,7 +3,7 @@
 ## Status
 
 - Tree state: active resource tree.
-- Evidence state: full manifest-script review with direct image-caller tracing. The image hardening described below is fixed in the current source and awaits commit/runtime verification.
+- Evidence state: full manifest-script review with direct image-caller tracing. Image hardening is committed in `3d4fcc4`; runtime verification remains open.
 - Runtime state: MTA startup, network, filesystem, database, and gameplay behavior are unverified; no tests or server/client startup were performed.
 
 ## What it does
