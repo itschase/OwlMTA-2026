@@ -32,7 +32,9 @@ No one interface fits every action. Keep narrow frequent actions close to the pl
 
 ## Per-resource command review record
 
-For each discovered command, document:
+Apply this review to **every existing and future resource dossier**, not only newly audited resources. Re-open the resource manifest and declared scripts before deciding what commands are active; a command mentioned in old documentation, a disabled file, or a neighboring resource is not proof that the resource currently registers it. Record an explicit `No manifest-loaded commands found` result when appropriate, then document the actual player, staff, or operator entry point that the resource does expose.
+
+For each source-confirmed, manifest-loaded command, document:
 
 1. Exact command, aliases, manifest-loaded file, and source lines.
 2. Intended audience, current permission check, required duty/state, arguments, and side effects.
@@ -41,6 +43,10 @@ For each discovered command, document:
 5. Most suitable alternative (or why a command is best), discoverability, accessibility, keyboard/controller impact, and confirmation requirements.
 6. Server API/capability that both UI and command should call; state and audit evidence required.
 7. Migration approach: keep alias, announce replacement, observe use, and remove only after compatibility and automation impact are understood.
+
+For the retrospective pass, group commands that reach the same underlying workflow and flag duplicates across resources. Prioritize workflows by player friction, frequency, risk of mistyped/destructive actions, and contextual relevance. Recommend an in-game replacement only when it improves that specific task; retain expert, accessibility, recovery, and automation shortcuts where a command remains the clearest interface. A command-only resource is not automatically a dashboard candidate, and a resource with no commands may already have a better contextual entry point.
+
+Each recommendation must explain the real user goal in plain language, who uses it, the current command or entry point, the proposed interaction (or why the current command is suitable), and the shared server operation and authorization boundary. Treat Discord capability mapping as a separate decision for privileged actions; ordinary player actions continue to use local gameplay/ownership rules, while faction/duty, donor entitlement, and MTA operator ACL remain distinct. Do not make raw Discord role IDs a resource-level dependency.
 
 Also record each action's authorization source: Discord-derived named capability, local account/gameplay policy, faction rank/duty, donor entitlement, or MTA operator ACL. A UI replacement must use the same server-side capability facade and local state checks as its command counterpart.
 
@@ -64,8 +70,8 @@ These examples are design prompts. Confirm each command and permission against t
 
 ## Delivery sequence
 
-1. Continue recording command audiences and interaction alternatives in every dossier.
-2. Build a cross-resource command inventory and group duplicate workflows by underlying domain operation.
+1. Retrospectively add or verify a command-and-interaction section in every existing dossier, including explicit no-command findings; continue the same review for every new dossier.
+2. Build and maintain a cross-resource inventory of source-confirmed loaded commands, grouping duplicates by underlying domain operation and marking review coverage so gaps are visible.
 3. Select one small player workflow and one staff workflow for a validated vertical slice.
 4. Establish shared panel navigation, server authorization, error/empty states, logging, and accessibility conventions from that slice.
 5. Expand only after caller, permission, data, and runtime behavior are verified in a disposable environment.
