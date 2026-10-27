@@ -1,6 +1,6 @@
 # Next work record
 
-Last updated: 2026-10-27 during publication of the next resource audit wave.
+Last updated: 2026-10-27 during publication of resource and command-interaction planning.
 
 ## Current publication state — 2026-10-27
 
@@ -8,11 +8,15 @@ Published the four pending, standardized Script Resource Discussions directly th
 
 This wave also created Issues #320-#323 after checking current issue matches: unauthorized `clothes:tempfix` resource restarts, requester/NPC interaction binding for clothes lists and dialogue, snowball teardown input cleanup, and checked lifecycle for global interior collision overrides. Issues #306-#315 remain linked to the four resource dossiers; each new issue is assigned under Milestone #7. These four candidates were searched before creation, and a matching `createObject` false-flag finding was already covered by #308 rather than duplicated.
 
+Audited `artifacts`, added its source dossier, and published [Script Resource Discussion #328](https://github.com/itschase/OwlMTA-2026/discussions/328). Issues #324-#326 cover unbound bulk cleanup, equip entitlement, and the empty `/removeartifacts` command path. Issue #327 in Milestone #4 tracks a cross-resource command inventory and fit-for-purpose in-game alternatives. Published [Plans & Enhancements Discussion #329](https://github.com/itschase/OwlMTA-2026/discussions/329) and added reusable command-audit requirements to the playbook and [Command and Interaction Strategy](COMMAND_AND_INTERACTION_STRATEGY.md).
+
+Current coverage is 70/179 resources with individual Discussions: 64 full source reviews and 6 partial; all are runtime-unverified. New publications in this batch are Discussions #316-#319, #328-#329 and Issues #320-#327. Issues #320-#326 are grouped under Milestone #7; #327 belongs to Milestone #4.
+
 The API credential's `CreateDiscussion` permission denial remains a publication-channel constraint; browser publication succeeded. Future Discussion batches should continue using the title form `Script Resource: <resource>` and update the generator, ledger, and index in the same publication batch. Four new discussions were verified live at the GitHub URLs above.
 
 The next audit wave should select high-impact remaining active resources, review manifest-loaded files plus direct callers and persistence, then publish dossiers, standardized Discussions, and deduplicated Issues. Maintain the static-review/safe-start gate; no MTA server has been started.
 
-## Current audit wave — 2026-10-26
+## Previous audit wave — 2026-10-26
 
 Four dossiers now record `activities`, `bone_attach`, `clothes`, and `official-interiors`. Their individual Discussions remain pending: the GitHub GraphQL credential available to this workspace returned a `CreateDiscussion` permission denial, and the available connector has no Discussion write operation. Dossiers and the status ledger keep that publication state explicit.
 
@@ -29,11 +33,11 @@ Three audited resources now have maintained dossiers and standardized Script Res
 Issues #292-#296 cover medical bill settlement, death/seizure authority, medical recovery custody, injury actions/control recovery, and hospital dispatch. Issues #297-#299 cover forklift transfer authorization, the incomplete shipping-order flow, and compiled client-source reproducibility. Issues #300-#302 cover paintball match authority, basketball/golf sessions, and skating/manifest reliability. Existing shared ownership was retained: stretcher paths update #132; cargo restart recovery links to #214; duplicate startup stays with #21; event remotes remain under #1; fall protection stays #260; item authorization remains #213.
 
 A focused `weapon:modify` server-side ownership/field validation fix is published in [commit `3a85580`](https://github.com/itschase/OwlMTA-2026/commit/3a85580). It covers only the weapon editor handler; Issue #288 remains open for satchel removal and switch/rebuild event authority, and the fix is runtime-unverified.
-## Verified project state
+## Verified project state as of 2026-10-27
 
 - `main` was synchronized with `origin/main` before this batch.
 - The manifest census remains 179 resources: 144 active-tree and 35 archived.
-- 65 resources have individual Discussions; the repository now has 69 maintained dossiers (63 full source reviews and 6 partial reviews). The four newest dossiers are awaiting individual Discussions.
+- 70 resources have individual Discussions; the repository now has 70 maintained dossiers (64 full source reviews and 6 partial reviews). All maintained dossier and Discussion findings remain runtime-unverified.
 - Source review, proposed design, fixed-in-source behavior, and runtime verification remain distinct. All resource dossiers are runtime-unverified.
 - The MTA server has not been started. Static review and safe-start preparation remain the gate.
 

@@ -14,12 +14,25 @@ For every player-facing feature, trace a complete scenario from the player's ent
 
 Record evidence labels consistently: `source-confirmed`, `inferred`, `proposed`, `fixed-in-source`, and `runtime-verified`. Never promote source inspection into a runtime claim.
 
+## Command-to-interaction review
+
+Commands are a valid interface for operators and experienced users, but they can hide functionality from players and make multi-step tasks error-prone. During every resource audit:
+
+- Inventory each loaded command, its audience and actual use case, permission and state requirements, arguments, side effects, output, and failure feedback.
+- Classify the task: quick status/lookup, repeatable personal action, world-object interaction, staff workflow, or server-operator maintenance.
+- Compare an alternative appropriate to that task: persistent dashboard/panel for broad management, contextual action for nearby entities, guided form for multi-field operations, keybind for frequent actions, or a discoverable help/search catalog for rare commands.
+- Map each proposed interaction to the same server-owned permission, validation, state, persistence, and audit path as the existing command. A new UI must not widen authority or trust client-submitted values.
+- Keep aliases as a fallback where useful; document whether they are player-facing, staff-only, operator-only, deprecated, or intentionally retained for automation.
+- Record source-confirmed current behavior separately from proposed interaction design, and link cross-resource overlap rather than creating duplicated panels.
+
+The cross-resource proposal and evaluation criteria are maintained in [`COMMAND_AND_INTERACTION_STRATEGY.md`](COMMAND_AND_INTERACTION_STRATEGY.md).
+
 ## Required resource dossier
 
 Each resource needs these fields, or an explicit `not applicable` with a reason:
 
 1. **Identity:** name, manifest path, active/archive state, startup state, description, and documentation owner/status.
-2. **Human explanation:** what the feature means to a player, why it exists, how to find it, what to do, prerequisites/costs, expected result, and common failure messages.
+2. **Human explanation:** what the feature means to a player, why it exists, how to find it, what to do, prerequisites/costs, expected result, and common failure messages. For every command or keybind, identify its audience and actual use case; consider a discoverable in-game panel, contextual/third-eye action, keybind, guided prompt, or dashboard that fits the task. Record tradeoffs and preserve command compatibility where practical instead of assuming every command should be removed.
 3. **Staff explanation:** who may act, what each action changes, required duty/faction/target conditions, approvals, audit trail, and recovery path.
 4. **Operator explanation:** configuration keys, dependencies/start order, database/import requirements, secrets, logs, backup/retention, optional integrations, and safe enable/disable instructions.
 5. **Technical map:** client/server/shared scripts, commands and keybinds, events and exports, trusted actor source, permission checks, state machine, validation, rate limits, callbacks/timers, persistence owner, and error handling.
