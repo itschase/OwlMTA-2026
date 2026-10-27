@@ -14,7 +14,9 @@ The `license-system` audit produced a new player/staff dossier and three bounded
 
 The active `dynamic_lighting_vehicles` review also found a source-confirmed mode-selection defect: its periodic color normalization uses callback-local `new_state` outside that callback, causing fallback to light mode 1. Added [Issue #392](https://github.com/itschase/OwlMTA-2026/issues/392) and recorded that state with runtime impact still unverified.
 
-The regenerated ledger maps 95 of 179 manifest rows to dossiers: 83 full reviews and 12 partial reviews; all runtime-unverified. The four same-name archive dossiers are comparisons rather than full per-script audits. Archive-specific Script Resource Discussions and individual topics for `grid`, `dynamic_lighting`, `dynamic_lighting_vehicles`, and `license-system` are pending publication.
+Completed independent reviews of `gps`, `lottery-system`, and `report`. GPS issues #396–#397 cover ZIP lookup and per-player street-cache correctness. Lottery Issue #398 records a dormant exported cooldown defect while clearly noting that ticket sales are disabled. Report Issues #399–#400 cover client-bound report submissions and client-supplied session counters; the dossier documents the active Help Center path, staff commands, queue durability limits, and missing staff-action logs.
+
+The regenerated ledger maps 98 of 179 manifest rows to dossiers: 86 full reviews and 12 partial reviews; all runtime-unverified. The four same-name archive dossiers are comparisons rather than full per-script audits. Individual Script Resource Discussions remain pending for recently added resource dossiers.
 
 ## Latest continuation — 2026-10-27
 

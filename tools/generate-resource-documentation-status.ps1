@@ -26,6 +26,9 @@ $published = @{
     "dynamic_lighting_vehicles" = @{ Dossier = "docs/resources/dynamic_lighting_vehicles.md"; State = "Full manifest and direct-export source review; individual Discussion pending" }
     "grid" = @{ Dossier = "docs/resources/grid.md"; State = "Full active manifest and exported-helper source review; runtime unverified" }
     "license-system" = @{ Dossier = "docs/resources/license-system.md"; State = "Full manifest and client/server/staff flow source review; individual Discussion pending" }
+    "gps" = @{ Dossier = "docs/resources/gps.md"; State = "Full manifest/player flow/shared helper/caller review; individual Discussion pending" }
+    "lottery-system" = @{ Dossier = "docs/resources/lottery-system.md"; State = "Full manifest/shop/item/event caller review; individual Discussion pending" }
+    "report" = @{ Dossier = "docs/resources/report.md"; State = "Full manifest/player/staff/queue/statistics review; individual Discussion pending" }
     "factions" = @{ Number = 101; Dossier = "docs/resources/factions.md"; State = "Full manifest-script source review; individual Discussion published" }
     "item-system" = @{ Number = 102; Dossier = "docs/resources/item-system.md"; State = "Full manifest-script source review; individual Discussion published" }
     "vehicle" = @{ Number = 107; Dossier = "docs/resources/vehicle.md" }

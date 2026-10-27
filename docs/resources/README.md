@@ -50,6 +50,9 @@ Every dossier distinguishes source evidence from runtime verification. Presence 
 | Vehicle headlight effects | [`dynamic_lighting_vehicles`](dynamic_lighting_vehicles.md) ([Issue #392](https://github.com/itschase/OwlMTA-2026/issues/392)) | Full manifest/export review; runtime unverified |
 | Simulation region helpers | [`grid`](grid.md) ([Issue #390](https://github.com/itschase/OwlMTA-2026/issues/390)) | Full active manifest/export review; runtime unverified |
 | Player licensing and firearm-license management | [`license-system`](license-system.md) (Issues [#393](https://github.com/itschase/OwlMTA-2026/issues/393)–[#395](https://github.com/itschase/OwlMTA-2026/issues/395)) | Full manifest/client/server/staff review; runtime unverified |
+| GPS, map navigation, and caller street context | [`gps`](gps.md) (Issues [#396](https://github.com/itschase/OwlMTA-2026/issues/396)–[#397](https://github.com/itschase/OwlMTA-2026/issues/397)) | Full manifest/player-flow/caller review; runtime unverified |
+| Lottery draw and dormant ticket purchase | [`lottery-system`](lottery-system.md) (Issue #398) | Full source review; ticket sales disabled; runtime unverified |
+| Player reports and staff response queue | [`report`](report.md) (Issues [#399](https://github.com/itschase/OwlMTA-2026/issues/399)–[#400](https://github.com/itschase/OwlMTA-2026/issues/400); related [#14](https://github.com/itschase/OwlMTA-2026/issues/14) and [#279](https://github.com/itschase/OwlMTA-2026/issues/279)) | Full manifest/player/staff/queue review; runtime unverified |
 
 ## Archived resource variants
 
