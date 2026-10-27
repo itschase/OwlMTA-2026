@@ -23,6 +23,7 @@ No one interface fits every action. Keep narrow frequent actions close to the pl
 
 - The server remains authoritative for actor identity, permissions, ownership, proximity, price, target, and persistent state.
 - UI controls and command arguments are requests, not proof of authority or truth.
+- For each privileged workflow, identify the exact server-side Discord capability check through the reusable identity adapter and an Owl host authorization facade. Do not scatter raw role checks across resources.
 - Player, staff/GameMaster, faction-duty, donor/supporter, and server-operator capabilities remain distinct. A donor tier never implies staff authority.
 - Discord roles may eventually map to named capabilities through a configurable host integration. A visible Discord role must not directly become a trusted client-side permission check; server-side identity and current role state govern the capability grant.
 - Every panel action and command should call the same validated domain operation where feasible, so permissions, persistence, and audit behavior do not drift.
@@ -40,6 +41,8 @@ For each discovered command, document:
 5. Most suitable alternative (or why a command is best), discoverability, accessibility, keyboard/controller impact, and confirmation requirements.
 6. Server API/capability that both UI and command should call; state and audit evidence required.
 7. Migration approach: keep alias, announce replacement, observe use, and remove only after compatibility and automation impact are understood.
+
+Also record each action's authorization source: Discord-derived named capability, local account/gameplay policy, faction rank/duty, donor entitlement, or MTA operator ACL. A UI replacement must use the same server-side capability facade and local state checks as its command counterpart.
 
 ## First application: `artifacts`
 

@@ -10,6 +10,14 @@ This is the proposed target design based on source review and project requiremen
 
 Discord login does not grant staff status. A `Support` or other donor role grants configured donor entitlements only. GameMaster, each admin tier, and specialty teams are separate grants.
 
+## Reusable plugin contract and Owl resource audit rule
+
+The separate [`mta-discord-identity`](https://github.com/itschase/mta-discord-identity) repository contains a generic identity service and MTA adapter source intended for reuse by OwlMTA. At external revision `619d18f`, its MTA resource declares server exports including `hasCapability(player, name)`, `getDonorTier(player)`, `beginLink`, `exchangeTicket`, and `clearPlayerSession`. Its host adapter contract requires the gamemode to answer the server-only `mta-discord-identity:resolve-account` event using a stable account ID derived from trusted server login state. The plugin exposes named capabilities and a separate donor tier, not raw role IDs or Discord credentials. This is external source evidence; the adapter is not yet integrated with Owl account or character flows.
+
+For every Owl resource audit, map each command, remotely callable action, export, and staff control to one of these decisions: local player/gameplay authorization only; character/faction rank or duty; Discord-backed global capability; donor entitlement; or MTA operator ACL. If a global capability is appropriate, record its narrow proposed key, the Owl server facade/call site that will check the plugin result, and the independent local ownership/state checks. Most ordinary gameplay should not require Discord; use it for identity and global staff/GameMaster/specialty/donor grants only where explicitly designed. A donor tier must not grant staff authority, and a capability must never bypass faction membership, duty, proximity, item ownership, or target validation.
+
+The current Owl code does not yet integrate this standalone plugin. Treat the external adapter API as a reusable source contract rather than proof of an Owl deployment. See [Issue #238](https://github.com/itschase/OwlMTA-2026/issues/238) for packaging/integration coordination and [Issue #3](https://github.com/itschase/OwlMTA-2026/issues/3) for capability-by-capability migration. Role IDs remain blank in OwlMTA; operators configure them only in the separate identity service.
+
 ## Current legacy fields to migrate
 
 `core.accounts` has numeric `admin`, `supporter`, `vct`, `mapper`, `scripter`, and `fmt` fields. `integration/g_configs.lua` maps admin 1–5 to Trial Administrator, Administrator, Senior Administrator, Lead Administrator, and Head Administrator. Supporter has levels 1–2; VCT, mapper, scripter and FMT have their own member/leader ranks. The code currently conflates some of these with `isPlayerStaff()`, and `getGameMasters()` checks supporter status. Do not preserve those mixed semantics in the new model.

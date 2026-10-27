@@ -101,7 +101,7 @@
 "freecam-tv","mods/deathmatch/resources/freecam-tv/meta.xml","Active tree","True","","","","Cataloged only","Unverified","Complete dossier and publish Script Resources topic"
 "freecam","mods/deathmatch/resources/freecam/meta.xml","Active tree","True","","","","Cataloged only","Unverified","Complete dossier and publish Script Resources topic"
 "gate-manager","mods/deathmatch/resources/gate-manager/meta.xml","Active tree","True","","","","Cataloged only","Unverified","Complete dossier and publish Script Resources topic"
-"gatekeepers-system","mods/deathmatch/resources/gatekeepers-system/meta.xml","Active tree","True","","","","Cataloged only","Unverified","Complete dossier and publish Script Resources topic"
+"gatekeepers-system","mods/deathmatch/resources/gatekeepers-system/meta.xml","Active tree","True","334","https://github.com/itschase/OwlMTA-2026/discussions/334","docs/resources/gatekeepers-system.md","Full manifest-script and direct-caller source review; Discussion published","Unverified","Complete remaining source review and runtime gate"
 "global","mods/deathmatch/resources/global/meta.xml","Active tree","True","73","https://github.com/itschase/OwlMTA-2026/discussions/73","docs/resources/global.md","Full manifest-script source review; individual Discussion published","Unverified","Complete remaining source review and runtime gate"
 "glue-system","mods/deathmatch/resources/glue-system/meta.xml","Active tree","True","","","","Cataloged only","Unverified","Complete dossier and publish Script Resources topic"
 "gps","mods/deathmatch/resources/gps/meta.xml","Active tree","True","","","","Cataloged only","Unverified","Complete dossier and publish Script Resources topic"

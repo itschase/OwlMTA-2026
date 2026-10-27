@@ -23,6 +23,12 @@ There is no dedicated staff UI or permission-aware configuration in this resourc
 
 Operators must start `bone_attach` for synchronized attachments and retain the model files declared by this resource's manifest. If `item-texture` is running, artifact texture data is sent through that resource; otherwise ordinary artifact models still attach. No resource settings, database schema, or external service configuration are declared.
 
+## Discord capability classification
+
+Ordinary item wear/removal and fishing-rod presentation should be authorized by the server-owned inventory or active job workflow, not by a global Discord staff role. The account character-switch cleanup is a lifecycle action and should not need Discord. Recon-driven removal is a staff workflow: its capability belongs at the recon/admin action boundary in `admin-system`, then the server may call a trusted internal cleanup function. The artifacts utility itself should not become a general staff authorization service. No artifact-specific donor entitlement was confirmed in this audit; if supporter cosmetics are introduced, use the adapter's separate donor-tier result and keep it distinct from moderation capabilities. Role IDs are not defined in this resource.
+
+The eventual call path should use the reusable [MTA Discord Identity adapter](https://github.com/itschase/mta-discord-identity) through an Owl-side authorization facade. The plugin's server-side `hasCapability` export answers only the global grant question; inventory ownership, job state, player identity, and local authorization still require their own checks. Current Owl source is not integrated with that plugin, and no capability gate is fixed or runtime-verified here.
+
 ## Technical map and connections
 
 - Manifest: [`meta.xml`](../../mods/deathmatch/resources/artifacts/meta.xml) loads `s_artifacts.lua`, `g_artifacts.lua`, `c_artifacts.lua`, and `c_replace.lua`; it declares model, shader, and texture files.
@@ -46,6 +52,7 @@ The server does not check whether `createObject` succeeded before applying scale
 - **Wear events do not prove an item or job entitlement.** `artifacts:add` restricts a remote caller to its own player, but accepts any defined artifact ID without checking server inventory ownership or a validated job session. The fishing client uses the same remote event to request a rod. This is an authority/workflow defect at the boundary between appearance and inventory/job state. See [Issue #325](https://github.com/itschase/OwlMTA-2026/issues/325).
 - **Empty bulk cleanup dereferences a missing list.** `/removeartifacts` evaluates `#artifactsList[player]` before calling cleanup. When the player has no list entry, the expression applies the length operator to `nil`; provide a zero-count path. See [Issue #326](https://github.com/itschase/OwlMTA-2026/issues/326).
 - **Creation/texture failure state is not explicit.** `createObject`, attachment exports, client shader creation, and texture creation results are not handled consistently. Add bounded diagnostic records and recoverable no-object/no-texture behavior after the desired degraded behavior is defined. Shared attachment failure contracts overlap [Issue #310](https://github.com/itschase/OwlMTA-2026/issues/310).
+- **Client texture handles are not retained for cleanup.** The client creates one shader and texture per requested entry, discards the handles, and has no per-object release path. See [Issue #330](https://github.com/itschase/OwlMTA-2026/issues/330); memory impact remains unmeasured.
 - **Wear limit is only a TODO.** Source comments mention limiting artifacts per bone, but the current logic permits any combination not already duplicated by artifact ID. Whether restrictions are desired is a gameplay design decision, not an existing defect.
 
 The calls to `artifacts:add` and `artifacts:remove` are protected against a remote player selecting a different target by `if client and player ~= client then return`. That check does not establish item ownership. Donor, staff, and GameMaster policy does not belong in this cosmetic resource; capabilities should remain separately defined and configured.

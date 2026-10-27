@@ -22,10 +22,25 @@ Commands are a valid interface for operators and experienced users, but they can
 - Classify the task: quick status/lookup, repeatable personal action, world-object interaction, staff workflow, or server-operator maintenance.
 - Compare an alternative appropriate to that task: persistent dashboard/panel for broad management, contextual action for nearby entities, guided form for multi-field operations, keybind for frequent actions, or a discoverable help/search catalog for rare commands.
 - Map each proposed interaction to the same server-owned permission, validation, state, persistence, and audit path as the existing command. A new UI must not widen authority or trust client-submitted values.
+- For every command and protected server event, classify whether it needs a Discord-derived capability. Record the proposed capability key, plugin/host-adapter call boundary, separate local gameplay checks, and outage/expired-grant behavior. Explicitly mark actions that should remain local gameplay, faction/duty, donor-only, or MTA-operator authorization rather than inventing a Discord gate.
 - Keep aliases as a fallback where useful; document whether they are player-facing, staff-only, operator-only, deprecated, or intentionally retained for automation.
 - Record source-confirmed current behavior separately from proposed interaction design, and link cross-resource overlap rather than creating duplicated panels.
 
 The cross-resource proposal and evaluation criteria are maintained in [`COMMAND_AND_INTERACTION_STRATEGY.md`](COMMAND_AND_INTERACTION_STRATEGY.md).
+
+## Discord capability review for scripts
+
+The reusable [MTA Discord Identity adapter](https://github.com/itschase/mta-discord-identity) exposes server exports for `hasCapability(player, name)`, `getDonorTier(player)`, linking/ticket exchange, and session clearing. Owl's host integration still has to resolve the trusted local account ID and make local policy decisions. The adapter returns only named capabilities and a separate donor tier; raw Discord role IDs remain in the operator-managed identity-service configuration.
+
+For each resource command, remote event, export, and staff control, auditors should record:
+
+1. Whether the operation is a normal player action, character-owned action, faction-rank/duty action, global staff/GameMaster action, donor entitlement, or server-operator action.
+2. If a Discord grant is appropriate, the narrow named capability key and exact server-side action boundary where it should be checked.
+3. The independent local conditions that still apply: actor derived from MTA `client`, ownership, active character, faction membership/rank, duty, target/proximity/world, limits, and current state.
+4. Behavior when unlinked, expired, revoked, role-removed, plugin/API unavailable, or the adapter resource is stopped. Elevated actions fail closed; ordinary local gameplay and process boot must not become accidental API dependencies.
+5. Whether the donor tier is relevant. `getDonorTier` is entitlement information only and must never replace a staff/GameMaster capability.
+
+Do not scatter role IDs, Discord REST requests, bot tokens, or raw-role comparisons through gameplay resources. Prefer one Owl-side authorization facade over the generic adapter, then migrate call sites by capability with legacy-policy comparison and rollback. Plugin exports and the host account resolver remain source-level contracts until verified together in the supported MTA runtime.
 
 ## Required resource dossier
 
@@ -37,8 +52,9 @@ Each resource needs these fields, or an explicit `not applicable` with a reason:
 4. **Operator explanation:** configuration keys, dependencies/start order, database/import requirements, secrets, logs, backup/retention, optional integrations, and safe enable/disable instructions.
 5. **Technical map:** client/server/shared scripts, commands and keybinds, events and exports, trusted actor source, permission checks, state machine, validation, rate limits, callbacks/timers, persistence owner, and error handling.
 6. **Connections:** upstream resources called, downstream callers, tables read/written, external endpoints, and related resource dossiers.
-7. **Risks and opportunities:** source defects, security boundaries, data integrity, performance, accessibility, UX friction, configuration gaps, and feasible improvements.
-8. **Evidence and status:** source locations, related Issues/Discussions, static-review findings, and runtime verification state.
+7. **Discord authorization review:** distinguish authentication, global named capability, donor tier, character/faction/duty policy, and MTA operator ACL. Identify the server-only check location and stable adapter contract; document `not required` when applicable.
+8. **Risks and opportunities:** source defects, security boundaries, data integrity, performance, accessibility, UX friction, configuration gaps, and feasible improvements.
+9. **Evidence and status:** source locations, related Issues/Discussions, static-review findings, and runtime verification state.
 
 ## Completion states
 

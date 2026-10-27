@@ -10,7 +10,15 @@ This wave also created Issues #320-#323 after checking current issue matches: un
 
 Audited `artifacts`, added its source dossier, and published [Script Resource Discussion #328](https://github.com/itschase/OwlMTA-2026/discussions/328). Issues #324-#326 cover unbound bulk cleanup, equip entitlement, and the empty `/removeartifacts` command path. Issue #327 in Milestone #4 tracks a cross-resource command inventory and fit-for-purpose in-game alternatives. Published [Plans & Enhancements Discussion #329](https://github.com/itschase/OwlMTA-2026/discussions/329) and added reusable command-audit requirements to the playbook and [Command and Interaction Strategy](COMMAND_AND_INTERACTION_STRATEGY.md).
 
-Current coverage is 70/179 resources with individual Discussions: 64 full source reviews and 6 partial; all are runtime-unverified. New publications in this batch are Discussions #316-#319, #328-#329 and Issues #320-#327. Issues #320-#326 are grouped under Milestone #7; #327 belongs to Milestone #4.
+Added Issue #330 for source-confirmed client texture-handle cleanup in `artifacts`; this issue separates a resource-owned presentation lifecycle from shared attachment state.
+
+Checked the standalone identity plugin at revision `619d18f`: it exposes server-side named-capability and donor-tier checks, and asks the host gamemode to resolve account identity through a server-only callback. Updated the audit standards to record a Discord capability decision for every resource command, protected event, export, and staff control. The intended pattern is one Owl-side authorization facade calling the reusable plugin, followed by each resource's local ownership, faction/duty, proximity, target, and state checks. The external adapter is not integrated into Owl yet; no resource receives a Discord grant by default.
+
+Audited `gatekeepers-system`, published [Script Resource Discussion #334](https://github.com/itschase/OwlMTA-2026/discussions/334), and created Issues #331-#333 for locksmith key settlement, factionless key-list handling, and global ped-damage suppression. No commands are loaded in that resource; its existing NPC context menu is documented as the current interface and an input for future third-eye/context unification.
+
+Posted the per-resource Discord authorization review to the existing [Discord identity Discussion #239](https://github.com/itschase/OwlMTA-2026/discussions/239), linking the audit standard, external adapter contract, and the distinction between Discord grants and local gameplay/faction/donor checks.
+
+Current coverage is 71/179 resources with individual Discussions: 65 full source reviews and 6 partial; all are runtime-unverified. New publications in this batch are Discussions #316-#319, #328-#329, and #334; Issues #320-#333. Issues #320-#326 and #330-#333 are grouped under Milestone #7; #327 belongs to Milestone #4.
 
 The API credential's `CreateDiscussion` permission denial remains a publication-channel constraint; browser publication succeeded. Future Discussion batches should continue using the title form `Script Resource: <resource>` and update the generator, ledger, and index in the same publication batch. Four new discussions were verified live at the GitHub URLs above.
 
@@ -37,7 +45,7 @@ A focused `weapon:modify` server-side ownership/field validation fix is publishe
 
 - `main` was synchronized with `origin/main` before this batch.
 - The manifest census remains 179 resources: 144 active-tree and 35 archived.
-- 70 resources have individual Discussions; the repository now has 70 maintained dossiers (64 full source reviews and 6 partial reviews). All maintained dossier and Discussion findings remain runtime-unverified.
+- 71 resources have individual Discussions; the repository now has 71 maintained dossiers (65 full source reviews and 6 partial reviews). All maintained dossier and Discussion findings remain runtime-unverified.
 - Source review, proposed design, fixed-in-source behavior, and runtime verification remain distinct. All resource dossiers are runtime-unverified.
 - The MTA server has not been started. Static review and safe-start preparation remain the gate.
 
