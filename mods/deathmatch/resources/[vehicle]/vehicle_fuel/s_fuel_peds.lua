@@ -396,25 +396,41 @@ end
 
 function payShopOwner(thePed, fuelCost)
 	-- give shop owner a portion of fuel price
-	local shopLink = tonumber( getElementData( thePed, 'shop_link') )
-	outputDebugString( 'Shop Link: ' .. shopLink )
+	if not (thePed and isElement(thePed)) then
+		outputDebugString("[vehicle_fuel] shop income skipped: fuel ped is unavailable", 2)
+		return false
+	end
+	local shopLink = tonumber(getElementData(thePed, 'shop_link')) or 0
+	outputDebugString('[vehicle_fuel] shop link: ' .. tostring(shopLink), 3)
 	if shopLink > 0 then
-		local money = math.floor( tonumber( fuelCost ) * 0.4 ) -- give 40% to shop owner
-		outputDebugString( 'Money: ' .. money )
-		local findShop = exports.mysql:query('SELECT `id`, `sIncome` FROM `shops` WHERE `shoptype` = 15 AND `dimension` = ' .. getElementData( thePed, 'shop_link') .. ' LIMIT 1')
+		local safeFuelCost = tonumber(fuelCost)
+		if not safeFuelCost or safeFuelCost <= 0 then
+			outputDebugString('[vehicle_fuel] shop income skipped: invalid fuel cost', 2)
+			return false
+		end
+		local money = math.floor(safeFuelCost * 0.4) -- give 40% to shop owner
+		outputDebugString('[vehicle_fuel] shop income amount: ' .. tostring(money), 3)
+		local findShop = exports.mysql:query('SELECT `id`, `sIncome` FROM `shops` WHERE `shoptype` = 15 AND `dimension` = ' .. shopLink .. ' LIMIT 1')
+		if not findShop then
+			outputDebugString('[vehicle_fuel] shop income lookup failed for link ' .. tostring(shopLink), 2)
+			return false
+		end
 
 		local row = exports.mysql:fetch_assoc( findShop )
 		if row then
 			for index, shopPed in pairs( getElementsByType( 'ped')) do
 				if tonumber( getElementData( shopPed, "dbid") ) == tonumber( row.id ) and getElementData( shopPed, "ped:type" ) == 'shop' then
-					outputDebugString( 'Shop ID: ' .. row.id )
+					outputDebugString('[vehicle_fuel] shop income credited to shop ID: ' .. tostring(row.id), 3)
 					exports.anticheat:changeProtectedElementDataEx( shopPed, "sIncome", tonumber( row.sIncome ) + money )
 				end
 			end
 			exports.mysql:query_free( "UPDATE `shops` SET `sIncome` = `sIncome` + " .. money .. " WHERE `id` = " .. row.id )
 		end
-		mysql:free_result( findShop )
+		if findShop then
+			mysql:free_result(findShop)
+		end
 	end
+	return true
 end
 
 function setConvoState(thePlayer, state)
@@ -503,7 +519,7 @@ function createFuelPed(skin, posX, posY, posZ, rotZ, name, int, dim, id, shop_li
 	exports.anticheat:changeProtectedElementDataEx(theNewPed, "name", name:gsub("_", " "), true)
 	exports.anticheat:changeProtectedElementDataEx(theNewPed, "ped:type", "fuel", true)
 	exports.anticheat:changeProtectedElementDataEx(theNewPed, "ped:fuelped",true, true)
-	exports.anticheat:changeProtectedElementDataEx(theNewPed, "shop_link", shop_link, true)
+	exports.anticheat:changeProtectedElementDataEx(theNewPed, "shop_link", tonumber(shop_link) or 0, true)
 
 	-- For the language system
 	exports.anticheat:changeProtectedElementDataEx(theNewPed, "languages.lang1" , 1, false)
@@ -598,7 +614,7 @@ function getNearByFuelPeds(thePlayer, commandName) --maxime
 					if (distance<=10) and (dimension==cdimension) then
 						local dbid = getElementData(thePed, "dbid")
 						local pedName = getElementData(thePed, "name")
-						local shopLink = tonumber(  getElementData(thePed, "shop_link") )
+						local shopLink = tonumber(getElementData(thePed, "shop_link")) or 0
 						outputChatBox("   Fuel NPC ID #" .. dbid .. ", name: "..tostring(pedName):gsub("_", " ") .. ( shopLink > 0 and ' shop link: ' .. shopLink or ''), thePlayer, 255, 126, 0)
 						count = count + 1
 					end

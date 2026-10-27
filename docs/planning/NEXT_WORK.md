@@ -1,8 +1,16 @@
 # Next work record
 
-Last updated: 2026-10-27 during the interior, phone, and MDC documentation batch.
+Last updated: 2026-10-27 during the vehicle-fuel audit continuation.
 
 ## Current continuation — 2026-10-27
+
+Completed a full manifest-script source review of `vehicle_fuel` and expanded its maintained dossier. It now explains player fueling, staff commands and their legacy gates, database/element-data paths, resource connections, MTA event trust boundaries, Discord/API placement, command-to-contextual-action opportunities, and a runtime validation matrix.
+
+Published and verified Issue [#342](https://github.com/itschase/OwlMTA-2026/issues/342) for station conversation and transaction integrity, and Issue [#343](https://github.com/itschase/OwlMTA-2026/issues/343) for POS PIN caller/card authorization. Both were checked against existing open issues before creation and remain runtime-unverified.
+
+Fixed in source: absent fuel-shop links are normalized to `0` when attendants are created/listed, shop-income diagnostics tolerate unavailable peds/invalid charges, and missing shop links skip income settlement safely. This does not close the issues' wider state, trust, database, or transaction work.
+
+Next: review the issues against the repository's SQL wrapper/card schema before implementation; inspect sibling vehicle and bank callers; deduplicate findings against existing issues; then continue the next high-risk active resource and update its dossier/index/Discussion/Issues as one publishing batch. No MTA runtime was started and no automated tests were run; static diff/whitespace review is the only validation for this source adjustment.
 
 Committed and pushed cache, prison, NPC/shop, truck-supply, tow, and map-manager source/dossier updates as [3d4fcc4](https://github.com/itschase/OwlMTA-2026/commit/3d4fcc4). The shop restock path calculates stock keys/prices from server catalog state, settles one-unit restocks without creating an empty delivery, preserves the existing owner/faction payer selection, commits local stock before settlement, and compensates local stock if trucker settlement fails. These writes still are not transactional across resources; a failed compensation is logged. Updated [Issue #182](https://github.com/itschase/OwlMTA-2026/issues/182) to capture this shared ledger boundary and runtime matrix. Updated [Issue #62](https://github.com/itschase/OwlMTA-2026/issues/62), assigned it to Milestone #7, and recorded map validation, actor/state checks, conditional transitions, and incomplete MyISAM rollback limits. Cache #63, prison #54/#341, and the six resource dossiers remain source-only; all need safe-start/runtime verification later. No MTA server was started and no tests were run.
 

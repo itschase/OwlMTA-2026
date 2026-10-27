@@ -1,5 +1,13 @@
 # Issues and Discussions workflow
 
+## Current resource follow-up — `vehicle_fuel`
+
+- Resource guide: [`docs/resources/vehicle_fuel.md`](../resources/vehicle_fuel.md); player/operator notes and MTA API references are consolidated there.
+- Existing resource overview: [Script Resource Discussion #108](https://github.com/itschase/OwlMTA-2026/discussions/108).
+- [Issue #342](https://github.com/itschase/OwlMTA-2026/issues/342) owns attendant conversation state, delayed settlement, and item/vehicle fuel transaction integrity.
+- [Issue #343](https://github.com/itschase/OwlMTA-2026/issues/343) owns POS PIN caller/card binding, safe input/database lookup, throttling, and one-use authorization state.
+- A separate source fix normalizes absent fuel-shop links and prevents nil arithmetic in attendant/shop-income paths. It is not runtime verified; Issue #342 remains open for the larger settlement redesign.
+
 Use both GitHub Issues and Discussions as the project's public working record. Write in the project's voice. Record source-backed findings and decisions without mentioning the tools or people that produced them.
 
 Keep GitHub surfaces audience-specific: Issues are the actionable defect/security backlog; Discussions are split into resource architecture, simplified player Q&A/wiki, staff/admin operations, server-operator runbooks, Discord/API design, and enhancement planning. Version-controlled Markdown remains the detailed source of truth. Where a category is unavailable, use the closest existing category and label the audience at the top of each post.
