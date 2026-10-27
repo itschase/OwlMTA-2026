@@ -12,7 +12,9 @@ The bundled SQL file defines `uniqueID`, `int_diagnose`, and `ext_diagnose`; thi
 
 The `/diagnose` command checks distance and sends a client consent prompt. However, the remotely triggerable `disp_diagnose` event directly invokes the diagnosis handler with client-provided patient, character ID, and recipient parameters. The handler queries the supplied character ID and can send the result to the supplied player without deriving the responding patient from MTA `client` or proving a matching server-held pending consent request. This is tracked in [Issue #444](https://github.com/itschase/OwlMTA-2026/issues/444). Treat unauthorized disclosure as a source risk; no live exploit or runtime behavior was tested.
 
-Other remotely registered server events include `send_response_data`, `init_treat_bodypart`, `init_treat_all`, `init_treat_response`, `send_info`, and `ped_treat`. The treatment trace confirms that the body-part/all-clear events write by a supplied character ID without an authorization check; `init_treat_response` trusts client-provided patient ID, payer, name, and price and clears injuries after `hasMoney` without deducting funds in that handler; `ped_treat` also trusts its payment and character parameters. These source findings are tracked in [Issue #445](https://github.com/itschase/OwlMTA-2026/issues/445). Runtime and economic impact remain unverified. `send_info` and `send_response_data` still need complete source/caller review.
+Other remotely registered server events include `send_response_data`, `init_treat_bodypart`, `init_treat_all`, `init_treat_response`, `send_info`, and `ped_treat`. The treatment trace confirms that the body-part/all-clear events write by a supplied character ID without an authorization check; `init_treat_response` trusts client-provided patient ID, payer, name, and price and clears injuries after `hasMoney` without deducting funds in that handler; `ped_treat` also trusts its payment and character parameters. See [Issue #445](https://github.com/itschase/OwlMTA-2026/issues/445). Separately, the normal NPC flow requests the caller's own character ID, but `send_info` accepts any supplied ID and sends the matching medical flags back to the caller; see [Issue #446](https://github.com/itschase/OwlMTA-2026/issues/446). Runtime and economic impact remain unverified.
+
+`send_response_data` writes injury flags to the event source's own active character after the target's client submits an acceptance value, but the server does not prove that a matching `/injure` request exists or that the accepted injury parameters match one. This may permit self-directed injury-state changes and forged decline messaging; confirm desired gameplay policy before changing it. Treat as an audit candidate rather than a confirmed separate defect until the complete response path is reviewed.
 
 ## Staff, medical roleplay, and Discord boundary
 
@@ -20,7 +22,7 @@ Medical roleplay uses local faction membership and player consent. Discord staff
 
 ## Operator notes and next audit
 
-Before enabling this feature, verify the `health_diagnose` schema and migration/import order, character-ID uniqueness, database failure behavior, loaded callers, and resource start dependencies. Continue tracing every remote event to its player UI and server-internal callers. Deduplicate issue candidates for treatment payer/price authority, body-part state changes, diagnosis retrieval (`send_info`), and ped billing before filing. No MTA server or tests were run.
+Before enabling this feature, verify the `health_diagnose` schema and migration/import order, character-ID uniqueness, database failure behavior, loaded callers, and resource start dependencies. Continue tracing every remote event to its player UI and server-internal callers. No MTA server or tests were run.
 
 ## Runtime verification
 

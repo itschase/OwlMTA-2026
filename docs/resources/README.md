@@ -66,7 +66,7 @@ Every dossier distinguishes source evidence from runtime verification. Presence 
 | Privileged client/server Lua execution utility | [`runcode`](runcode.md) ([Issue #443](https://github.com/itschase/OwlMTA-2026/issues/443)) | Full manifest/command/UI/remote/export/ACL source review; runtime unverified |
 | Client-side GTA sound-effect browser | [`sfxbrowser`](sfxbrowser.md) | Full client-only manifest/GUI/catalog/playback source review; runtime unverified |
 | Shared client font asset for resource UIs | [`fonts`](fonts.md) | Full asset manifest/direct client consumer review; runtime unverified |
-| Character injury, diagnosis, and treatment roleplay | [`health-addon`](health-addon.md) (Issues [#444](https://github.com/itschase/OwlMTA-2026/issues/444)–[#445](https://github.com/itschase/OwlMTA-2026/issues/445)) | Partial injury/diagnosis/treatment event review; remaining event audit and runtime verification pending |
+| Character injury, diagnosis, and treatment roleplay | [`health-addon`](health-addon.md) (Issues [#444](https://github.com/itschase/OwlMTA-2026/issues/444)–[#446](https://github.com/itschase/OwlMTA-2026/issues/446)) | Partial injury/diagnosis/treatment event review; runtime verification pending |
 
 ## Archived resource variants
 
