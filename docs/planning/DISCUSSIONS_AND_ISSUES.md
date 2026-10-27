@@ -358,6 +358,7 @@ Issues #52 (MDC) and #55 (phone) were updated with the additional read, mutation
 - [Issue #437: Bind language preference events to their authenticated owner](https://github.com/itschase/OwlMTA-2026/issues/437)
 - [Issue #438: Select an occupied language slot after unlearning](https://github.com/itschase/OwlMTA-2026/issues/438)
 - [Issue #442: Align performance-browser command and telemetry access policy](https://github.com/itschase/OwlMTA-2026/issues/442)
+- [Issue #443: Restrict remote server-side Lua execution to Lead Scripters](https://github.com/itschase/OwlMTA-2026/issues/443)
 
 The same-name archived copies have separate source identities. Their archive dossiers and separate `(archived)` Script Resource Discussions are indexed from [`docs/resources/README.md`](../resources/README.md). Archive reviews remain partial comparisons, not evidence of current availability or runtime behavior.
 - [Player Guide Q&A #389: How do I use and recharge a flashlight?](https://github.com/itschase/OwlMTA-2026/discussions/389)

@@ -63,6 +63,7 @@ Every dossier distinguishes source evidence from runtime verification. Presence 
 | Faction television broadcast and spectator camera | [`freecam-tv`](freecam-tv.md) ([Script Resource #440](https://github.com/itschase/OwlMTA-2026/discussions/440); [Issue #436](https://github.com/itschase/OwlMTA-2026/issues/436)) | Full manifest/player/item-caller/faction-payout review; runtime unverified |
 | Character language learning, speech, and preferences | [`language-system`](language-system.md) ([Script Resource #441](https://github.com/itschase/OwlMTA-2026/discussions/441); Issues [#437](https://github.com/itschase/OwlMTA-2026/issues/437)–[#438](https://github.com/itschase/OwlMTA-2026/issues/438)) | Full manifest/player/UI/persistence/direct-caller review; runtime unverified |
 | In-game server performance browser and high-CPU sampler | [`ipb`](ipb.md) | Full manifest/access/settings/sampling/player-event source review; runtime unverified |
+| Privileged client/server Lua execution utility | [`runcode`](runcode.md) ([Issue #443](https://github.com/itschase/OwlMTA-2026/issues/443)) | Full manifest/command/UI/remote/export/ACL source review; runtime unverified |
 
 ## Archived resource variants
 

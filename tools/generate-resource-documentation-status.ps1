@@ -39,6 +39,7 @@ $published = @{
     "freecam-tv" = @{ Number = 440; Dossier = "docs/resources/freecam-tv.md"; State = "Full manifest/player/item-caller/faction-payout review; individual Discussion published" }
     "language-system" = @{ Number = 441; Dossier = "docs/resources/language-system.md"; State = "Full manifest/player/UI/persistence/direct-caller review; individual Discussion published" }
     "ipb" = @{ Dossier = "docs/resources/ipb.md"; State = "Full manifest/access/settings/sampling/player-event source review; Discussion pending" }
+    "runcode" = @{ Dossier = "docs/resources/runcode.md"; State = "Full manifest/command/UI/remote/export/ACL source review; Discussion pending" }
     "factions" = @{ Number = 101; Dossier = "docs/resources/factions.md"; State = "Full manifest-script source review; individual Discussion published" }
     "item-system" = @{ Number = 102; Dossier = "docs/resources/item-system.md"; State = "Full manifest-script source review; individual Discussion published" }
     "vehicle" = @{ Number = 107; Dossier = "docs/resources/vehicle.md" }
