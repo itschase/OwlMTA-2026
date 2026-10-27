@@ -20,6 +20,17 @@ It is not a case, evidence, court, or chain-of-custody service. Its current warr
 - Lead administrators/scripters can create accounts; FAA, Trial Administrator, or scripter paths refresh pilot licensing; two migration commands are scripter-only.
 - Donor/supporter status is not an authority predicate in this resource.
 
+## Commands and interaction opportunities
+
+| Command(s) | Current audience and use | Current entry point | Future direction and Discord boundary |
+|---|---|---|---|
+| `/apblist` | Toggles the client's APB overlay. | The in-car/APB presentation is already a contextual overlay. | Keep the shortcut and add the toggle to the vehicle/computer public-safety interface if needed. It must not reveal records to a player who lacks the server-side APB view policy; the overlay switch itself is presentation, not authorization. |
+| `/makemdcaccount [target] [organization] [level]` | Lead Admin or Scripter creates, updates, or removes a character's MDC access level. | Command-based staff provisioning; an account-management GUI also exists. | Improve the existing staff form with target/organization/level preview, explicit confirmation, and audit detail. A proposed `mdc.accounts.manage` Discord capability belongs at the server mutation boundary, with current staff hierarchy and organization scope retained as local checks. |
+| `/refreshpilotlicenses` | Eligible aviation-faction leader, Trial Admin, or Scripter refreshes the shared pilot-license cache. | Operator/staff maintenance shortcut. | Surface refresh status and failure in an aviation/public-safety operator panel; retain the command for recovery. A future named grant may protect the global staff path, but eligible faction leadership remains a separate local authority check. |
+| `/convertmdcaccounts`, `/removeduplicatedaccounts` | Scripter-only migration utilities; the duplicate-removal command explicitly warns not to run twice. | Database maintenance commands, not normal play. | Keep out of the player and general staff dashboards. Replace with versioned, reviewable, repeat-safe migrations with backup, dry-run, and result reporting; retain only a documented operator recovery path. These are database/operator actions and should not become ordinary Discord staff capabilities. |
+
+The `/mdc` shortcut remains commented out; normal access is through the existing vehicle/computer entry points. These command alternatives are proposals, not implemented replacements. Record every future command against its manifest-loaded script and preserve the server authorization/data path. See [Issue #327](https://github.com/itschase/OwlMTA-2026/issues/327).
+
 ## Operator and technical map
 
 - Manifest: [`mods/deathmatch/resources/mdc/meta.xml`](../../mods/deathmatch/resources/mdc/meta.xml)
@@ -33,7 +44,7 @@ It is not a case, evidence, court, or chain-of-custody service. Its current warr
 
 ## Source-confirmed risks
 
-- Login now derives the actor character ID server-side, but nearly every downstream read and mutation trusts client arguments and `source` without rechecking account, duty, capability, target, or organization. This exposes person searches, crime/warrant/profile/pilot/APB/ANPR/stolen/toll/account mutation and deletion.
+- Login and the main view now bind to the current logged-in requester and derive the active character ID from server state; the client-supplied character ID is ignored. The main response uses the validated requester for its permission checks and reply. These are fixed-in-source entry-boundary changes, not runtime verified. Nearly every downstream read and mutation still needs action-specific checks for account, duty, capability, target, and organization. This includes person searches and crime/warrant/profile/pilot/APB/ANPR/stolen/toll/account mutations and deletions.
 - Search returns broad identity, contact, property, vehicle, crime, license, wanted, and history data without server authorization or field minimization. Global APB/ANPR lists and overlays are not organization/audience filtered.
 - MDC account administration is client-authorized only. Account creation corrupts the requested level and checks duplicate organization using the wrong value.
 - Deleted-faction cleanup passes an undefined variable; empty group results do not establish a safe empty cache.
@@ -44,7 +55,7 @@ It is not a case, evidence, court, or chain-of-custody service. Its current warr
 
 ## Tracked work and target direction
 
-- [Issues #41](https://github.com/itschase/OwlMTA-2026/issues/41) and [#52](https://github.com/itschase/OwlMTA-2026/issues/52) own actor binding, server-side read/mutation authorization, privacy, and remote-event coverage.
+- [Issue #52](https://github.com/itschase/OwlMTA-2026/issues/52) tracks verification of active-character binding at login/main entry; that boundary is fixed in source but awaits runtime verification. [Issue #41](https://github.com/itschase/OwlMTA-2026/issues/41) tracks the separate broad review of search and mutation authorization, privacy, and remote-event coverage.
 - [Issue #89](https://github.com/itschase/OwlMTA-2026/issues/89) owns authorized APB creation.
 - [Issues #153](https://github.com/itschase/OwlMTA-2026/issues/153), [#187](https://github.com/itschase/OwlMTA-2026/issues/187), [#188](https://github.com/itschase/OwlMTA-2026/issues/188), and [#189](https://github.com/itschase/OwlMTA-2026/issues/189) define the future evidence, warrant, incident-alert, and justice-record boundaries.
 - [Issue #193](https://github.com/itschase/OwlMTA-2026/issues/193) corrects account level/organization uniqueness; [#194](https://github.com/itschase/OwlMTA-2026/issues/194) repairs orphan cleanup and empty caches; [#195](https://github.com/itschase/OwlMTA-2026/issues/195) repairs search results and DB-result lifecycle.

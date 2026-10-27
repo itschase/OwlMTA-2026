@@ -2,8 +2,10 @@
 local messageLimit = 20
 local threadLimit = 100
 local function getRequester()
+    local player = client or source
     if client and client ~= source then return nil end
-    return client or source
+    if not isElement(player) or getElementType(player) ~= "player" or getElementData(player, "loggedin") ~= 1 then return nil end
+    return player
 end
 
 local function ownsPhone(player, phone)
@@ -47,9 +49,7 @@ end
 addEvent("phone:fetchSMS", true)
 addEventHandler("phone:fetchSMS", root, fetchSMS)
 
-function fetchOneSMSThread(fetchForPhone, messageSentTo, outGoing, forceUpdateContactList1, limit)
-    local player = getRequester()
-    if not player then return end
+local function fetchOneSMSThreadForPlayer(player, fetchForPhone, messageSentTo, outGoing, forceUpdateContactList1, limit)
     fetchForPhone = ownsPhone(player, fetchForPhone)
     messageSentTo = tonumber(messageSentTo)
     local SMSs = {}
@@ -70,12 +70,16 @@ function fetchOneSMSThread(fetchForPhone, messageSentTo, outGoing, forceUpdateCo
     --outputDebugString("fetchOneSMSThread / "..getPlayerName(source))
     triggerClientEvent(player, "phone:receiveOneSMSThreadFromServer", player, fetchForPhone, messageSentTo, SMSs, outGoing)
 end
+
+function fetchOneSMSThread(fetchForPhone, messageSentTo, outGoing, forceUpdateContactList1, limit)
+    local player = getRequester()
+    if not player then return end
+    fetchOneSMSThreadForPlayer(player, fetchForPhone, messageSentTo, outGoing, forceUpdateContactList1, limit)
+end
 addEvent("phone:fetchOneSMSThread", true)
 addEventHandler("phone:fetchOneSMSThread", root, fetchOneSMSThread)
 
-function sendSMS(from, to, content, private, showChatNotification)
-    local player = getRequester()
-    if not player then return false end
+local function sendSMSForPlayer(player, from, to, content, showChatNotification)
     from = ownsPhone(player, from)
     to = tonumber(to)
     local powerOn, isSecret
@@ -102,7 +106,7 @@ function sendSMS(from, to, content, private, showChatNotification)
         if not t_powerOn then --not existed
             local notExisted = "Delivery has failed to these recipients: #"..to..". Number does not exist."
             mysql:query_insert_free("INSERT INTO `phone_sms` SET `from`='"..to.."', `to`='"..from.."', `content`='"..exports.global:toSQL(notExisted).."' ")
-            triggerEvent("phone:fetchOneSMSThread", player, from, to, true)
+            fetchOneSMSThreadForPlayer(player, from, to, true)
 
             exports['logs']:dbLog(player, 30, loggedElements, content)
             return false
@@ -115,15 +119,22 @@ function sendSMS(from, to, content, private, showChatNotification)
 
     local found, target = searchForPhone(to)
     if found and target then
-        triggerEvent("phone:fetchOneSMSThread", target, to, from)
+        fetchOneSMSThreadForPlayer(target, to, from)
         table.insert(loggedElements, target)
         if alertUser then
             triggerClientEvent(target, "newSMSReceived", resourceRoot, from, to, content)
         end
     end
-    triggerEvent("phone:fetchOneSMSThread", player, from, to, true)
+    fetchOneSMSThreadForPlayer(player, from, to, true)
 
     exports['logs']:dbLog(player, 30, loggedElements, content)
+end
+
+function sendSMS(from, to, content, private, showChatNotification)
+    local player = getRequester()
+    if not player then return false end
+    -- The client-supplied privacy flag is intentionally ignored; the owned phone's setting is authoritative.
+    return sendSMSForPlayer(player, from, to, content, showChatNotification)
 end
 addEvent("phone:sendSMS", true)
 addEventHandler("phone:sendSMS", root, sendSMS)
@@ -146,7 +157,7 @@ for i = 1, 20 do
                         local message = table.concat({...}, " ")
                         local power = getPhoneSettings(from,  true)
                         if power and power ~= 0 then 
-                            triggerEvent("phone:sendSMS", thePlayer, from, to, message, 0, true)
+                            sendSMSForPlayer(thePlayer, from, to, message, true)
                             return
                         else
                             outputChatBox("Your phone needs to be powered on to be able to SMS.", thePlayer, 255, 0, 0)
@@ -161,19 +172,23 @@ for i = 1, 20 do
 end
 
 function startRingingSMS(fromPhone, smsTone, volume)
+    local player = getRequester()
+    if not player then return false end
+    fromPhone = ownsPhone(player, fromPhone)
+    if not fromPhone then return false end
     local phoneSettings = {getPhoneSettings(fromPhone, true)}
-    turnedOn = phoneSettings[1]
+    local turnedOn = phoneSettings[1]
     smsTone = phoneSettings[8]
     volume = phoneSettings[9]
 
-    if turnedOn ~= 0 then 
-        for _,nearbyPlayer in ipairs(exports.global:getNearbyElements(source, "player"), 10) do
-            triggerClientEvent(nearbyPlayer, "startRinging", source, 2, smsTone, volume)
+    if turnedOn and turnedOn ~= 0 then
+        for _,nearbyPlayer in ipairs(exports.global:getNearbyElements(player, "player"), 10) do
+            triggerClientEvent(nearbyPlayer, "startRinging", player, 2, smsTone, volume)
         end
         if smsTone > 1 then
-            triggerEvent('sendAme', source, "'s cellphone starts to ring.")
+            triggerEvent('sendAme', player, "'s cellphone starts to ring.")
         end
-        outputChatBox("Your phone #"..fromPhone.." has received a new text message.", source) 
+        outputChatBox("Your phone #"..fromPhone.." has received a new text message.", player)
     end
 end
 addEvent("phone:startRingingSMS", true)
@@ -184,7 +199,7 @@ function updateSMSViewedState(fromPhone, threadIndex)
     fromPhone = player and ownsPhone(player, fromPhone)
     threadIndex = tonumber(threadIndex)
     if fromPhone and threadIndex and mysql:query_free("UPDATE `phone_sms` SET `viewed`=1 WHERE `from`='"..threadIndex.."' AND `to`='"..fromPhone.."' ") then
-        triggerEvent("phone:fetchOneSMSThread", player, fromPhone, threadIndex)
+        fetchOneSMSThreadForPlayer(player, fromPhone, threadIndex)
     end
 end
 addEvent("phone:updateSMSViewedState", true)

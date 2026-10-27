@@ -251,6 +251,9 @@ Issues #52 (MDC) and #55 (phone) were updated with the additional read, mutation
 
 ### Recent Issues
 
+- [#41: Bind MDC access to the caller and authorize search/mutation events](https://github.com/itschase/OwlMTA-2026/issues/41)
+- [#52: Bind MDC login to the caller's authenticated character](https://github.com/itschase/OwlMTA-2026/issues/52)
+- [#55: Scope phone messages and contacts to the caller's owned phone](https://github.com/itschase/OwlMTA-2026/issues/55)
 - [#64: Review interior-manager permissions and catalog data access](https://github.com/itschase/OwlMTA-2026/issues/64)
 - [#306: Bind activities snowball events to the authenticated player](https://github.com/itschase/OwlMTA-2026/issues/306)
 - [#307: Restrict persistent automatic official-interiors catalog repair](https://github.com/itschase/OwlMTA-2026/issues/307)
@@ -277,5 +280,6 @@ Issues #52 (MDC) and #55 (phone) were updated with the additional read, mutation
 - [#335: Bind animation changes and synchronization to the requesting player](https://github.com/itschase/OwlMTA-2026/issues/335)
 - [#337: Validate help command catalog writes and align editor visibility with server policy](https://github.com/itschase/OwlMTA-2026/issues/337)
 - [#338: Bind help command-list refreshes to the requesting player](https://github.com/itschase/OwlMTA-2026/issues/338)
+- [#340: Separate 911 log access from donor entitlements](https://github.com/itschase/OwlMTA-2026/issues/340)
 Milestone [M4 — Organizations & Living Roleplay](https://github.com/itschase/OwlMTA-2026/milestone/6) groups the compatibility-first organization, contextual interaction, criminal opportunity, evidence, and connected-roleplay foundation work. M0/M1 portability and security gates remain prerequisites.
 

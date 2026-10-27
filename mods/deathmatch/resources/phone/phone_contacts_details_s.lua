@@ -11,7 +11,9 @@ end
 
 function updateContactDetails(id, name, number, email, address, favo)
 	local player, contact = getOwnedContact(id)
-	if not player or type(name) ~= "string" or type(number) ~= "string" or not tonumber(number) or string.len(name) < 1 or string.len(number) < 1 then
+	if not player or type(name) ~= "string" or type(number) ~= "string" or type(email) ~= "string" or type(address) ~= "string"
+		or not tonumber(number) or string.len(name) < 1 or string.len(name) > 50 or string.len(number) < 1 or string.len(number) > 50
+		or string.len(email) > 60 or string.len(address) > 100 then
 		return false
 	end
 	if mysql:query_free("UPDATE `phone_contacts` SET `entryName`='"..exports.global:toSQL(name).."', `entryNumber`='"..exports.global:toSQL(number).."', `entryEmail`='"..exports.global:toSQL(email or "").."', `entryAddress`='"..exports.global:toSQL(address or "").."', `entryFavorited`='"..(tonumber(favo) == 1 and 1 or 0).."' WHERE `id`='"..contact.id.."' AND `phone`='"..mysql:escape_string(tostring(contact.phone)).."' ") then

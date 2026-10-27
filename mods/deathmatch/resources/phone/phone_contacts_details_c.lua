@@ -102,7 +102,7 @@ function openContactDetails(name, number, yoffset)
 			if isPhoneGUICreated() then
 				guiSetEnabled(wPhoneMenu, false)
 			end
-			triggerServerEvent("phone:contacts:details:update", localPlayer, theContact2.id, textName, textNumber,textAddress, textAddress, favorited)
+			triggerServerEvent("phone:contacts:details:update", localPlayer, theContact2.id, textName, textNumber, textEmail, textAddress, favorited)
 		end, false)
 		addEventHandler("onClientGUIClick", bDelete_contact_details, function()
 			if isPhoneGUICreated() then

@@ -1,8 +1,10 @@
 # Next work record
 
-Last updated: 2026-10-27 during the animation-system audit and publication.
+Last updated: 2026-10-27 during the interior, phone, and MDC documentation batch.
 
 ## Current publication state — 2026-10-27
+
+Consolidated the pending phone/MDC source work after rechecking the live checkout and manifest callers. Phone SMS and contact updates now validate requester/login and owned phone/contact state, respect server-owned privacy settings, bound contact fields to the table schema, and the contact editor sends email separately from address. MDC login/main derive the active character from the validated requester; downstream data and mutation handlers remain open. Added command/interaction reviews for phone and MDC, including future Discord capability boundaries and where local gameplay/faction/operator authority must remain. Updated Issue #55 to separate source-fixed scope from residual phone paths, #41/#52 to correct MDC progress, and created [Issue #340](https://github.com/itschase/OwlMTA-2026/issues/340) for Supporter access to emergency-call logs. Static review only; no MTA start or runtime verification.
 
 Retrospective command review now has its first applied example: `interior-manager`. Its dossier records `/interiors` and `/ints`, `/checkint` and `/checkinterior`, `/setintfaction`, and `/setinttomyfaction`, distinguishing current catalog/details UI from the proposed guided/contextual improvements. It also documents where an external Discord capability could apply and where property ownership and faction rank must remain local authority. Updated [Issue #64](https://github.com/itschase/OwlMTA-2026/issues/64) to replace stale event/search claims with current source evidence and the remaining donor-privacy and catalog data-shape work; linked findings to [Issue #327](https://github.com/itschase/OwlMTA-2026/issues/327). Static review only; no server started.
 
