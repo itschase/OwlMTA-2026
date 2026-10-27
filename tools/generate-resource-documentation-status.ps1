@@ -29,6 +29,9 @@ $published = @{
     "gps" = @{ Dossier = "docs/resources/gps.md"; State = "Full manifest/player flow/shared helper/caller review; individual Discussion pending" }
     "lottery-system" = @{ Dossier = "docs/resources/lottery-system.md"; State = "Full manifest/shop/item/event caller review; individual Discussion pending" }
     "report" = @{ Dossier = "docs/resources/report.md"; State = "Full manifest/player/staff/queue/statistics review; individual Discussion pending" }
+    "id-system" = @{ Dossier = "docs/resources/id-system.md"; State = "Full active manifest and session-ID lifecycle/caller review; individual Discussion pending" }
+    "realism" = @{ Dossier = "docs/resources/realism.md"; State = "Full bundled manifest/command/event/dependency review; individual Discussion pending" }
+    "hud" = @{ Dossier = "docs/resources/hud.md"; State = "Full active manifest/player/staff/display/dependency review; individual Discussion pending" }
     "factions" = @{ Number = 101; Dossier = "docs/resources/factions.md"; State = "Full manifest-script source review; individual Discussion published" }
     "item-system" = @{ Number = 102; Dossier = "docs/resources/item-system.md"; State = "Full manifest-script source review; individual Discussion published" }
     "vehicle" = @{ Number = 107; Dossier = "docs/resources/vehicle.md" }

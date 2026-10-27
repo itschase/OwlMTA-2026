@@ -53,6 +53,9 @@ Every dossier distinguishes source evidence from runtime verification. Presence 
 | GPS, map navigation, and caller street context | [`gps`](gps.md) (Issues [#396](https://github.com/itschase/OwlMTA-2026/issues/396)–[#397](https://github.com/itschase/OwlMTA-2026/issues/397)) | Full manifest/player-flow/caller review; runtime unverified |
 | Lottery draw and dormant ticket purchase | [`lottery-system`](lottery-system.md) (Issue #398) | Full source review; ticket sales disabled; runtime unverified |
 | Player reports and staff response queue | [`report`](report.md) (Issues [#399](https://github.com/itschase/OwlMTA-2026/issues/399)–[#400](https://github.com/itschase/OwlMTA-2026/issues/400); related [#14](https://github.com/itschase/OwlMTA-2026/issues/14) and [#279](https://github.com/itschase/OwlMTA-2026/issues/279)) | Full manifest/player/staff/queue review; runtime unverified |
+| Temporary player session IDs | [`id-system`](id-system.md) | Full ID lifecycle/caller review; runtime unverified |
+| Vehicle safety, roleplay interactions, and ambient realism | [`realism`](realism.md) (Issues #401–#409) | Full manifest/command/event/dependency review; runtime unverified |
+| Player HUD, staff display, and overlay notifications | [`hud`](hud.md) (Issues #410–#413) | Full manifest/player/staff/dependency review; runtime unverified |
 
 ## Archived resource variants
 

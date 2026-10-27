@@ -16,7 +16,13 @@ The active `dynamic_lighting_vehicles` review also found a source-confirmed mode
 
 Completed independent reviews of `gps`, `lottery-system`, and `report`. GPS issues #396–#397 cover ZIP lookup and per-player street-cache correctness. Lottery Issue #398 records a dormant exported cooldown defect while clearly noting that ticket sales are disabled. Report Issues #399–#400 cover client-bound report submissions and client-supplied session counters; the dossier documents the active Help Center path, staff commands, queue durability limits, and missing staff-action logs.
 
-The regenerated ledger maps 98 of 179 manifest rows to dossiers: 86 full reviews and 12 partial reviews; all runtime-unverified. The four same-name archive dossiers are comparisons rather than full per-script audits. Individual Script Resource Discussions remain pending for recently added resource dossiers.
+The `id-system` dossier now documents session IDs as temporary connection identifiers, their player-pool dependency, ID reuse, and the lead-admin `/fakeme` path. No separate defect issue was warranted by the static source review. Discord identity must remain tied to trusted account/character identity, never this session slot.
+
+The `realism` resource audit covers its bundled vehicle, item, ambient, and presentation systems, commands, direct dependencies, and Discord boundaries. Issues #401–#409 isolate crash/seatbelt/handbrake/glowstick/walking-style/smoking/alarm/drunkness findings. `weapon jams` and district alarm reporting are explicitly documented as commented out, not active features.
+
+The `hud` dossier covers player panels, statistics, staff/supporter display separation, commands, notification exports, and its high fan-in dependencies. Issues #410–#413 track stats caller/privacy binding, forced blur state, overlapping achievement timers, and the compiled-only interface source/build gap. The `/stats` owner activity timestamp side effect is documented for policy review, not filed as a confirmed defect.
+
+The regenerated ledger maps 101 of 179 manifest rows to dossiers: 89 full reviews and 12 partial reviews; all runtime-unverified. The four same-name archive dossiers are comparisons rather than full per-script audits. Individual Script Resource Discussions remain pending for recently added resource dossiers.
 
 ## Latest continuation — 2026-10-27
 

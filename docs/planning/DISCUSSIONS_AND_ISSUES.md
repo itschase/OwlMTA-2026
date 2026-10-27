@@ -327,6 +327,8 @@ Issues #52 (MDC) and #55 (phone) were updated with the additional read, mutation
 - [Issue #392: Use the active vehicle light mode for darkness normalization](https://github.com/itschase/OwlMTA-2026/issues/392)
 - [Issues #396–#398: GPS lookup/cache and dormant lottery cooldown](https://github.com/itschase/OwlMTA-2026/issues/396)
 - [Issues #399–#400: Report submission trust and session-stat integrity](https://github.com/itschase/OwlMTA-2026/issues/399)
+- [Issues #401–#409: realism vehicle, item, timer, alarm, and staff event findings](https://github.com/itschase/OwlMTA-2026/issues/401)
+- [Issues #410–#413: HUD stats, blur, popup lifecycle, and compiled interface](https://github.com/itschase/OwlMTA-2026/issues/410)
 
 The same-name archived copies have separate source identities. Their archive dossiers are indexed from [`docs/resources/README.md`](../resources/README.md); publish archive-specific Script Resource Discussions with a consistent suffix such as `(archived)` rather than reusing the active resource thread.
 - [Player Guide Q&A #389: How do I use and recharge a flashlight?](https://github.com/itschase/OwlMTA-2026/discussions/389)
