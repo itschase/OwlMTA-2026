@@ -1,6 +1,14 @@
 # Next work record
 
-Last updated: 2026-10-27 after publishing 12 standardized Script Resource Discussions.
+Last updated: 2026-10-27 after documenting and publishing the freecam, freecam-TV, and language-system batch.
+
+## Latest continuation — staff camera, faction TV, and language systems
+
+Added maintained dossiers for [`freecam`](../resources/freecam.md), [`freecam-tv`](../resources/freecam-tv.md), and [`language-system`](../resources/language-system.md), with standardized Script Resources Discussions [#439](https://github.com/itschase/OwlMTA-2026/discussions/439), [#440](https://github.com/itschase/OwlMTA-2026/discussions/440), and [#441](https://github.com/itschase/OwlMTA-2026/discussions/441). The reviews trace privileged camera state through staff/recon callers; faction-TV item, audience, and payout flows; and character language slots through UI, persistence, chat, phone, donor, and admin callers.
+
+Created [Issues #435–#438](https://github.com/itschase/OwlMTA-2026/issues/435) for server-boundary review of freecam activation, TV spectator requests, language preference events, and language-slot selection. Updated those issue records with their published resource discussions. The immediately prior batch documented [`gate-manager`](../resources/gate-manager.md), [`selfck-system`](../resources/selfck-system.md), and [`scoreboard`](../resources/scoreboard.md) in Discussions [#432](https://github.com/itschase/OwlMTA-2026/discussions/432)–[#434](https://github.com/itschase/OwlMTA-2026/discussions/434), with Issues [#429](https://github.com/itschase/OwlMTA-2026/issues/429)–[#431](https://github.com/itschase/OwlMTA-2026/issues/431). Existing local policy boundaries remain authoritative: Discord capabilities must not replace character ownership, faction membership, item/key checks, or established staff policy, and donor tiers are not staff authority.
+
+Regenerated `RESOURCE_DOCUMENTATION_STATUS.csv` after adding these mappings. It records the current count of reviewed manifest rows, distinguishes full from partial archived-source coverage, and marks every runtime state unverified. Continue with cataloged-only active resources in dependency/caller order; choose a bounded batch, trace each manifest through player/staff/operator entry points and direct callers, search existing Issues before filing, then update the dossier, one-to-one Script Resources topic, ledger, and cross-linked tracker together. Before any server boot, complete static dependency, schema, and startup-order review plus the safe-start preflight.
 
 ## Latest continuation — archived resource variants and active `grid`
 
@@ -22,7 +30,7 @@ The `realism` resource audit covers its bundled vehicle, item, ambient, and pres
 
 The `hud` dossier covers player panels, statistics, staff/supporter display separation, commands, notification exports, and its high fan-in dependencies. Issues #410–#413 track stats caller/privacy binding, forced blur state, overlapping achievement timers, and the compiled-only interface source/build gap. The `/stats` owner activity timestamp side effect is documented for policy review, not filed as a confirmed defect.
 
-The regenerated ledger maps 101 of 179 manifest rows to dossiers: 89 full reviews and 12 partial reviews; all runtime-unverified. The five archive dossiers are comparisons rather than full per-script audits. Published one-to-one Script Resource Discussions for active `grid`, `dynamic_lighting`, `dynamic_lighting_vehicles`, `license-system`, `gps`, `lottery-system`, and `report`, plus archive-specific threads for `dynamic_lighting`, `dynamic_lighting_flash`, `dynamic_lighting_vehicles`, `grid`, and `dynamic_lighting_projectiles`. The discussion tracker and resource index now link all 12 threads. Script Resource Discussions remain pending for the later `id-system`, `realism`, and `hud` dossiers; request permission before publishing those outside the approved batch.
+The regenerated ledger maps 101 of 179 manifest rows to dossiers: 89 full reviews and 12 partial reviews; all runtime-unverified. The five archive dossiers are comparisons rather than full per-script audits. Published one-to-one Script Resource Discussions for active `grid`, `dynamic_lighting`, `dynamic_lighting_vehicles`, `license-system`, `gps`, `lottery-system`, `report`, `id-system`, `realism`, and `hud`, plus archive-specific threads for `dynamic_lighting`, `dynamic_lighting_flash`, `dynamic_lighting_vehicles`, `grid`, and `dynamic_lighting_projectiles`. The discussion tracker and resource index link all 15 threads. Remaining cataloged-only resources should be audited next, beginning with their loaded scripts, caller graph, player/staff/operator use, persistence, and existing issue coverage.
 
 ## Latest continuation — 2026-10-27
 

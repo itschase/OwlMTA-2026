@@ -22,16 +22,22 @@ $published = @{
     "elections" = @{ Number = 378; Dossier = "docs/resources/elections.md"; State = "Full manifest and direct-caller source review; individual Discussion published" }
     "driveby" = @{ Number = 386; Dossier = "docs/resources/driveby.md"; State = "Full manifest/client/server/export source review; individual Discussion published" }
     "dynamic_lighting_flash" = @{ Number = 388; Dossier = "docs/resources/dynamic_lighting_flash.md"; State = "Full manifest-script and direct-caller source review; individual Discussion published" }
-    "dynamic_lighting" = @{ Dossier = "docs/resources/dynamic_lighting.md"; State = "Partial manifest and consumer API review; individual Discussion pending" }
-    "dynamic_lighting_vehicles" = @{ Dossier = "docs/resources/dynamic_lighting_vehicles.md"; State = "Full manifest and direct-export source review; individual Discussion pending" }
-    "grid" = @{ Dossier = "docs/resources/grid.md"; State = "Full active manifest and exported-helper source review; runtime unverified" }
-    "license-system" = @{ Dossier = "docs/resources/license-system.md"; State = "Full manifest and client/server/staff flow source review; individual Discussion pending" }
-    "gps" = @{ Dossier = "docs/resources/gps.md"; State = "Full manifest/player flow/shared helper/caller review; individual Discussion pending" }
-    "lottery-system" = @{ Dossier = "docs/resources/lottery-system.md"; State = "Full manifest/shop/item/event caller review; individual Discussion pending" }
-    "report" = @{ Dossier = "docs/resources/report.md"; State = "Full manifest/player/staff/queue/statistics review; individual Discussion pending" }
-    "id-system" = @{ Dossier = "docs/resources/id-system.md"; State = "Full active manifest and session-ID lifecycle/caller review; individual Discussion pending" }
-    "realism" = @{ Dossier = "docs/resources/realism.md"; State = "Full bundled manifest/command/event/dependency review; individual Discussion pending" }
-    "hud" = @{ Dossier = "docs/resources/hud.md"; State = "Full active manifest/player/staff/display/dependency review; individual Discussion pending" }
+    "dynamic_lighting" = @{ Number = 415; Dossier = "docs/resources/dynamic_lighting.md"; State = "Partial manifest and consumer API review; individual Discussion published" }
+    "dynamic_lighting_vehicles" = @{ Number = 416; Dossier = "docs/resources/dynamic_lighting_vehicles.md"; State = "Full manifest and direct-export source review; individual Discussion published" }
+    "grid" = @{ Number = 414; Dossier = "docs/resources/grid.md"; State = "Full active manifest and exported-helper source review; individual Discussion published" }
+    "license-system" = @{ Number = 417; Dossier = "docs/resources/license-system.md"; State = "Full manifest and client/server/staff flow source review; individual Discussion published" }
+    "gps" = @{ Number = 418; Dossier = "docs/resources/gps.md"; State = "Full manifest/player flow/shared helper/caller review; individual Discussion published" }
+    "lottery-system" = @{ Number = 419; Dossier = "docs/resources/lottery-system.md"; State = "Full manifest/shop/item/event caller review; individual Discussion published" }
+    "report" = @{ Number = 420; Dossier = "docs/resources/report.md"; State = "Full manifest/player/staff/queue/statistics review; individual Discussion published" }
+    "id-system" = @{ Number = 426; Dossier = "docs/resources/id-system.md"; State = "Full active manifest and session-ID lifecycle/caller review; individual Discussion published" }
+    "realism" = @{ Number = 427; Dossier = "docs/resources/realism.md"; State = "Full bundled manifest/command/event/dependency review; individual Discussion published" }
+    "hud" = @{ Number = 428; Dossier = "docs/resources/hud.md"; State = "Full active manifest/player/staff/display/dependency review; individual Discussion published" }
+    "gate-manager" = @{ Number = 432; Dossier = "docs/resources/gate-manager.md"; State = "Full manifest and direct client/server event-flow review; individual Discussion published" }
+    "selfck-system" = @{ Number = 433; Dossier = "docs/resources/selfck-system.md"; State = "Full manifest/player/staff/character-death flow review; individual Discussion published" }
+    "scoreboard" = @{ Number = 434; Dossier = "docs/resources/scoreboard.md"; State = "Full manifest and client/server display-source review; individual Discussion published" }
+    "freecam" = @{ Number = 439; Dossier = "docs/resources/freecam.md"; State = "Full manifest/player/server-event/export/direct-caller review; individual Discussion published" }
+    "freecam-tv" = @{ Number = 440; Dossier = "docs/resources/freecam-tv.md"; State = "Full manifest/player/item-caller/faction-payout review; individual Discussion published" }
+    "language-system" = @{ Number = 441; Dossier = "docs/resources/language-system.md"; State = "Full manifest/player/UI/persistence/direct-caller review; individual Discussion published" }
     "factions" = @{ Number = 101; Dossier = "docs/resources/factions.md"; State = "Full manifest-script source review; individual Discussion published" }
     "item-system" = @{ Number = 102; Dossier = "docs/resources/item-system.md"; State = "Full manifest-script source review; individual Discussion published" }
     "vehicle" = @{ Number = 107; Dossier = "docs/resources/vehicle.md" }
@@ -105,11 +111,11 @@ $published = @{
 }
 
 $publishedByPath = @{
-    "mods/deathmatch/resource-archive/dynamic_lighting/meta.xml" = @{ Dossier = "docs/resources/archive/dynamic_lighting.md"; State = "Partial archived-source comparison; archive-specific Discussion pending" }
-    "mods/deathmatch/resource-archive/dynamic_lighting_flash/meta.xml" = @{ Dossier = "docs/resources/archive/dynamic_lighting_flash.md"; State = "Partial archived-source comparison; archive-specific Discussion pending" }
-    "mods/deathmatch/resource-archive/dynamic_lighting_vehicles/meta.xml" = @{ Dossier = "docs/resources/archive/dynamic_lighting_vehicles.md"; State = "Partial archived-source comparison; archive-specific Discussion pending" }
-    "mods/deathmatch/resource-archive/grid/meta.xml" = @{ Dossier = "docs/resources/archive/grid.md"; State = "Partial archived-source comparison; archive-specific Discussion pending" }
-    "mods/deathmatch/resource-archive/dynamic_lighting_projectiles/meta.xml" = @{ Dossier = "docs/resources/archive/dynamic_lighting_projectiles.md"; State = "Partial archived manifest and cleanup review; archive-specific Discussion pending" }
+    "mods/deathmatch/resource-archive/dynamic_lighting/meta.xml" = @{ Number = 421; Dossier = "docs/resources/archive/dynamic_lighting.md"; State = "Partial archived-source comparison; archive-specific Discussion published" }
+    "mods/deathmatch/resource-archive/dynamic_lighting_flash/meta.xml" = @{ Number = 422; Dossier = "docs/resources/archive/dynamic_lighting_flash.md"; State = "Partial archived-source comparison; archive-specific Discussion published" }
+    "mods/deathmatch/resource-archive/dynamic_lighting_vehicles/meta.xml" = @{ Number = 423; Dossier = "docs/resources/archive/dynamic_lighting_vehicles.md"; State = "Partial archived-source comparison; archive-specific Discussion published" }
+    "mods/deathmatch/resource-archive/grid/meta.xml" = @{ Number = 424; Dossier = "docs/resources/archive/grid.md"; State = "Partial archived-source comparison; archive-specific Discussion published" }
+    "mods/deathmatch/resource-archive/dynamic_lighting_projectiles/meta.xml" = @{ Number = 425; Dossier = "docs/resources/archive/dynamic_lighting_projectiles.md"; State = "Partial archived manifest and cleanup review; archive-specific Discussion published" }
 }
 
 $inventoryByPath = @{}

@@ -308,6 +308,15 @@ Issues #52 (MDC) and #55 (phone) were updated with the additional read, mutation
 
 ### Resource coverage continuation
 
+- [Script Resource #432: gate-manager](https://github.com/itschase/OwlMTA-2026/discussions/432)
+- [Script Resource #433: selfck-system](https://github.com/itschase/OwlMTA-2026/discussions/433)
+- [Script Resource #434: scoreboard](https://github.com/itschase/OwlMTA-2026/discussions/434)
+- [Script Resource #439: freecam](https://github.com/itschase/OwlMTA-2026/discussions/439)
+- [Script Resource #440: freecam-tv](https://github.com/itschase/OwlMTA-2026/discussions/440)
+- [Script Resource #441: language-system](https://github.com/itschase/OwlMTA-2026/discussions/441)
+- [Script Resource #426: id-system](https://github.com/itschase/OwlMTA-2026/discussions/426)
+- [Script Resource #427: realism](https://github.com/itschase/OwlMTA-2026/discussions/427)
+- [Script Resource #428: hud](https://github.com/itschase/OwlMTA-2026/discussions/428)
 - [Script Resource #414: grid](https://github.com/itschase/OwlMTA-2026/discussions/414)
 - [Script Resource #415: dynamic_lighting](https://github.com/itschase/OwlMTA-2026/discussions/415)
 - [Script Resource #416: dynamic_lighting_vehicles](https://github.com/itschase/OwlMTA-2026/discussions/416)
@@ -341,6 +350,13 @@ Issues #52 (MDC) and #55 (phone) were updated with the additional read, mutation
 - [Issues #399–#400: Report submission trust and session-stat integrity](https://github.com/itschase/OwlMTA-2026/issues/399)
 - [Issues #401–#409: realism vehicle, item, timer, alarm, and staff event findings](https://github.com/itschase/OwlMTA-2026/issues/401)
 - [Issues #410–#413: HUD stats, blur, popup lifecycle, and compiled interface](https://github.com/itschase/OwlMTA-2026/issues/410)
+- [Issue #429: Bind Self-CK requests to the authenticated player](https://github.com/itschase/OwlMTA-2026/issues/429)
+- [Issue #430: Enforce proximity and world checks before gate activation](https://github.com/itschase/OwlMTA-2026/issues/430)
+- [Issue #431: Fix the unlogged-player Self-CK approval cleanup path](https://github.com/itschase/OwlMTA-2026/issues/431)
+- [Issue #435: Bind privileged freecam state changes to the requesting player](https://github.com/itschase/OwlMTA-2026/issues/435)
+- [Issue #436: Bind TV viewing requests to the authenticated player](https://github.com/itschase/OwlMTA-2026/issues/436)
+- [Issue #437: Bind language preference events to their authenticated owner](https://github.com/itschase/OwlMTA-2026/issues/437)
+- [Issue #438: Select an occupied language slot after unlearning](https://github.com/itschase/OwlMTA-2026/issues/438)
 
 The same-name archived copies have separate source identities. Their archive dossiers and separate `(archived)` Script Resource Discussions are indexed from [`docs/resources/README.md`](../resources/README.md). Archive reviews remain partial comparisons, not evidence of current availability or runtime behavior.
 - [Player Guide Q&A #389: How do I use and recharge a flashlight?](https://github.com/itschase/OwlMTA-2026/discussions/389)
