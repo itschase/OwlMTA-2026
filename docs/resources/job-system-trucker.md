@@ -49,6 +49,36 @@ Route state, assigned truck, and in-progress runs are primarily memory or elemen
 
 Proposed direction: persist a typed order payload and a server-owned run state machine from depot entry through loading, route checkpoints, delivery, and closeout. Bind every event to `client`, current job, driver seat, exact server vehicle, dimension, proximity, expected stage, and one-use completion key. Replace recursive route search with a bounded candidate list; settle cargo, stock, reward, and order state idempotently; reconcile interrupted sessions at startup. Donor entitlements must not grant staff or route-management authority.
 
+## Command use cases and non-command alternatives
+
+| Command(s) | Source-confirmed use and current authority | Fitting alternative |
+|---|---|---|
+| `/ordersupplies [money]` | Owner/keyholder or faction finance manager orders for the current business. | Business stock panel with server pricing, payer preview and pending-order status. |
+| `/aordersupplies [money]` | Administrator creates a capped order without normal payment. | Audited staff intervention with a mandatory reason. |
+| `/setjob`, `/deljob` | Trial Administrator **or Supporter** assigns/removes a civic job. | Normal employment flow plus a capability-gated staff correction panel; supporter authority should be removed. |
+| `/setjoblevel` | Lead Administrator changes job level/progress. | Audited progression correction panel. |
+| `/respawntrucks`, `/skiproute` | Trial Administrator resets trucks or advances a route. | Operations dashboard showing the exact session, vehicle and route before correction. |
+| `/checkactiveroutes`, `/showActualOrders`, `/showAllTruckMarkers` | Scripter diagnostics and visualization. | Read-only operations dashboard with bounded fields. |
+| `/fetchActualOrders`, `/addtruckerjobmarker` | Scripter reloads or creates persistent routes. | Reconciliation job and validated route editor. |
+| Client `/clearallmarkers`, `/deltruckmarker` | Local marker cleanup and UI-mediated server deletion; `delMarker` lacks its own server staff check. | Staff route panel whose delete action reauthorizes on the server. |
+
+## Current focused source changes
+
+**Fixed in source, runtime unverified:** `remoteOrderSupplies` uses MTA [`client`](https://wiki.multitheftauto.com/wiki/Client) during a remote event and otherwise retains the explicit server-side player for exports and commands. Numeric cost is recalculated from `supplies * oneSupply`. Itemized maps require string keys and finite, nonnegative integer quantities with a positive delivery amount.
+
+Business type, owner, faction ID/team, faction `manage_finance`, funds, and payer are server-derived. Itemized personal shop orders use the character bank once; faction orders use the faction bank; generic numeric command orders retain wallet payment. Failed order insertion refunds the same payer.
+
+This does not make delivery atomic: order, cargo, stock, reward, and route state still span independent writes and memory. Restart hydration still reads `orderWeight` instead of decoding `orderSupplies`.
+
+## Discord authorization boundary
+
+**Proposed only:** no Discord capability consumer exists here.
+
+- Suitable independent global staff capabilities are `jobs.assignment.correct`, `jobs.progress.correct`, `trucker.vehicle.respawn`, `trucker.route.skip`, `trucker.route.inspect`, `trucker.order.reconcile`, and `trucker.route.manage`.
+- Donor/supporter tiers must not grant job assignment/deletion, route mutation, truck respawn, free orders, or operational diagnostics.
+- Business ownership/keys, faction membership and `manage_finance`, payer balance, current interior, job/duty or work-session state, exact truck/seat, route stage and proximity remain local server checks.
+- Future capability checks belong at the start of the relevant handlers in `s_trucker_job_admin_cmds.lua`, the command and `delMarker` handlers in `s_truckroutes_manager.lua`, and the admin override in `s_business_order_supply.lua`, before lookup or mutation. Remote handlers must also bind `client` and validate session state as required by MTA [`Script security`](https://wiki.multitheftauto.com/wiki/Script_security).
+
 ## Runtime verification matrix
 
 All behavior remains runtime-unverified. A future disposable-server pass must cover normal routes, wrong job/seat/dimension, remote load/delivery/teleport, event replay, cross-vehicle cargo deletion, all routes occupied, order restart and partial fulfillment, insufficient funds, database failures at each settlement step, mid-run disconnect/restart, and supporter-only staff command attempts.

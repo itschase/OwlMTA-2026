@@ -55,7 +55,7 @@ function adminOrderSupplies(thePlayer, commandName, money)
 end
 addCommandHandler("aordersupplies", adminOrderSupplies, false, false)
 
-local function canOrderSupplies(player, is_admin, money)
+local function canOrderSupplies(player, is_admin, money, useBank)
 	money = tonumber(money)
 	if not money or money%1~=0 or money <= 0 then
 		return false, "Invalid money input."
@@ -65,9 +65,9 @@ local function canOrderSupplies(player, is_admin, money)
 	local dim = getElementDimension(player)
 	local interior = exports.pool:getElement('interior', dim)
 	local status = interior and getElementData(interior, 'status')
-	local faction_owned = status and status.faction
-	local owner = status and status.owner
-	local int_type = status and status.type
+	local faction_owned = status and tonumber(status.faction)
+	local owner = status and tonumber(status.owner)
+	local int_type = status and tonumber(status.type)
 
 	if dim <= 0 then
 		return false, "You must be inside the business and have pair of keys to be able to order more supplies."
@@ -85,6 +85,9 @@ local function canOrderSupplies(player, is_admin, money)
 	if faction_owned and faction_owned > 0 then
 		local is_faction_leader = exports.factions:hasMemberPermissionTo(player, faction_owned, "manage_finance")
 		local faction = exports.pool:getElement('team', faction_owned)
+		if not faction or not isElement(faction) then
+			return false, "The business faction is unavailable."
+		end
 		if is_faction_leader or is_admin then
 			if exports.bank:hasBankMoney(faction, money) then
 				return true, faction
@@ -97,9 +100,15 @@ local function canOrderSupplies(player, is_admin, money)
 	end
 
 	-- if player owned
-	if is_admin or owner == getElementData(player, 'dbid') or exports.global:hasItem(player,4, dim) or exports.global:hasItem(player,5, dim) then
-		if is_admin or exports.global:hasMoney(player, money) then
-			return true
+	if is_admin or owner == tonumber(getElementData(player, 'dbid')) or exports.global:hasItem(player,4, dim) or exports.global:hasItem(player,5, dim) then
+		local hasFunds
+		if useBank then
+			hasFunds = exports.bank:hasBankMoney(player, money)
+		else
+			hasFunds = exports.global:hasMoney(player, money)
+		end
+		if is_admin or hasFunds then
+			return true, useBank and player or nil
 		else
 			return false, "You don't have $"..exports.global:formatMoney(money).."."
 		end
@@ -108,7 +117,8 @@ local function canOrderSupplies(player, is_admin, money)
 	end
 end
 
-function remoteOrderSupplies(thePlayer, supplies, money, isAdmin)
+function remoteOrderSupplies(thePlayer, supplies, money, isAdmin, stockOnly)
+	stockOnly = stockOnly == true
 	-- For client-triggered callers, the event's client is authoritative. Export
 	-- callers and command handlers retain their explicit server-side player.
 	if client and isElement(client) and getElementType(client) == "player" then
@@ -125,36 +135,44 @@ function remoteOrderSupplies(thePlayer, supplies, money, isAdmin)
 	if type(supplies) == "number" and (supplies <= 0 or supplies ~= supplies or supplies == math.huge) then
 		return false, "Invalid supply amount."
 	end
+	if type(supplies) == "number" then
+		amount = math.ceil(supplies * oneSupply)
+	end
 	if type(supplies) == "table" then
 		local hasSupply = false
 		for key, value in pairs(supplies) do
 			local quantity = tonumber(value)
-			if type(key) ~= "string" or not quantity or quantity < 0 or quantity ~= quantity or quantity == math.huge then
+			if type(key) ~= "string" or not quantity or quantity < 0 or quantity % 1 ~= 0 or quantity ~= quantity or quantity == math.huge then
 				return false, "Invalid supply amount."
 			end
 			if quantity > 0 then hasSupply = true end
 		end
-		if not hasSupply then return false, "Invalid supply amount." end
+		if (not hasSupply and not stockOnly) or (hasSupply and stockOnly) then
+			return false, "Invalid supply amount."
+		end
 	end
-	local authorized, payerOrReason = canOrderSupplies(thePlayer, admin, amount)
+	local authorized, payerOrReason = canOrderSupplies(thePlayer, admin, amount, type(supplies) == "table")
 	if not authorized then return false, payerOrReason end
 	local payer = payerOrReason
 	if payer == nil then payer = true end -- true means the player wallet
 	if payer ~= true and payer ~= false and not isElement(payer) then return false, "Invalid business payer." end
 
-	--Find the closest interior on world map.
-	local safeCount = 0 -- To prevent freezing server in the worst case.
-	local x, y, z, name = findRootInteriorMarker(getElementDimension(thePlayer))
-	while not x do
-		x, y, z, name = findRootInteriorMarker(y)
-		safeCount = safeCount + 1
-		if safeCount >= 100 then
-			break
+	local x, y, z, name
+	if not stockOnly then
+		-- Find the closest interior on world map for a driver delivery.
+		local safeCount = 0 -- To prevent freezing server in the worst case.
+		x, y, z, name = findRootInteriorMarker(getElementDimension(thePlayer))
+		while not x do
+			x, y, z, name = findRootInteriorMarker(y)
+			safeCount = safeCount + 1
+			if safeCount >= 100 then
+				break
+			end
 		end
-	end
 
-	if not x then
-		return false, "Your interior has no entrance from world map. Therefore, RS Haul Driver will not be able to reach here. Hit F1 for assistance."
+		if not x then
+			return false, "Your interior has no entrance from world map. Therefore, RS Haul Driver will not be able to reach here. Hit F1 for assistance."
+		end
 	end
 
 	-- Confirm funds above before creating the delivery order. If the order
@@ -168,6 +186,9 @@ function remoteOrderSupplies(thePlayer, supplies, money, isAdmin)
 		charged = true -- administrator order
 	end
 	if not charged then return false, "The selected payer no longer has enough money." end
+	if stockOnly then
+		return true, "Shop stock payment completed."
+	end
 	local done, why = addOrder(getElementDimension(thePlayer), supplies, x, y, z, name)
 	if done then
 		if admin then

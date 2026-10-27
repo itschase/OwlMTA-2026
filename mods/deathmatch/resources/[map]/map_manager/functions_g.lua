@@ -43,28 +43,110 @@ end
 
 function canEditMap( player, map, tab_id )
 	local isOwner = tonumber(map.uploader) == tonumber(getElementData(player, 'account:id'))
-	return isOwner and not exports.map_load:isMapLoaded(map.id) and tonumber(map.approved) == 0 and tonumber(map.enabled) == 0
+	local isPending = not exports.map_load:isMapLoaded(map.id) and tonumber(map.approved) == 0 and tonumber(map.enabled) == 0
+	if tab_id == 1 then
+		return isOwner and isPending
+	elseif tab_id == 3 then
+		return isPending and canAdminMaps(player)
+	end
+	return false
 end
 
 function canDeleteMap( player, map, tab_id )
 	local isOwner = tonumber(map.uploader) == tonumber(getElementData(player, 'account:id'))
-	return isOwner and tonumber(map.approved) == 0 and tonumber(map.enabled) == 0 and not exports.map_load:isMapLoaded(map.id)
+	local canDelete = tonumber(map.enabled) == 0 and not exports.map_load:isMapLoaded(map.id)
+	if tab_id == 1 then
+		return isOwner and tonumber(map.approved) == 0 and canDelete
+	elseif tab_id == 3 then
+		return canDelete and canAdminMaps(player)
+	end
+	return false
 end
 
 function canAcceptMap( player, map, tab_id )
-	return ( map.approved ~= 1 and map.enabled == 0 ) and canAdminMaps( player )
+	return tonumber(map.approved) == 0 and tonumber(map.enabled) == 0 and canAdminMaps(player)
 end
 
 function canDeclineMap( player, map, tab_id )
-	return ( map.approved ~= 2 and map.enabled == 0 ) and canAdminMaps( player )
+	return tonumber(map.approved) == 0 and tonumber(map.enabled) == 0 and canAdminMaps(player)
 end
 
 function canImplementMap( player, map, tab_id ) 
-	return map.approved == 1 and map.enabled ~= 1 and canAdminMaps( player )
+	return tonumber(map.approved) == 1 and tonumber(map.enabled) == 0 and canAdminMaps(player)
 end
 
 function canDisableMap( player, map, tab_id )
-	return map.approved == 1 and map.enabled == 1 and canAdminMaps( player )
+	return tonumber(map.approved) == 1 and tonumber(map.enabled) == 1 and canAdminMaps(player)
+end
+
+local function finiteNumber(value)
+	local number = tonumber(value)
+	return number and number == number and number ~= math.huge and number ~= -math.huge and number or false
+end
+
+local function integerInRange(value, minimum, maximum)
+	local number = finiteNumber(value)
+	return number and number == math.floor(number) and number >= minimum and (not maximum or number <= maximum)
+end
+
+local function optionalNumber(value, minimum, maximum, integer)
+	if value == nil then
+		return true
+	end
+	local number = finiteNumber(value)
+	return number and (not minimum or number >= minimum) and (not maximum or number <= maximum)
+		and (not integer or number == math.floor(number))
+end
+
+function validateSubmittedMap(map, maxObjects)
+	if type(map) ~= 'table' or not integerInRange(maxObjects, 1) then
+		return false, 'Invalid map object collection.'
+	end
+
+	local objectCount = 0
+	for index in pairs(map) do
+		if type(index) ~= 'number' or index < 1 or index ~= math.floor(index) then
+			return false, 'Map objects must use a contiguous numeric list.'
+		end
+		objectCount = objectCount + 1
+		if objectCount > maxObjects then
+			return false, 'Map exceeds the maximum object count.'
+		end
+	end
+	if objectCount < 1 then
+		return false, 'Map must contain at least one object.'
+	end
+
+	local submittedInterior, submittedDimension
+	for index = 1, objectCount do
+		local object = map[index]
+		if type(object) ~= 'table'
+			or (object.id ~= nil and type(object.id) ~= 'string')
+			or not integerInRange(object.interior, 0)
+			or not optionalNumber(object.dimension, 0, nil, true)
+			or not optionalNumber(object.collisions, 0, 1, true)
+			or not optionalNumber(object.breakable, 0, 1, true)
+			or not optionalNumber(object.radius, 0)
+			or not integerInRange(object.model, 1)
+			or not optionalNumber(object.lodModel, 0, nil, true)
+			or not finiteNumber(object.posX) or not finiteNumber(object.posY) or not finiteNumber(object.posZ)
+			or not finiteNumber(object.rotX) or not finiteNumber(object.rotY) or not finiteNumber(object.rotZ)
+			or not optionalNumber(object.doublesided, 0, 1, true)
+			or not optionalNumber(object.scale, 0)
+			or not optionalNumber(object.alpha, 0, 255, true) then
+			return false, 'Map object #'..index..' contains invalid persisted fields.'
+		end
+
+		local objectInterior = tonumber(object.interior)
+		local objectDimension = tonumber(object.dimension) or 0
+		if not submittedInterior then
+			submittedInterior, submittedDimension = objectInterior, objectDimension
+		elseif objectInterior ~= submittedInterior or objectDimension ~= submittedDimension then
+			return false, 'All map objects must use the same interior and dimension.'
+		end
+	end
+
+	return true
 end
 
 function processMapContent( content, max_objects, content_is_filepath )
@@ -79,7 +161,7 @@ function processMapContent( content, max_objects, content_is_filepath )
 	    if root then
 	    	local objects = xmlNodeGetChildren( root )
 	    	if objects then
-	    		if #objects < 1 or #objects > settings.external_map_max_objects then
+			if #objects < 1 or #objects > max_objects then
 	    			result, message = false, "Your map ("..#objects.." objs) must contain at least one object and at most "..max_objects.." objects (including world object removals)."
 	    		else
 	    			local submit_objects = {}

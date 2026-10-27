@@ -24,8 +24,7 @@ local function getPrisonActorAccess(actor)
     local admin = exports.integration:isPlayerTrialAdmin(actor) == true
     local duty = tonumber(getElementData(actor, "duty")) or 0
     local law = (exports.factions:isInFactionType(actor, 2) or exports.factions:isPlayerInFaction(actor, 81)) and duty > 0
-    local factionID = tonumber(getElementData(actor, "faction"))
-    local offlineManager = factionID == tonumber(pd_update_access) and duty > 0
+    local offlineManager = exports.factions:isPlayerInFaction(actor, pd_update_access) and duty > 0
     return true, admin, law == true, offlineManager == true
 end
 
@@ -123,6 +122,24 @@ addCommandHandler("arrest", startGUI)
 addEvent("startPrisonGUI", true)
 addEventHandler("startPrisonGUI", root, startGUI)
 
+local function removePrisonRecord(removeid)
+	local row = getRow(removeid)
+	if not row then return false end
+
+	local record = t[row]
+	local jailID = tonumber(record[1])
+	local charID = tonumber(record[2])
+	if not jailID or not charID then return false end
+
+	if not mysql:query_free("DELETE FROM jailed WHERE id=" .. mysql:escape_string(jailID)) then
+		return false
+	end
+
+	mysql:query_free("UPDATE characters SET pdjail=0 WHERE id=" .. mysql:escape_string(charID))
+	table.remove(t, row)
+	return record
+end
+
 addEvent("removePrisoner", true)
 addEventHandler("removePrisoner", resourceRoot,
 	function( removeid, fromGUI )
@@ -136,19 +153,12 @@ addEventHandler("removePrisoner", resourceRoot,
 				outputChatBox("You must be near this prisoner to remove them.", client, 255, 0, 0)
 				return
 			end
-			-- This flag used to select a weaker cleanup path and is entirely client-controlled.
-			fromGUI = true
-			local result = mysql:query_free( "DELETE FROM jailed WHERE id=" .. mysql:escape_string(tonumber(t[row][1])) .. "" )
-			local charID = tonumber(t[row][2])
-			if result then
-				mysql:query_free("UPDATE characters SET pdjail=0 WHERE id=" .. mysql:escape_string(charID))
-				if not fromGUI then
-					exports.logs:dbLog(client, 35, charID, "Removed from jail CharacterID= "..tostring(t[row][2]))
-				else
-					sendPrisonMsg(getPlayerName(client).." removed "..t[row][3].." from jail.")
+			local record = removePrisonRecord(removeid)
+			if record then
+				sendPrisonMsg(getPlayerName(client).." removed "..record[3].." from jail.")
 					local players = exports.pool:getPoolElementsByType("player")
 					for key, value in ipairs(players) do
-						if getElementData(value, "dbid") == tonumber(t[row][2]) then
+						if getElementData(value, "dbid") == tonumber(record[2]) then
 							outputChatBox("You were removed from jail by ".. string.gsub(getPlayerName(client), "_", " "), value, 0, 255, 0)
                             if not getElementData(value, "adminjailed") then
                                 local cell = getElementData(value, "jail:cell")
@@ -174,11 +184,7 @@ addEventHandler("removePrisoner", resourceRoot,
                             break
     					end
     				end
-    			end
-				table.remove(t, row)
-				if fromGUI then
-					triggerClientEvent(client, "PrisonGUI:Refresh", client, t)
-            	end
+				triggerClientEvent(client, "PrisonGUI:Refresh", client, t)
             else
                 outputChatBox("Error, PS#01. Report on Mantis: bugs.owlgaming.net", client, 255, 0, 0)
 			end
@@ -302,7 +308,7 @@ addEventHandler("addPrisoner", resourceRoot,
 							local dbid = getElementData(name, "dbid")
 							exports['item-system']:deleteAll(47, dbid)
 						end
-						exports.global:giveItem(thePlayer, restrainedObj, 1)
+						exports.global:giveItem(client, restrainedObj, 1)
 						mysql:query_free("UPDATE characters SET cuffed = 0, restrainedby = 0, restrainedobj = 0 WHERE id = " .. mysql:escape_string(getElementData( name, "dbid" )) )
 					end
 					setPedWeaponSlot(name,0)
@@ -483,7 +489,7 @@ function checkForRelease(client, firstLogin)
 			local days, hours, remainingtime = cleanMath(value[4])
             local onlineMinutes = value[10]
     		if remainingtime<=0 and tonumber(onlineMinutes)<=0 then
-    			triggerEvent("removePrisoner", resourceRoot, value[1])
+			removePrisonRecord(value[1])
                 if not getElementData(client, "adminjailed") then
                     local cell = value[8]
                     local rel = releaseLocations[cells[cell].location]
@@ -629,7 +635,7 @@ addCommandHandler("jailtime", function(thePlayer)
 		elseif remainingtime<=0 and tonumber(onlineMinutes)<=0 then
 			for key, value in ipairs(t) do
 				if tonumber(value[2]) == tonumber(getElementData(thePlayer, "dbid")) then
-				    triggerEvent("removePrisoner", resourceRoot, value[1])
+				    removePrisonRecord(value[1])
                     if not getElementData(thePlayer, "adminjailed") then
                         local cell = getElementData(thePlayer, "jail:cell")
                         local rel = releaseLocations[cells[cell].location]
@@ -637,8 +643,8 @@ addCommandHandler("jailtime", function(thePlayer)
                         setElementDimension(thePlayer, rel[5])
                         setElementInterior(thePlayer, rel[4])
                     end
-                    local timer = getElementData(source, "jail:timer")
-                    if timer then
+                    local timer = getElementData(thePlayer, "jail:timer")
+                    if isTimer(timer) then
                         killTimer(timer)
                     end
     			    if getElementData(thePlayer, "jailed") then -- If called from /jailtime
@@ -694,7 +700,7 @@ function timeReleaseCheck(initialize)
     			    if remainingtime<=0 and tonumber(onlineMinutes)<=0 then
     				    outputDebugString("JAIL: Timer removed " .. string.gsub(tostring(res[3]), "_", " ") .. " from jail.")
     				    outputChatBox("Your time has been served!", value, 0, 255, 0)
-                        triggerEvent("removePrisoner", resourceRoot, res[1])
+                        removePrisonRecord(res[1])
                         local timer = getElementData(value, "jail:timer")
                         if timer then
                             killTimer(timer)

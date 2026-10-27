@@ -820,6 +820,13 @@ function solvePendingWage(payer, ped, solver)
 	if not interior or getElementDimension(player) ~= getElementDimension(ped) or getElementInterior(player) ~= getElementInterior(ped) then
 		return 0
 	end
+	local px, py, pz = getElementPosition(player)
+	local sx, sy, sz = getElementPosition(ped)
+	if getDistanceBetweenPoints3D(px, py, pz, sx, sy, sz) > 5 then
+		return 0
+	end
+	local activeBusiness = isActiveBusiness(interior)
+	if not activeBusiness then return 0 end
 	local ownerID = status and tonumber(status.owner)
 	local playerID = tonumber(getElementData(player, "dbid"))
 	local hasAccess = ownerID and ownerID == playerID
@@ -844,14 +851,17 @@ function solvePendingWage(payer, ped, solver)
 	-- or another player's element as the payer.
 	if exports.global:hasMoney(player, wage) then
 		if exports.global:takeMoney(player, wage) then
-			playPayWageSound(ped )
 			took_money = true
 		end
 	end
 
 	-- now finally we can clear the wage on npc
 	if took_money then
-		setShopStats(ped, 'sPendingWage', 0)
+		if not setShopStats(ped, 'sPendingWage', 0) then
+			exports.global:giveMoney(player, wage)
+			return 0
+		end
+		playPayWageSound(ped)
 		local id = getElementData(ped, 'dbid')
 		if destroyElement(ped) then
 			loadOneShop(id)
@@ -906,27 +916,104 @@ function canIUseThisName(pedName)
 	return true, "This name is cool"
 end
 
+local function getShopSupplyPrices(shopType)
+	local prices = {}
+	local handledClothes = false
+	for _, category in ipairs(g_shops[shopType] or {}) do
+		for _, item in ipairs(category) do
+			if not bandanas[item.itemID] and item.itemID ~= 114 then
+				if item.itemID == 16 then
+					if not handledClothes then prices["16"] = 40; handledClothes = true end
+				else
+					local key = tostring(item.itemID) .. ":" .. tostring(item.itemValue or 1)
+					local metaValue = getMetaItemName(item)
+					if metaValue then key = key .. ":" .. metaValue end
+					local price = math.ceil((item.price / 5) * 4)
+					if price >= item.price then price = math.ceil(item.price / 2) end
+					if shopType == 7 then price = math.ceil(price * 0.5) end
+					prices[key] = price
+				end
+			end
+		end
+	end
+	if shopType == 5 then prices["122"] = 4 end
+	if shopType == 14 or shopType == 7 then
+		local upgradePrices = { spoilerPrice, hoodPrice, sideskirtPrice, roofPrice, lightPrice, wheelPrice, exhaustPrice, bullbarPrice, bumperPrice, hydraulicPrice }
+		for index, price in ipairs(upgradePrices) do
+			if shopType == 14 or index == 6 then
+				local stockPrice = (price / 2) / 5 * 4
+				if shopType == 7 then stockPrice = math.ceil(stockPrice * 0.5) end
+				prices["114:" .. index] = stockPrice
+			end
+		end
+	end
+	return prices
+end
+
 function updateShopSupplies(interiorID, supplies, thePlayer, cost, pedName)
+	local player = client
+	if not player or not isElement(player) or getElementType(player) ~= "player" then return false end
+	if not isElement(source) or getElementType(source) ~= "interior" then return false end
+	local serverInteriorID = tonumber(getElementData(source, "dbid"))
+	if not serverInteriorID or getElementDimension(player) ~= serverInteriorID then return false end
 	local status = getElementData(source, "status")
+	if not status or tonumber(status.type) ~= 1 or type(supplies) ~= "table" then return false end
+	local shopPed
+	for _, ped in ipairs(getElementsByType("ped", resourceRoot)) do
+		if getElementData(ped, "shopkeeper") and getElementDimension(ped) == serverInteriorID then
+			shopPed = ped
+			break
+		end
+	end
+	if not shopPed then return false end
+	local prices = getShopSupplyPrices(tonumber(getElementData(shopPed, "shoptype")) or 0)
+	local serverCost = 0
+	local validatedSupplies = {}
+	for key, value in pairs(supplies) do
+		local quantity = tonumber(value)
+		if type(key) ~= "string" or not prices[key] or not quantity or quantity <= 0 or quantity % 1 ~= 0 or quantity ~= quantity or quantity == math.huge then return false end
+		validatedSupplies[key] = quantity
+		serverCost = serverCost + prices[key] * quantity
+	end
+	serverCost = math.ceil(serverCost)
+	if serverCost <= 0 or serverCost ~= serverCost or serverCost == math.huge then return false end
 	local updateSupplies = fromJSON(status.supplies)
+	if type(updateSupplies) ~= "table" then updateSupplies = {} end
+	local previousSupplies = status.supplies
 	local haulSupplies = {}
-	for i, v in pairs(supplies) do
+	local hasDeliverySupplies = false
+	for i, v in pairs(validatedSupplies) do
 		updateSupplies[i] = (updateSupplies[i] or 0) + math.ceil(v/2)
 		haulSupplies[i] = math.floor(v/2)
+		if haulSupplies[i] > 0 then hasDeliverySupplies = true end
 	end
 
-	local success, why = exports['job-system-trucker']:remoteOrderSupplies(thePlayer, haulSupplies, cost, false)
-	if success then
-		local query = mysql:query_free("UPDATE interiors SET supplies='" .. mysql:escape_string(toJSON(updateSupplies)) .. "' WHERE id='" .. interiorID .. "'")
-		if query then
-			status.supplies = toJSON(updateSupplies)
-			setElementData(source, "status", status)
-			exports.bank:takeBankMoney(thePlayer, cost)
-			exports.bank:addBankTransactionLog(getElementData(thePlayer, "dbid"), nil, cost, 0, "SHOP RESTOCK", "Purchased "..tostring(cost).."$ worth of supplies for business ID"..tostring(interiorID), nil, nil)
-			storeKeeperSay(thePlayer, "We have stocked your business with half of your order. The other half has been sent to RS Haul delivery drivers.", pedName)
-		end
+	local updatedSupplies = toJSON(updateSupplies)
+	local query = mysql:query_free("UPDATE interiors SET supplies='" .. mysql:escape_string(updatedSupplies) .. "' WHERE id='" .. serverInteriorID .. "'")
+	if not query then
+		outputDebugString("[NPC] Failed to persist shop restock for interior #"..serverInteriorID, 1)
+		return false
+	end
+	local success, why
+	if hasDeliverySupplies then
+		success, why = exports['job-system-trucker']:remoteOrderSupplies(player, haulSupplies, serverCost, false)
 	else
-		outputChatBox(why, thePlayer, 255, 0, 0)
+		-- A one-unit restock is fully added to local stock; it has no driver delivery.
+		-- Let the trucker settlement preserve its owner or faction-bank payer policy.
+		success, why = exports['job-system-trucker']:remoteOrderSupplies(player, haulSupplies, serverCost, false, true)
+	end
+	if success then
+		status.supplies = updatedSupplies
+		setElementData(source, "status", status)
+		exports.bank:addBankTransactionLog(getElementData(player, "dbid"), nil, serverCost, 0, "SHOP RESTOCK", "Purchased "..tostring(serverCost).."$ worth of supplies for business ID"..tostring(serverInteriorID), nil, nil)
+		storeKeeperSay(player, "We have stocked your business with half of your order. The other half has been sent to RS Haul delivery drivers.", getPedName(shopPed))
+	else
+		local rollback = mysql:query_free("UPDATE interiors SET supplies='" .. mysql:escape_string(previousSupplies or "{}") .. "' WHERE id='" .. serverInteriorID .. "'")
+		if rollback then
+			outputChatBox(why, player, 255, 0, 0)
+		else
+			outputDebugString("[NPC] Failed to roll back uncharged shop restock for interior #"..serverInteriorID, 1)
+		end
 	end
 end
 addEvent("updateShopSupplies", true)

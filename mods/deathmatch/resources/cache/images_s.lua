@@ -6,8 +6,10 @@ local MAX_IMAGE_BYTES = 2 * 1024 * 1024
 local MAX_CACHE_BYTES = 32 * 1024 * 1024
 local MAX_CACHE_ENTRIES = 512
 local MAX_PENDING_FETCHES = 32
+local MAX_PENDING_FETCHES_PER_PLAYER = 4
 local pending_fetches = {}
 local pending_fetch_count = 0
+local pending_fetches_by_player = {}
 local cache_sizes = {}
 local cache_entry_count = 0
 local cache_total_bytes = 0
@@ -93,8 +95,60 @@ local function trackExistingFile(id, size)
 	return true
 end
 
+local function untrackFile(id)
+	local oldSize = cache_sizes[id]
+	if not oldSize then return end
+	cache_sizes[id] = nil
+	cache_entry_count = math.max(0, cache_entry_count - 1)
+	cache_total_bytes = math.max(0, cache_total_bytes - oldSize)
+	saveCacheIndex()
+end
+
+local function addPendingClient(request, player)
+	if not player then return true end
+	if request.clients[player] then return true end
+	local count = pending_fetches_by_player[player] or 0
+	if count >= MAX_PENDING_FETCHES_PER_PLAYER then return false end
+	request.clients[player] = true
+	pending_fetches_by_player[player] = count + 1
+	return true
+end
+
+local function releasePendingClients(request)
+	if not request then return end
+	for player in pairs(request.clients) do
+		local count = (pending_fetches_by_player[player] or 1) - 1
+		pending_fetches_by_player[player] = count > 0 and count or nil
+	end
+end
+
 local function getPath(url)
 	return 'images_cache/' .. md5(tostring(url)) .. '.tex'
+end
+
+local function queueImageFetch(id, url, requester)
+	if not validImageUrl(id, url) then return false end
+	if requester and (not isElement(requester) or getElementType(requester) ~= 'player') then return false end
+
+	local request = pending_fetches[id]
+	if request then
+		if request.url ~= url then return false end
+		return addPendingClient(request, requester)
+	end
+	if pending_fetch_count >= MAX_PENDING_FETCHES then return false end
+
+	request = { url = url, clients = {} }
+	if not addPendingClient(request, requester) then return false end
+	pending_fetch_count = pending_fetch_count + 1
+	pending_fetches[id] = request
+	local requestHandle = fetchRemote(url, "cache/images", 1, addImageAsync, "", true, url, id)
+	if not requestHandle then
+		pending_fetches[id] = nil
+		pending_fetch_count = math.max(0, pending_fetch_count - 1)
+		releasePendingClients(request)
+		return false
+	end
+	return true
 end
 
 -- Leave 'data' parameter empty if you intend to add a new image from URL.
@@ -119,7 +173,10 @@ function addImage(id, url, data)
 				oldSize = fileGetSize(oldFile)
 				fileClose(oldFile)
 			end
-			if oldSize and not trackExistingFile(id, oldSize) then return end
+			if oldSize and not trackExistingFile(id, oldSize) then
+				fileDelete(filename)
+				oldSize = nil
+			end
 			isTracked = oldSize ~= nil
 		end
 		oldSize = oldSize or 0
@@ -132,7 +189,11 @@ function addImage(id, url, data)
 		if fileExists(filename) then fileDelete(filename) end
 
 		local file = fileCreate(filename)
-		if not file then return end
+		if not file then
+			images[id] = nil
+			untrackFile(id)
+			return false
+		end
 		local size = fileWrite(file, data)
 		fileClose(file)
 		if size == #data then
@@ -142,25 +203,16 @@ function addImage(id, url, data)
 			cache_total_bytes = cache_total_bytes - oldSize + size
 			saveCacheIndex()
 			outputDebugString("[CACHE] Images / Server / addImage / Cached image - "..id.." in server's file system as '"..filename.."'.Total: "..exports.global:formatMoney(math.floor(size/1000)).."KB")
+			return true
 		else
 			fileDelete(filename)
+			images[id] = nil
+			untrackFile(id)
 			outputDebugString("[CACHE] Images / Server / addImage / Couln't cache image - "..id.." in server's file system.")
+			return false
 		end
 	else
-		if not validImageUrl(id, url) then return end
-		local request = pending_fetches[id]
-		if request then
-			if request.url == url and client then request.clients[client] = true end
-			return
-		end
-		if pending_fetch_count >= MAX_PENDING_FETCHES then return end
-		pending_fetch_count = pending_fetch_count + 1
-		pending_fetches[id] = { url = url, clients = client and { [client] = true } or {} }
-		local requestHandle = fetchRemote(url, "cache/images", 1, addImageAsync, "", true, url, id)
-		if not requestHandle then
-			pending_fetches[id] = nil
-			pending_fetch_count = math.max(0, pending_fetch_count - 1)
-		end
+		return queueImageFetch(id, url, client)
 	end
 end
 addEvent("cache:addImage", true)
@@ -180,15 +232,16 @@ function addImageAsync(data, errno, url, id)
 	local request = pending_fetches[id]
 	pending_fetches[id] = nil
 	pending_fetch_count = math.max(0, pending_fetch_count - 1)
+	releasePendingClients(request)
 	if errno == 0 then
 		if validImageUrl(id, url) and validImageData(data) then
-			addImage(id, url, data)
-			if request then
+			local cached = addImage(id, url, data)
+			if cached and request then
 				for client_to_sync in pairs(request.clients) do
 					sendImageToClient(client_to_sync, id, data)
 				end
 			end
-			searched[id] = getTickCount()
+			if cached then searched[id] = getTickCount() end
 		end
 	else
 		--outputDebugString("[CACHE] Images / Server / addImageAsync / Couldn't fetch image - "..tostring(id)..". Error Code: "..errno)
@@ -200,6 +253,7 @@ function getImage(id, url)
 	if not id or (client and (not isElement(client) or getElementType(client) ~= 'player' or source ~= client)) then
 		return false
 	end
+	local requester = client
 	if not images[id] then
 		-- Check file system
 		local filename = getPath(id)
@@ -209,11 +263,23 @@ function getImage(id, url)
 				local size = fileGetSize(file)
 				if tonumber(size) > 0 and size <= MAX_IMAGE_BYTES and trackExistingFile(id, size) then
 					local data = fileRead(file, size)
-					if validImageData(data) then images[id] = data end
+					if validImageData(data) then
+						images[id] = data
+					else
+						fileClose(file)
+						file = nil
+						fileDelete(filename)
+						untrackFile(id)
+					end
 					-- Check if the image from server is up to date with id's.
-					verifyServerImageFile(id, url, size)
+					if file then verifyServerImageFile(id, url, size) end
+				else
+					fileClose(file)
+					file = nil
+					fileDelete(filename)
+					untrackFile(id)
 				end
-				fileClose(file)
+				if file then fileClose(file) end
 			end
 		end
 	end
@@ -225,7 +291,7 @@ function getImage(id, url)
 		if searched[id] and refresh_rate > 0 and getTickCount() - searched[id] > 1000*60*60*refresh_rate then
 			--outputDebugString("[CACHE] images / Server / getImage / cache refreshing and requested new image from server: "..id)
 			-- Recache on server and also sent the file to client to recache client side for the player that requested for it.
-			recached = triggerEvent('cache:addImage', source, id, url)
+			recached = queueImageFetch(id, url, requester)
 		end
 		-- Send the current image to client who requested for this.
 		if not recached then
@@ -233,7 +299,7 @@ function getImage(id, url)
 		end
 	else -- if image is NOT found anywhere on server, fetch it from URL again then send to client who requested it.
 		--outputDebugString("[CACHE] images / Server / getImage / fetching image from URL: "..url)
-		triggerEvent('cache:addImage', source, id, url)
+		queueImageFetch(id, url, requester)
 	end
 	return images[id]
 end
@@ -252,12 +318,27 @@ function verifyClientImageFile(id, size)
 		local file = fileOpen(filename, true)
 		if file then
 			local sizeServer = fileGetSize(file)
-			if size ~= sizeServer then
-				-- rebuilt image if it's not existed on server.
+			if not sizeServer or sizeServer <= 0 or sizeServer > MAX_IMAGE_BYTES then
+				fileClose(file)
+				images[id] = nil
+				fileDelete(filename)
+				untrackFile(id)
+				triggerClientEvent(source, "cache:removeImage", source, id)
+				return false
+			else
 				if not images[id] then
-					images[id] = fileRead(file, sizeServer)
+					local data = fileRead(file, sizeServer)
+					if validImageData(data) then images[id] = data end
 				end
-				sendImageToClient(source, id, images[id])
+				if not images[id] then
+					fileClose(file)
+					fileDelete(filename)
+					untrackFile(id)
+					triggerClientEvent(source, "cache:removeImage", source, id)
+					return false
+				elseif size ~= sizeServer then
+					sendImageToClient(source, id, images[id])
+				end
 				--outputDebugString("[CACHE] Images / Server / verifyClientImageFile / Sending new image data to "..getPlayerName(source))
 			end
 			fileClose(file)
@@ -290,13 +371,7 @@ function removeImage(id, remove_from_client_too)
 	if fileExists ( filename ) then -- if yes, clear it.
 		fileDelete(filename)
 	end
-	local oldSize = cache_sizes[id]
-	if oldSize then
-		cache_sizes[id] = nil
-		cache_entry_count = math.max(0, cache_entry_count - 1)
-		cache_total_bytes = math.max(0, cache_total_bytes - oldSize)
-		saveCacheIndex()
-	end
+	untrackFile(id)
 	if remove_from_client_too and source and getElementType(source) == 'player' then
 		triggerClientEvent(source, "cache:removeImage", source, id)
 	end

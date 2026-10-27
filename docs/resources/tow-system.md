@@ -67,4 +67,33 @@ Published follow-up work binds the implementation target for every LEO tow/impou
 
 The target is a typed `ImpoundCase` with authenticated actor, organization and duty/capability evidence, vehicle, reason/evidence, fine/storage policy, seizure or release time, lane, and audited state transitions. Lane reservation and vehicle persistence should be atomic or use a durable outbox; release payment should be server-priced and idempotent; startup should reconcile vehicle, lane and case state. MDC should consume a structured projection rather than own the free-text transaction.
 
+## Command use cases and non-command alternatives
+
+| Command(s) | Source-confirmed use and current authority | Fitting alternative |
+|---|---|---|
+| `/towtruck` | Any player toggles the single global faction-4 request beacon. | Phone/service request with queue, location, expiry, cancellation and assignment. |
+| `/resettowbackup` | Trial Administrator or faction-4 member with `add_member` clears the beacon. | Dispatch panel; normal cancellation should belong to requester/dispatcher rather than membership-management permission. |
+| `/impoundbike` | Faction-4 member at rank index 5+ impounds eligible motorcycles/bicycles. | On-duty tow interaction bound to vehicle, lot and named impound permission. |
+| `/unimpound` | Trial Administrator corrects conventional impounds for selected impounders. | Audited staff correction panel with reason and state preview. |
+| `/unimp` | Direct LEO lane-script unimpound. | Department impound console with local faction, duty and permission checks plus an audited override. |
+| `/fixlanes` | Scripter reconciles lanes against loaded vehicles. | Restricted reconciliation job/dashboard with dry-run output. |
+| `/scripterCreateLot`, `/rtMoveImpoundsToNewLot` | Scripter creates lanes or migrates the towing lot. | Offline deployment/migration tooling, not a routine Discord action. |
+
+## Current focused source changes
+
+**Fixed in source, runtime unverified:** conventional `releaseCar` already binds the actor through MTA [`client`](https://wiki.multitheftauto.com/wiki/Client), requires lot proximity, validates the loaded vehicle, derives owner/faction/impounder/impound state, requires character ownership or membership in the owning faction, restricts release to faction-4 impounds, and charges a fixed $1,000.
+
+The current diff also verifies the towing faction team after debit and refunds the player if it is unavailable. The wire-transfer journal insert must succeed; failure reverses the faction credit and refunds the player. This does not harden the separate LEO release path or make vehicle relocation and all persistent state one transaction.
+
+The release UI still uses a different affordability threshold than the authoritative $1,000 server charge, so its presentation can disagree even though the server rejects insufficient funds.
+
+## Discord authorization boundary
+
+**Proposed only:** no Discord authorization is implemented here.
+
+- Appropriate global staff capabilities are `tow.impound.override`, `tow.release.override`, `tow.lanes.inspect`, and `tow.lanes.reconcile`. Lane creation/migration should remain restricted deployment maintenance.
+- Donor/supporter tiers must grant no tow, impound, release, lane, report, or relocation authority.
+- Faction membership, current duty, action-specific faction permission, rank where policy retains it, exact vehicle/attachment, owner, impounder, lot/lane/NPC, proximity, release date and payer remain local server-derived checks. Discord staff status does not make a user an on-duty tow or LEO operator.
+- Future global checks belong at `unimpoundVeh` in `s_tow.lua` and staff repair/override handlers in `leo-impound/impound_s.lua`, before lookup or mutation. `removeBackup` in `s_backup.lua` needs either a distinct staff dispatch capability or local faction dispatcher policy. Gameplay remote events must still bind `client` and recheck local state per MTA [`Script security`](https://wiki.multitheftauto.com/wiki/Script_security).
+
 Runtime verification must cover every faction/rank/duty/capability and badge combination; forged sources, departments, NPCs, fields and direct events; booth and lane concurrency; duration/fine bounds; conventional tow chains and bikes; owner/faction/other and loaded/unloaded release; every injected persistence/payment failure; restart during impound/release; orphaned lanes; year rollover and retention policy; deletion/proceeds failure; tow-payment replay; and beacon quit/restart behavior.

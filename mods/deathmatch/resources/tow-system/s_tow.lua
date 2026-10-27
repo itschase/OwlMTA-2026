@@ -243,8 +243,19 @@ function payRelease(vehid)
 	end
 	if exports.global:takeMoney(player, 1000) then
         local towingFactionTeam = exports.factions:getFactionFromID(towingFactionID)
+		if not towingFactionTeam or not isElement(towingFactionTeam) then
+			exports.global:giveMoney(player, 1000)
+			outputChatBox("The towing faction is unavailable; no money was charged.", player, 255, 0, 0)
+			return false
+		end
         exports.global:giveMoney(towingFactionTeam, 1000) --give money to towing faction
-		exports.mysql:query_free( "INSERT INTO wiretransfers (`from`, `to`, `amount`, `reason`, `type`) VALUES (" .. exports.mysql:escape_string(characterID) .. ", " .. -towingFactionID .. ", " .. 1000 .. ", 'Vehicle Release', 16)" )
+		local logged = exports.mysql:query_free( "INSERT INTO wiretransfers (`from`, `to`, `amount`, `reason`, `type`) VALUES (" .. exports.mysql:escape_string(characterID) .. ", " .. -towingFactionID .. ", " .. 1000 .. ", 'Vehicle Release', 16)" )
+		if not logged then
+			exports.global:takeMoney(towingFactionTeam, 1000)
+			exports.global:giveMoney(player, 1000)
+			outputChatBox("The release could not be recorded; no money was charged.", player, 255, 0, 0)
+			return false
+		end
         setElementFrozen(vehID, false)
         local x, y, z, int, dim, rotation = getReleasePosition()
         setElementPosition(vehID, x, y, z)

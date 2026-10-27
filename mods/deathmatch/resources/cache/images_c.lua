@@ -11,6 +11,19 @@ local images = {}
 local searched = {}
 local cooldown = 10 --seconds.
 local refresh_rate = 0 -- hours, 0 = never recache.
+local MAX_IMAGE_BYTES = 2 * 1024 * 1024
+
+local function validId(id)
+	local number = tonumber(id)
+	return number and number == math.floor(number) and number ~= 0 and math.abs(number) <= 2147483647 and number
+end
+
+local function validImageData(data)
+	if type(data) ~= 'string' or #data == 0 or #data > MAX_IMAGE_BYTES then
+		return false
+	end
+	return data:sub(1, 3) == '\255\216\255' or data:sub(1, 8) == '\137PNG\r\n\26\n'
+end
 
 local function getPath(url)
 	return '@images_cache/' .. md5(tostring(url)) .. '.tex'
@@ -20,11 +33,11 @@ end
 -- If you intend to cache a new image from URL from client, call the function directly or use triggerServerEvent instead.
 function addImage(id, data)
 	local url = nil
-	id = tonumber(id)
-	if not id or id == 0 or id ~= math.floor(id) then return false end
+	id = validId(id)
+	if not id then return false end
 
 	if source then -- Triggered from server.
-		if not data or not id then
+		if not validImageData(data) then
 			--outputDebugString("[CACHE] Images / Client / addImage / id and data are required parameters.")
 			return
 		end
@@ -33,15 +46,17 @@ function addImage(id, data)
 		local filename = removeImage(id)
 
 		--Now create a file in client's file system too, so next time they can load it quickly.
-		local file = fileCreate(filename) 
+		local file = fileCreate(filename)
+		if not file then return false end
 		local size = fileWrite(file, data)
 		fileClose(file)
 
-		if size and size>0 then
+		if size == #data then
 			--outputDebugString("[CACHE] Images / Client / addImage / Received "..exports.global:formatMoney(math.floor(size/1000)).."KB of data from server. Cached image in client's file system as '"..filename.."' - "..id)
 			images[id] = getImage(id)
 			searched[id] = getTickCount()
 		else
+			fileDelete(filename)
 			--outputDebugString("[CACHE] Images / Client / addImage / Couln't cache image - "..id.." in client's file system.")
 		end
 		
@@ -78,7 +93,8 @@ addEventHandler("cache:addImage", root, addImage)
 
 function getImage(id)
 	local url = nil
-	id = tonumber(id)
+	id = validId(id)
+	if not id then return false end
 
 	if not images[id] then
 		-- Check file system
@@ -87,14 +103,20 @@ function getImage(id)
 			local file = fileOpen(filename, true)
 			if file then
 				local size = fileGetSize(file)
-				if tonumber(size) > 0 then
+				if tonumber(size) > 0 and size <= MAX_IMAGE_BYTES then
 					local content = fileRead(file, size)
-					images[id] = { data = content, tex = dxCreateTexture(filename)}
+					if validImageData(content) then
+						images[id] = { data = content, tex = dxCreateTexture(filename)}
+					else
+						fileClose(file)
+						fileDelete(filename)
+						file = nil
+					end
 					-- Check if the image from client is up to date with server's.
-					triggerServerEvent("cache:verifyClientImageFile", localPlayer, id, size)
+					if file then triggerServerEvent("cache:verifyClientImageFile", localPlayer, id, size) end
 					--outputDebugString("[CACHE] images / client / getImage / Verify image : "..id)
 				end
-				fileClose(file)
+				if file then fileClose(file) end
 			end
 		end
 	end

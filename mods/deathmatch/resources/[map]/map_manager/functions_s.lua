@@ -7,22 +7,39 @@
 * ***********************************************************************************************************************
 ]]
 
-function submitExteriorMapRequest ( name, url, who, what, why, map, player, converter ) -- for some super weird reasons, mta built in mysql function refuses to work for half of the records if you loop it instantly, no idea why.
+function submitExteriorMapRequest ( name, url, who, what, why, map, player, converter )
+	local mapIsValid, validationError = validateSubmittedMap(map, converter and 9999 or settings.external_map_max_objects)
+	if not mapIsValid then
+		return false, validationError
+	end
+
 	local qh, res, nums, map_id
 	if converter then
 		local mysql = exports.mysql
-		res, map_id = true, mysql:query_insert_free("INSERT INTO maps SET name='"..mysql:escape_string(name).."', preview='"..mysql:escape_string(url).."', purposes='"..mysql:escape_string(what).."', used_by='"..mysql:escape_string(who).."', reasons='"..mysql:escape_string(why).."', uploader='"..mysql:escape_string(getElementData( player, 'account:id' )).."', note='' ")
+		map_id = mysql:query_insert_free("INSERT INTO maps SET name='"..mysql:escape_string(name).."', preview='"..mysql:escape_string(url).."', purposes='"..mysql:escape_string(what).."', used_by='"..mysql:escape_string(who).."', reasons='"..mysql:escape_string(why).."', uploader='"..mysql:escape_string(getElementData(player, 'account:id')).."', note='' ")
+		res = map_id and true or false
 	else
 		qh = dbQuery( exports.mysql:getConn('mta'), "INSERT INTO maps SET name=?, preview=?, purposes=?, used_by=?, reasons=?, uploader=?, note='' ", name, url, what, who, why, getElementData( player, 'account:id' ) )
 		res, nums, map_id = dbPoll( qh, 10000 )
 	end
 	if res and map_id then
 		for _, obj in ipairs( map ) do
-			dbExec( exports.mysql:getConn('mta'), "INSERT INTO maps_objects SET map_id=?, id=?, interior=?, dimension=?, collisions=?, breakable=?, radius=?, model=?, lodModel=?, posX=?, posY=?, posZ=?, rotX=?, rotY=?, rotZ=?, doublesided=?, scale=?, alpha=?", map_id, obj.id, obj.interior, obj.dimension, obj.collisions, obj.breakable, obj.radius, obj.model, obj.lodModel, obj.posX, obj.posY, obj.posZ, obj.rotX, obj.rotY, obj.rotZ, obj.doublesided, obj.scale, obj.alpha )
+			local inserted = dbExec( exports.mysql:getConn('mta'), "INSERT INTO maps_objects SET map_id=?, id=?, interior=?, dimension=?, collisions=?, breakable=?, radius=?, model=?, lodModel=?, posX=?, posY=?, posZ=?, rotX=?, rotY=?, rotZ=?, doublesided=?, scale=?, alpha=?", map_id, obj.id, obj.interior, obj.dimension, obj.collisions, obj.breakable, obj.radius, obj.model, obj.lodModel, obj.posX, obj.posY, obj.posZ, obj.rotX, obj.rotY, obj.rotZ, obj.doublesided, obj.scale, obj.alpha )
+			if not inserted then
+				local objectsCleaned = dbExec(exports.mysql:getConn('mta'), "DELETE FROM maps_objects WHERE map_id=?", map_id)
+				local requestCleaned = dbExec(exports.mysql:getConn('mta'), "DELETE FROM maps WHERE id=?", map_id)
+				if not objectsCleaned or not requestCleaned then
+					outputDebugString("[MAPS] Failed to fully clean up incomplete map request #"..tostring(map_id), 1)
+					return false, 'Map object persistence failed and cleanup was incomplete. Code 18.'
+				end
+				return false, 'Map object persistence failed. Code 18.'
+			end
 		end
 		return true
 	else
-		dbFree( qh )
+		if qh then
+			dbFree( qh )
+		end
 		return false, 'Internal Error. Code 17.'
 	end
 end
