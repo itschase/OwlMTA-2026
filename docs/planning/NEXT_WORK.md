@@ -1,6 +1,6 @@
 # Next work record
 
-Last updated: 2026-10-27 during the archived-resource comparison continuation.
+Last updated: 2026-10-27 after publishing 12 standardized Script Resource Discussions.
 
 ## Latest continuation — archived resource variants and active `grid`
 
@@ -22,7 +22,7 @@ The `realism` resource audit covers its bundled vehicle, item, ambient, and pres
 
 The `hud` dossier covers player panels, statistics, staff/supporter display separation, commands, notification exports, and its high fan-in dependencies. Issues #410–#413 track stats caller/privacy binding, forced blur state, overlapping achievement timers, and the compiled-only interface source/build gap. The `/stats` owner activity timestamp side effect is documented for policy review, not filed as a confirmed defect.
 
-The regenerated ledger maps 101 of 179 manifest rows to dossiers: 89 full reviews and 12 partial reviews; all runtime-unverified. The four same-name archive dossiers are comparisons rather than full per-script audits. Individual Script Resource Discussions remain pending for recently added resource dossiers.
+The regenerated ledger maps 101 of 179 manifest rows to dossiers: 89 full reviews and 12 partial reviews; all runtime-unverified. The five archive dossiers are comparisons rather than full per-script audits. Published one-to-one Script Resource Discussions for active `grid`, `dynamic_lighting`, `dynamic_lighting_vehicles`, `license-system`, `gps`, `lottery-system`, and `report`, plus archive-specific threads for `dynamic_lighting`, `dynamic_lighting_flash`, `dynamic_lighting_vehicles`, `grid`, and `dynamic_lighting_projectiles`. The discussion tracker and resource index now link all 12 threads. Script Resource Discussions remain pending for the later `id-system`, `realism`, and `hud` dossiers; request permission before publishing those outside the approved batch.
 
 ## Latest continuation — 2026-10-27
 

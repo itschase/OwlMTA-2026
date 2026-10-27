@@ -308,6 +308,18 @@ Issues #52 (MDC) and #55 (phone) were updated with the additional read, mutation
 
 ### Resource coverage continuation
 
+- [Script Resource #414: grid](https://github.com/itschase/OwlMTA-2026/discussions/414)
+- [Script Resource #415: dynamic_lighting](https://github.com/itschase/OwlMTA-2026/discussions/415)
+- [Script Resource #416: dynamic_lighting_vehicles](https://github.com/itschase/OwlMTA-2026/discussions/416)
+- [Script Resource #417: license-system](https://github.com/itschase/OwlMTA-2026/discussions/417)
+- [Script Resource #418: gps](https://github.com/itschase/OwlMTA-2026/discussions/418)
+- [Script Resource #419: lottery-system](https://github.com/itschase/OwlMTA-2026/discussions/419)
+- [Script Resource #420: report](https://github.com/itschase/OwlMTA-2026/discussions/420)
+- [Script Resource #421: dynamic_lighting (archived)](https://github.com/itschase/OwlMTA-2026/discussions/421)
+- [Script Resource #422: dynamic_lighting_flash (archived)](https://github.com/itschase/OwlMTA-2026/discussions/422)
+- [Script Resource #423: dynamic_lighting_vehicles (archived)](https://github.com/itschase/OwlMTA-2026/discussions/423)
+- [Script Resource #424: grid (archived)](https://github.com/itschase/OwlMTA-2026/discussions/424)
+- [Script Resource #425: dynamic_lighting_projectiles (archived)](https://github.com/itschase/OwlMTA-2026/discussions/425)
 - [Script Resource #369: clubtec](https://github.com/itschase/OwlMTA-2026/discussions/369)
 - [Script Resource #376: customblips](https://github.com/itschase/OwlMTA-2026/discussions/376)
 - [Operator Notes #377: customblips dependencies and lifecycle](https://github.com/itschase/OwlMTA-2026/discussions/377)
@@ -330,7 +342,7 @@ Issues #52 (MDC) and #55 (phone) were updated with the additional read, mutation
 - [Issues #401–#409: realism vehicle, item, timer, alarm, and staff event findings](https://github.com/itschase/OwlMTA-2026/issues/401)
 - [Issues #410–#413: HUD stats, blur, popup lifecycle, and compiled interface](https://github.com/itschase/OwlMTA-2026/issues/410)
 
-The same-name archived copies have separate source identities. Their archive dossiers are indexed from [`docs/resources/README.md`](../resources/README.md); publish archive-specific Script Resource Discussions with a consistent suffix such as `(archived)` rather than reusing the active resource thread.
+The same-name archived copies have separate source identities. Their archive dossiers and separate `(archived)` Script Resource Discussions are indexed from [`docs/resources/README.md`](../resources/README.md). Archive reviews remain partial comparisons, not evidence of current availability or runtime behavior.
 - [Player Guide Q&A #389: How do I use and recharge a flashlight?](https://github.com/itschase/OwlMTA-2026/discussions/389)
 - [#367: Authorize ClubTec video-player actions against caller and target](https://github.com/itschase/OwlMTA-2026/issues/367)
 - [#368: Validate ClubTec texture and shader settings before persistence](https://github.com/itschase/OwlMTA-2026/issues/368)
