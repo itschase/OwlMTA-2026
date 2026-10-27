@@ -1,6 +1,16 @@
 # Next work record
 
-Last updated: 2026-10-27 during the death and datetime documentation continuation.
+Last updated: 2026-10-27 during the archived-resource comparison continuation.
+
+## Latest continuation — archived resource variants and active `grid`
+
+Compared all four same-name archive entries against the active resource tree using file-level hashes and manifest inspection. Added separate archive dossiers for `dynamic_lighting`, `dynamic_lighting_flash`, `dynamic_lighting_vehicles`, and `grid`; the archived `grid` is a crossing/map implementation distinct from the active simulation-helper library. The three archived lighting copies also differ from their active counterparts; details and evidence are in the individual archive dossiers. The status generator now supports archive-specific dossier records by manifest path so the archive rows do not borrow active coverage.
+
+Reviewed active `grid` exports and caller references. `isSimCrossingRequiredForTeleport` refers to undefined `element` when `target` is an element. Created and assigned [Issue #390](https://github.com/itschase/OwlMTA-2026/issues/390) under Milestone #7. Added the active [`grid` dossier](../resources/grid.md). This is source-confirmed; runtime remains unverified.
+
+Read-only parallel reviews of organizations/criminal systems and account/login found no duplicate issues: drug ingredient partial-consumption failure is already tracked by #185, and account flows are covered by #43, #158, and #201–#204 among others. Preserve those existing trackers and extend their dossiers if later audit adds materially new behavior.
+
+The regenerated ledger now maps 93 of 179 manifest rows to dossiers: 81 full reviews and 12 partial reviews; all runtime-unverified. The four archive dossiers are comparisons rather than full per-script audits, and each still needs a consistently named Script Resource Discussion. Continue source reviews of uncatalogued active resources and remaining archive entries.
 
 ## Latest continuation — 2026-10-27
 

@@ -319,6 +319,9 @@ Issues #52 (MDC) and #55 (phone) were updated with the additional read, mutation
 - [Script Resource #386: driveby](https://github.com/itschase/OwlMTA-2026/discussions/386)
 - [Operator Notes #387: driveby settings and client startup](https://github.com/itschase/OwlMTA-2026/discussions/387)
 - [Script Resource #388: dynamic_lighting_flash](https://github.com/itschase/OwlMTA-2026/discussions/388)
+- [Issue #390: Resolve simulation for the target element in teleport checks](https://github.com/itschase/OwlMTA-2026/issues/390)
+
+The same-name archived copies have separate source identities. Their archive dossiers are indexed from [`docs/resources/README.md`](../resources/README.md); publish archive-specific Script Resource Discussions with a consistent suffix such as `(archived)` rather than reusing the active resource thread.
 - [Player Guide Q&A #389: How do I use and recharge a flashlight?](https://github.com/itschase/OwlMTA-2026/discussions/389)
 - [#367: Authorize ClubTec video-player actions against caller and target](https://github.com/itschase/OwlMTA-2026/issues/367)
 - [#368: Validate ClubTec texture and shader settings before persistence](https://github.com/itschase/OwlMTA-2026/issues/368)

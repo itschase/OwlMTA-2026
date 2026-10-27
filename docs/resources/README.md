@@ -46,6 +46,20 @@ Every dossier distinguishes source evidence from runtime verification. Presence 
 | Ambient interior dancers and staff placement | [`dancer-system`](dancer-system.md) ([Script Resource #381](https://github.com/itschase/OwlMTA-2026/discussions/381), [staff guide #382](https://github.com/itschase/OwlMTA-2026/discussions/382), [Issues #374](https://github.com/itschase/OwlMTA-2026/issues/374)–[#375](https://github.com/itschase/OwlMTA-2026/issues/375)) | Full manifest/direct-caller/schema review; runtime unverified |
 | Vehicle occupant drive-by controls | [`driveby`](driveby.md) ([Script Resource #386](https://github.com/itschase/OwlMTA-2026/discussions/386), [operator notes #387](https://github.com/itschase/OwlMTA-2026/discussions/387), [Issue #383](https://github.com/itschase/OwlMTA-2026/issues/383)) | Full manifest/client/server/export review; runtime unverified |
 | Rechargeable inventory flashlight and dynamic light | [`dynamic_lighting_flash`](dynamic_lighting_flash.md) ([Script Resource #388](https://github.com/itschase/OwlMTA-2026/discussions/388), [player Q&A #389](https://github.com/itschase/OwlMTA-2026/discussions/389), [Issues #384](https://github.com/itschase/OwlMTA-2026/issues/384)–[#385](https://github.com/itschase/OwlMTA-2026/issues/385)) | Full manifest/direct-caller review; runtime unverified |
+| Dynamic shader lighting provider | [`dynamic_lighting`](dynamic_lighting.md) | Partial manifest/API review; runtime unverified |
+| Vehicle headlight effects | [`dynamic_lighting_vehicles`](dynamic_lighting_vehicles.md) | Partial manifest/export review; runtime unverified |
+| Simulation region helpers | [`grid`](grid.md) ([Issue #390](https://github.com/itschase/OwlMTA-2026/issues/390)) | Full active manifest/export review; runtime unverified |
+
+## Archived resource variants
+
+Archive dossiers describe source stored under `mods/deathmatch/resource-archive/`; they are not evidence of currently available gameplay. Same-named active and archived resources are tracked as separate manifest rows and must not inherit each other's behavior.
+
+| Archived resource | Dossier | Comparison state |
+|---|---|---|
+| `dynamic_lighting` | [`archive/dynamic_lighting`](archive/dynamic_lighting.md) | Compared with active v1.5.8; archived v1.5.3 differs in five shared files |
+| `dynamic_lighting_flash` | [`archive/dynamic_lighting_flash`](archive/dynamic_lighting_flash.md) | Archived shader/manifest and model assets differ from active copy |
+| `dynamic_lighting_vehicles` | [`archive/dynamic_lighting_vehicles`](archive/dynamic_lighting_vehicles.md) | One script differs from the active copy |
+| `grid` | [`archive/grid`](archive/grid.md) | Distinct crossing/map implementation; only the differently defined manifest shares a relative path |
 
 The complete manifest census remains in [`RESOURCE_CATALOG.md`](../reference/RESOURCE_CATALOG.md). The required review fields and completion states are defined in [`RESOURCE_AUDIT_PLAYBOOK.md`](../planning/RESOURCE_AUDIT_PLAYBOOK.md).
 
