@@ -279,7 +279,7 @@ Issues #52 (MDC) and #55 (phone) were updated with the additional read, mutation
 - [#333: Scope gatekeepers ped damage protection to intended NPCs](https://github.com/itschase/OwlMTA-2026/issues/333)
 - [#335: Bind animation changes and synchronization to the requesting player](https://github.com/itschase/OwlMTA-2026/issues/335)
 - [#337: Validate help command catalog writes and align editor visibility with server policy](https://github.com/itschase/OwlMTA-2026/issues/337)
-- [#338: Bind help command-list refreshes to the requesting player](https://github.com/itschase/OwlMTA-2026/issues/338)
+- [#338: Bind help command-list refresh requests to the requesting player](https://github.com/itschase/OwlMTA-2026/issues/338)
 - [#340: Separate 911 log access from donor entitlements](https://github.com/itschase/OwlMTA-2026/issues/340)
 Milestone [M4 — Organizations & Living Roleplay](https://github.com/itschase/OwlMTA-2026/milestone/6) groups the compatibility-first organization, contextual interaction, criminal opportunity, evidence, and connected-roleplay foundation work. M0/M1 portability and security gates remain prerequisites.
 

@@ -545,5 +545,5 @@ function tabSwitch(theTab)
 end
 
 function canEditCmds()
-	return exports.integration:isPlayerTrialAdmin(localPlayer) or exports.integration:isPlayerSupporter(localPlayer)
+	return exports.integration:isPlayerTrialAdmin(localPlayer)
 end

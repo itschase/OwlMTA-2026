@@ -78,6 +78,7 @@ $published = @{
     "artifacts" = @{ Number = "328"; Dossier = "docs/resources/artifacts.md"; State = "Full manifest-script and direct-caller source review; Discussion published" }
     "gatekeepers-system" = @{ Number = "334"; Dossier = "docs/resources/gatekeepers-system.md"; State = "Full manifest-script and direct-caller source review; Discussion published" }
     "animation-system" = @{ Number = "336"; Dossier = "docs/resources/animation-system.md"; State = "Full manifest-script and direct-caller source review; Discussion published" }
+    "help" = @{ Number = "339"; Dossier = "docs/resources/help.md"; State = "Full manifest-script and direct-caller source review; Discussion published" }
 }
 
 $inventoryByPath = @{}
