@@ -26,10 +26,15 @@ function fetchBuriedCharacters()
 end
 
 function sendburiedCharactersToClient()
-	if source then
-		client = source
+	local requestingPlayer = client
+	if not (requestingPlayer and isElement(requestingPlayer) and getElementType(requestingPlayer) == "player") then
+		return false
 	end
-	triggerClientEvent(client, "receiveBuriedCharactersFromServer", client, buriedCharacters)
+	if source ~= requestingPlayer then
+		return false
+	end
+	triggerClientEvent(requestingPlayer, "receiveBuriedCharactersFromServer", requestingPlayer, buriedCharacters)
+	return true
 end
 addEvent("sendburiedCharactersToClient", true)
 addEventHandler("sendburiedCharactersToClient", root, sendburiedCharactersToClient)

@@ -22,6 +22,21 @@
 - [Issue #68](https://github.com/itschase/OwlMTA-2026/issues/68) now tracks route/schema reconciliation and the missing Owl host adapter, login integration, capability facade, and revocation handler.
 - The separate service's process-local state and unverified MTA adapter runtime are explicit limits. Do not claim end-to-end Discord login or role authorization exists in OwlMTA.
 
+## Current resource follow-up — `death`
+
+- Resource guide: [`docs/resources/death.md`](../resources/death.md); standardized [Script Resource: death Discussion #347](https://github.com/itschase/OwlMTA-2026/discussions/347).
+- [Issue #345](https://github.com/itschase/OwlMTA-2026/issues/345) tracks verification of cemetery-cache caller binding and request-rate behavior after the source fix.
+- CK authority remains in the admin/self-CK resource paths; Discord named capabilities, if adopted, belong at their global staff action boundary. Death presentation and public cemetery access carry no staff role requirement.
+- Runtime remains unverified.
+
+## Current resource follow-up — `datetime`
+
+- Resource guide: [`docs/resources/datetime.md`](../resources/datetime.md); standardized [Script Resource: datetime Discussion #348](https://github.com/itschase/OwlMTA-2026/discussions/348).
+- [Issue #346](https://github.com/itschase/OwlMTA-2026/issues/346) tracks the mixed timestamp epochs, reversed IPPC future/past classification, date parsing, and legacy-value migration plan. [Issue #349](https://github.com/itschase/OwlMTA-2026/issues/349) tracks caller-bound clock synchronization and related event review.
+- The helper is shared broadly and some `now()` results are persisted; do not change its epoch as a local cleanup. Complete the consumer/value migration audit before implementation.
+- Discord grants have no clock-formatting role; any action timed by a feature stays authorized and validated by that feature's server logic.
+- Runtime remains unverified.
+
 Use both GitHub Issues and Discussions as the project's public working record. Write in the project's voice. Record source-backed findings and decisions without mentioning the tools or people that produced them.
 
 Keep GitHub surfaces audience-specific: Issues are the actionable defect/security backlog; Discussions are split into resource architecture, simplified player Q&A/wiki, staff/admin operations, server-operator runbooks, Discord/API design, and enhancement planning. Version-controlled Markdown remains the detailed source of truth. Where a category is unavailable, use the closest existing category and label the audience at the top of each post.

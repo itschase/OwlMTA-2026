@@ -1,6 +1,6 @@
 # Next work record
 
-Last updated: 2026-10-27 during the vehicle-fuel and faction authorization documentation continuation.
+Last updated: 2026-10-27 during the death and datetime documentation continuation.
 
 ## Current continuation — 2026-10-27
 
@@ -15,6 +15,10 @@ Next: review the issues against the repository's SQL wrapper/card schema before 
 The faction/duty review from the concurrent project audit is now reflected in resource dossiers and GitHub Issues. Issues [#38](https://github.com/itschase/OwlMTA-2026/issues/38), [#39](https://github.com/itschase/OwlMTA-2026/issues/39), and [#53](https://github.com/itschase/OwlMTA-2026/issues/53) now distinguish older reported missing checks from current source coverage and remaining roster privacy, offline membership, package payload, and actor-binding tasks. [Issue #344](https://github.com/itschase/OwlMTA-2026/issues/344) separately tracks the global `dutyAdmin:Save` authorization/payload gap. Local faction rank/duty policy remains distinct from any future Discord global staff capability.
 
 The API review compared Owl's proposed `/api/v1` document with the published standalone service's implemented `/v1` contract. They differ; Owl still lacks its host adapter, login integration, local capability facade, and revocation disconnect handler. Updated [Issue #68](https://github.com/itschase/OwlMTA-2026/issues/68) to make contract reconciliation and the Owl host slice the actionable work. [`API_CONTRACT.md`](../architecture/API_CONTRACT.md) now clearly labels the target routes as proposed and records the actual separate-service route snapshot. The standalone service currently uses process-local state and has not been verified inside a real MTA server.
+
+Audited the complete `death` manifest and direct CK/cemetery callers; added [`docs/resources/death.md`](../resources/death.md), updated the status ledger and resource index, and created [Issue #345](https://github.com/itschase/OwlMTA-2026/issues/345). A remote cemetery-list handler previously used the client-supplied event source as the reply recipient; it now binds the caller to MTA's `client`, validates source equality, and replies only to that caller. The response is public memorial data, so impact is documented as recipient spoofing/unwanted response delivery. Runtime verification and request-rate review remain open.
+
+Audited `datetime` and the direct IPPC consumer; added [`docs/resources/datetime.md`](../resources/datetime.md) and created [Issue #346](https://github.com/itschase/OwlMTA-2026/issues/346) for mixed timestamp epochs and IPPC classification. Because `now()` values are stored and read across many resources, changing its epoch requires a consumer and legacy-data migration plan. Also created [Issue #349](https://github.com/itschase/OwlMTA-2026/issues/349) and fixed the remote clock-sync response to bind to authenticated `client`, validate source equality, and target only the caller. Published [Script Resource: death #347](https://github.com/itschase/OwlMTA-2026/discussions/347) and [Script Resource: datetime #348](https://github.com/itschase/OwlMTA-2026/discussions/348). The status ledger records 75 of 179 resources with maintained dossiers (70 full source reviews and 5 partial) and 75 individual resource Discussions; both dossiers remain runtime-unverified.
 
 Committed and pushed cache, prison, NPC/shop, truck-supply, tow, and map-manager source/dossier updates as [3d4fcc4](https://github.com/itschase/OwlMTA-2026/commit/3d4fcc4). The shop restock path calculates stock keys/prices from server catalog state, settles one-unit restocks without creating an empty delivery, preserves the existing owner/faction payer selection, commits local stock before settlement, and compensates local stock if trucker settlement fails. These writes still are not transactional across resources; a failed compensation is logged. Updated [Issue #182](https://github.com/itschase/OwlMTA-2026/issues/182) to capture this shared ledger boundary and runtime matrix. Updated [Issue #62](https://github.com/itschase/OwlMTA-2026/issues/62), assigned it to Milestone #7, and recorded map validation, actor/state checks, conditional transitions, and incomplete MyISAM rollback limits. Cache #63, prison #54/#341, and the six resource dossiers remain source-only; all need safe-start/runtime verification later. No MTA server was started and no tests were run.
 
@@ -77,7 +81,7 @@ A focused `weapon:modify` server-side ownership/field validation fix is publishe
 
 - `main` was synchronized with `origin/main` before this batch.
 - The manifest census remains 179 resources: 144 active-tree and 35 archived.
-- 73 resources have individual Discussions; the repository now has 73 maintained dossiers (68 full source reviews and 5 partial reviews). The `vehicle_fuel` dossier is now a full manifest-script source review. All maintained dossier and Discussion findings remain runtime-unverified.
+- 75 resources have individual Discussions; the repository now has 75 maintained dossiers (70 full source reviews and 5 partial reviews). All dossier and Discussion findings remain runtime-unverified.
 - Source review, proposed design, fixed-in-source behavior, and runtime verification remain distinct. All resource dossiers are runtime-unverified.
 - The MTA server has not been started. Static review and safe-start preparation remain the gate.
 

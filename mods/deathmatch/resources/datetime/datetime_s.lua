@@ -6,7 +6,15 @@ addEventHandler("onResourceStart", resourceRoot, function()
 end)
 
 function getServerCurrentTimeSec()
-	triggerClientEvent(source, "setServerCurrentTimeSec", source, now())
+	local requestingPlayer = client
+	if not (requestingPlayer and isElement(requestingPlayer) and getElementType(requestingPlayer) == "player") then
+		return false
+	end
+	if source ~= requestingPlayer then
+		return false
+	end
+	triggerClientEvent(requestingPlayer, "setServerCurrentTimeSec", requestingPlayer, now())
+	return true
 end
 addEvent("getServerCurrentTimeSec", true)
 addEventHandler("getServerCurrentTimeSec", root, getServerCurrentTimeSec)
