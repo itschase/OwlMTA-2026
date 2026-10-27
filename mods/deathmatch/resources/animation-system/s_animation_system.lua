@@ -63,7 +63,7 @@ addEventHandler( "stopAnimationFix2", getRootElement(), stopAnimationFix2 )
 ]]
 
 function animationList(thePlayer)
-	outputChatBox("/piss /wank /slapass /fixcar /handsup /hailtaxi /scratch /fu /carchat /tired /cover", thePlayer, 255, 194, 14)
+	outputChatBox("/piss /wank /slapass /handsup /hailtaxi /scratch /fu /carchat /tired /cover", thePlayer, 255, 194, 14)
 	outputChatBox("/strip 1-2 /lightup /drink /beg /mourn /cheer 1-3 /dance 1-3 /crack 1-4 /walk(2) 1-37", thePlayer, 255, 194, 14)
 	outputChatBox("/gsign 1-5 /puke /rap 1-3 /sit 1-5 /smoke 1-3 /smokelean /laugh /startrace /bat 1-3", thePlayer, 255, 194, 14)
 	outputChatBox("/daps 1-2 /shove /bitchslap /shocked /dive /what /fall /fallfront /cpr /copaway", thePlayer, 255, 194, 14)

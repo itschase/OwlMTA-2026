@@ -1,6 +1,6 @@
 # Next work record
 
-Last updated: 2026-10-27 during publication of resource and command-interaction planning.
+Last updated: 2026-10-27 during the animation-system audit and publication.
 
 ## Current publication state — 2026-10-27
 
@@ -18,15 +18,17 @@ Audited `gatekeepers-system`, published [Script Resource Discussion #334](https:
 
 Posted the per-resource Discord authorization review to the existing [Discord identity Discussion #239](https://github.com/itschase/OwlMTA-2026/discussions/239), linking the audit standard, external adapter contract, and the distinction between Discord grants and local gameplay/faction/donor checks.
 
-Current coverage is 71/179 resources with individual Discussions: 65 full source reviews and 6 partial; all are runtime-unverified. New publications in this batch are Discussions #316-#319, #328-#329, and #334; Issues #320-#333. Issues #320-#326 and #330-#333 are grouped under Milestone #7; #327 belongs to Milestone #4.
+Audited `animation-system`, published standardized [Script Resource Discussion #336](https://github.com/itschase/OwlMTA-2026/discussions/336), and created [Issue #335](https://github.com/itschase/OwlMTA-2026/issues/335) for unbound animation mutation/sync event payloads and duplicate subscriptions. The dossier inventories player command use cases and alternatives, finds no current staff-only command (so ordinary emotes need no Discord role), and records where a future staff animation control would check the external adapter's named capability. Corrected the stale `/fixcar` help entry in source; static diff only.
 
-The API credential's `CreateDiscussion` permission denial remains a publication-channel constraint; browser publication succeeded. Future Discussion batches should continue using the title form `Script Resource: <resource>` and update the generator, ledger, and index in the same publication batch. Four new discussions were verified live at the GitHub URLs above.
+Current coverage is 72/179 resources with individual Discussions: 66 full source reviews and 6 partial; all are runtime-unverified. New publications in this batch are Discussions #316-#319, #328-#329, #334, and #336; Issues #320-#333 and #335. Issues #320-#326 and #330-#333, #335 are grouped under Milestone #7; #327 belongs to Milestone #4.
+
+The API credential's `CreateDiscussion` permission denial remains a publication-channel constraint; browser publication succeeded. Future Discussion batches should continue using the title form `Script Resource: <resource>` and update the generator, ledger, and index in the same publication batch. The new resource Discussion pages were verified live at the linked GitHub URLs above.
 
 The next audit wave should select high-impact remaining active resources, review manifest-loaded files plus direct callers and persistence, then publish dossiers, standardized Discussions, and deduplicated Issues. Maintain the static-review/safe-start gate; no MTA server has been started.
 
 ## Previous audit wave — 2026-10-26
 
-Four dossiers now record `activities`, `bone_attach`, `clothes`, and `official-interiors`. Their individual Discussions remain pending: the GitHub GraphQL credential available to this workspace returned a `CreateDiscussion` permission denial, and the available connector has no Discussion write operation. Dossiers and the status ledger keep that publication state explicit.
+The `activities`, `bone_attach`, `clothes`, and `official-interiors` dossiers and their standardized Discussions were published in the next wave above after the workspace credential returned a `CreateDiscussion` permission denial and browser publication was used. The status ledger records the current links.
 
 `activities` source review found snowball creation and throw remotes trust actor/trajectory payload fields instead of binding them to MTA's authenticated caller; this maps to focused [Issue #306](https://github.com/itschase/OwlMTA-2026/issues/306) and umbrella Issue #1. The `clothes` audit retained existing authorization [Issue #58](https://github.com/itschase/OwlMTA-2026/issues/58) and created distinct issues #312-#315 for upload intake, shop settlement, manufacture/copies/resale, and texture streaming. `bone_attach` now has lifecycle/API [Issue #310](https://github.com/itschase/OwlMTA-2026/issues/310), and the independent phone object-key bug is [Issue #311](https://github.com/itschase/OwlMTA-2026/issues/311); existing weapon remote Issue #289 remains owner of the weapon caller path. `official-interiors` issues #307-#309 track authorized catalog repair, geometry defects, and measured on-demand loading.
 
