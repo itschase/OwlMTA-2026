@@ -78,6 +78,8 @@ The duty lookup and the personal manufacture/copy/sale ownership comparisons use
 ## Existing tracker ownership
 
 - **#58 — [Validate clothing design ownership and staff authorization](https://github.com/itschase/OwlMTA-2026/issues/58)** remains the owner for create/update/delete ownership and staff-capability checks. This audit does not duplicate it.
+- **#320 — [Restrict remote clothes resource restarts](https://github.com/itschase/OwlMTA-2026/issues/320)** owns the `clothes:tempfix` remotely callable whole-resource restart and rate/state validation.
+- **#321 — [Bind clothing lists and Dupont dialogue to server interaction state](https://github.com/itschase/OwlMTA-2026/issues/321)** owns requester-bound personal/faction list responses and server-validated NPC dialogue context.
 - **#312 — [Replace duplicate uploads with one bounded intake pipeline](https://github.com/itschase/OwlMTA-2026/issues/312)** owns upload idempotency, provider restrictions, bounded fetch, and one-charge/one-design settlement.
 - **#313 — [Bind clothing purchases to shop context and settle grants](https://github.com/itschase/OwlMTA-2026/issues/313)** owns the NPC/shop session, catalog validation, outfit purchase, supply, and business-profit settlement.
 - **#314 — [Make manufacture, copies, and resale recoverable](https://github.com/itschase/OwlMTA-2026/issues/314)** owns durable design transitions and idempotent cash/GameCoin/item settlement.

@@ -1,6 +1,16 @@
 # Next work record
 
-Last updated: 2026-10-26 during the next resource audit wave.
+Last updated: 2026-10-27 during publication of the next resource audit wave.
+
+## Current publication state — 2026-10-27
+
+Published the four pending, standardized Script Resource Discussions directly through the signed-in Brave session after the workspace GitHub credential lacked Discussion write permission: `activities` #316, `bone_attach` #317, `clothes` #318, and `official-interiors` #319. The prior source dossiers already existed and are linked from each discussion. The individual resource coverage is now 69/179: 63 full source reviews and 6 partial reviews, all runtime-unverified. The manifest census remains 179 resources (144 active-tree, 35 archived).
+
+This wave also created Issues #320-#323 after checking current issue matches: unauthorized `clothes:tempfix` resource restarts, requester/NPC interaction binding for clothes lists and dialogue, snowball teardown input cleanup, and checked lifecycle for global interior collision overrides. Issues #306-#315 remain linked to the four resource dossiers; each new issue is assigned under Milestone #7. These four candidates were searched before creation, and a matching `createObject` false-flag finding was already covered by #308 rather than duplicated.
+
+The API credential's `CreateDiscussion` permission denial remains a publication-channel constraint; browser publication succeeded. Future Discussion batches should continue using the title form `Script Resource: <resource>` and update the generator, ledger, and index in the same publication batch. Four new discussions were verified live at the GitHub URLs above.
+
+The next audit wave should select high-impact remaining active resources, review manifest-loaded files plus direct callers and persistence, then publish dossiers, standardized Discussions, and deduplicated Issues. Maintain the static-review/safe-start gate; no MTA server has been started.
 
 ## Current audit wave — 2026-10-26
 

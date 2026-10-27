@@ -71,10 +71,10 @@ $published = @{
     "es-system" = @{ Number = 303; Dossier = "docs/resources/es-system.md"; State = "Full manifest-script and direct-caller source review; individual Discussion published" }
     "cargo" = @{ Number = 304; Dossier = "docs/resources/cargo.md"; State = "Full manifest-script and direct-caller source review; individual Discussion published" }
     "event-system" = @{ Number = 305; Dossier = "docs/resources/event-system.md"; State = "Full manifest-script and direct-caller source review; individual Discussion published" }
-    "activities" = @{ Number = ""; Dossier = "docs/resources/activities.md"; State = "Full manifest-script and direct-caller source review; Discussion pending" }
-    "bone_attach" = @{ Number = ""; Dossier = "docs/resources/bone_attach.md"; State = "Full manifest-script and direct-caller source review; Discussion pending" }
-    "clothes" = @{ Number = ""; Dossier = "docs/resources/clothes.md"; State = "Full manifest-script and direct-caller source review; Discussion pending" }
-    "official-interiors" = @{ Number = ""; Dossier = "docs/resources/official-interiors.md"; State = "Full manifest-script and direct-caller source review; Discussion pending" }
+    "activities" = @{ Number = "316"; Dossier = "docs/resources/activities.md"; State = "Full manifest-script and direct-caller source review; Discussion published" }
+    "bone_attach" = @{ Number = "317"; Dossier = "docs/resources/bone_attach.md"; State = "Full manifest-script and direct-caller source review; Discussion published" }
+    "clothes" = @{ Number = "318"; Dossier = "docs/resources/clothes.md"; State = "Full manifest-script and direct-caller source review; Discussion published" }
+    "official-interiors" = @{ Number = "319"; Dossier = "docs/resources/official-interiors.md"; State = "Full manifest-script and direct-caller source review; Discussion published" }
 }
 
 $inventoryByPath = @{}

@@ -73,7 +73,7 @@ MTA event handlers receive the authenticated remote `client` separately from the
 
 ## Tracking and verification
 
-The snowball remote boundary is tracked by [Issue #306](https://github.com/itschase/OwlMTA-2026/issues/306) under the existing [remote-event authorization umbrella, Issue #1](https://github.com/itschase/OwlMTA-2026/issues/1). No narrower `activities` issue existed at review time. Runtime behavior, position synchronization, event abuse impact, attachment cleanup, and resource start/stop behavior have not been tested.
+The snowball remote boundary is tracked by [Issue #306](https://github.com/itschase/OwlMTA-2026/issues/306) under the existing [remote-event authorization umbrella, Issue #1](https://github.com/itschase/OwlMTA-2026/issues/1). Inconsistent input unbinding across snowball teardown paths is tracked separately in [Issue #322](https://github.com/itschase/OwlMTA-2026/issues/322). Runtime behavior, position synchronization, event abuse impact, attachment cleanup, and resource start/stop behavior have not been tested.
 
 ## MTA references
 
