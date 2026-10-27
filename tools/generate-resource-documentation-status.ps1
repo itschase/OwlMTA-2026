@@ -44,6 +44,7 @@ $published = @{
     "fonts" = @{ Dossier = "docs/resources/fonts.md"; State = "Full asset manifest/direct client consumer review; Discussion pending" }
     "health-addon" = @{ Dossier = "docs/resources/health-addon.md"; State = "Partial manifest/injury/diagnosis flow and treatment event inventory; source review continuing; Discussion pending" }
     "fakevideo" = @{ Dossier = "docs/resources/fakevideo.md"; State = "Partial manifest/client-server streaming/catalog/caller review; Discussion pending" }
+    "glue-system" = @{ Dossier = "docs/resources/glue-system.md"; State = "Full manifest/client command/server attachment event review; Discussion pending" }
     "factions" = @{ Number = 101; Dossier = "docs/resources/factions.md"; State = "Full manifest-script source review; individual Discussion published" }
     "item-system" = @{ Number = 102; Dossier = "docs/resources/item-system.md"; State = "Full manifest-script source review; individual Discussion published" }
     "vehicle" = @{ Number = 107; Dossier = "docs/resources/vehicle.md" }

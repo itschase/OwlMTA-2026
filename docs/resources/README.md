@@ -68,6 +68,7 @@ Every dossier distinguishes source evidence from runtime verification. Presence 
 | Shared client font asset for resource UIs | [`fonts`](fonts.md) | Full asset manifest/direct client consumer review; runtime unverified |
 | Character injury, diagnosis, and treatment roleplay | [`health-addon`](health-addon.md) (Issues [#444](https://github.com/itschase/OwlMTA-2026/issues/444)–[#446](https://github.com/itschase/OwlMTA-2026/issues/446)) | Partial injury/diagnosis/treatment event review; runtime verification pending |
 | Animated textures for in-world video players | [`fakevideo`](fakevideo.md) ([Issue #447](https://github.com/itschase/OwlMTA-2026/issues/447)) | Partial streaming/catalog/caller review; runtime unverified |
+| Player and vehicle attachment through `/glue` | [`glue-system`](glue-system.md) ([Issue #448](https://github.com/itschase/OwlMTA-2026/issues/448)) | Full manifest/client/server event-flow review; runtime unverified |
 
 ## Archived resource variants
 

@@ -363,6 +363,7 @@ Issues #52 (MDC) and #55 (phone) were updated with the additional read, mutation
 - [Issue #445: Derive treatment target, price, and payment server-side](https://github.com/itschase/OwlMTA-2026/issues/445)
 - [Issue #446: Restrict ped diagnosis lookup to the caller's active character](https://github.com/itschase/OwlMTA-2026/issues/446)
 - [Issue #447: Complete failed frame fetches and release pending texture requests](https://github.com/itschase/OwlMTA-2026/issues/447)
+- [Issue #448: Bind attachment and detach events to valid local elements](https://github.com/itschase/OwlMTA-2026/issues/448)
 
 The same-name archived copies have separate source identities. Their archive dossiers and separate `(archived)` Script Resource Discussions are indexed from [`docs/resources/README.md`](../resources/README.md). Archive reviews remain partial comparisons, not evidence of current availability or runtime behavior.
 - [Player Guide Q&A #389: How do I use and recharge a flashlight?](https://github.com/itschase/OwlMTA-2026/discussions/389)
