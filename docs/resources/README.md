@@ -65,6 +65,7 @@ Every dossier distinguishes source evidence from runtime verification. Presence 
 | In-game server performance browser and high-CPU sampler | [`ipb`](ipb.md) | Full manifest/access/settings/sampling/player-event source review; runtime unverified |
 | Privileged client/server Lua execution utility | [`runcode`](runcode.md) ([Issue #443](https://github.com/itschase/OwlMTA-2026/issues/443)) | Full manifest/command/UI/remote/export/ACL source review; runtime unverified |
 | Client-side GTA sound-effect browser | [`sfxbrowser`](sfxbrowser.md) | Full client-only manifest/GUI/catalog/playback source review; runtime unverified |
+| Shared client font asset for resource UIs | [`fonts`](fonts.md) | Full asset manifest/direct client consumer review; runtime unverified |
 
 ## Archived resource variants
 
