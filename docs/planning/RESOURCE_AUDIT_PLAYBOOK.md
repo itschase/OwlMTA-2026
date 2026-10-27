@@ -40,6 +40,19 @@ For each resource command, remote event, export, and staff control, auditors sho
 4. Behavior when unlinked, expired, revoked, role-removed, plugin/API unavailable, or the adapter resource is stopped. Elevated actions fail closed; ordinary local gameplay and process boot must not become accidental API dependencies.
 5. Whether the donor tier is relevant. `getDonorTier` is entitlement information only and must never replace a staff/GameMaster capability.
 
+### Where scripts check authorization
+
+Record the check at the server-side action boundary, not just where a button or menu is shown:
+
+- A command checks the trusted command caller before doing privileged work. A remote event repeats the check using MTA's server-provided `client`; hiding the corresponding UI or button is only presentation, not authorization.
+- An exported function documents whether it is callable by other resources, its trusted actor input, and whether the caller must provide or inherit an authorization context. Do not treat a client-supplied account/player ID as proof of identity.
+- A privileged mutation checks the narrow capability immediately before its action, then checks local conditions such as active character, faction/rank/duty, ownership, target, proximity, world/interior, and current state. Shared helpers may centralize policy, but each reachable entry path must be shown to reach the helper.
+- Gameplay resources call an Owl-owned authorization facade; that facade alone adapts to the reusable Discord identity plugin's stable server export contract. Keep raw role IDs, Discord HTTP calls, bot credentials, and plugin-specific details out of gameplay scripts.
+- The dossier records the exact handler/helper and capability key, whether a grant is required at login or only for the action, and behavior for unlinked, expired, revoked, or unavailable authorization. Revocation should clear affected grants and terminate or restrict linked sessions according to the identity/session design.
+- Do not add a Discord check to ordinary character gameplay merely because the feature has a script or command. Mark such actions `not required` and explain which local policy authorizes them. Donor tier is an entitlement input, never a substitute for staff or GameMaster authority.
+
+During migration, compare the existing permission predicate and every caller before replacing it. Record any intentional policy change explicitly; do not silently translate numeric admin levels, faction ranks, duty state, donor levels, or MTA ACL into a Discord role hierarchy. The external plugin's export contract and revocation timing remain proposed until verified against the pinned plugin version and supported MTA runtime.
+
 Do not scatter role IDs, Discord REST requests, bot tokens, or raw-role comparisons through gameplay resources. Prefer one Owl-side authorization facade over the generic adapter, then migrate call sites by capability with legacy-policy comparison and rollback. Plugin exports and the host account resolver remain source-level contracts until verified together in the supported MTA runtime.
 
 ## Required resource dossier
