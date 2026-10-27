@@ -1,6 +1,6 @@
 # `dynamic_lighting_vehicles` resource
 
-**Review state:** Partial manifest and direct-export review. The active script calls the `dynamic_lighting` client API; rendering, element lifecycle, and performance require runtime verification. The older archived variant is documented separately at [`archive/dynamic_lighting_vehicles.md`](archive/dynamic_lighting_vehicles.md).
+**Review state:** Full manifest and direct-export source review. The active script calls the `dynamic_lighting` client API; rendering, element lifecycle, and performance require runtime verification. The older archived variant is documented separately at [`archive/dynamic_lighting_vehicles.md`](archive/dynamic_lighting_vehicles.md).
 
 ## What players see
 
@@ -16,6 +16,8 @@ This client resource builds headlight effects for streamed vehicles using spot l
 ## Source comparison and future interaction
 
 The active `c_vehicleLight.lua` has a narrower resource-change trigger condition than the archived copy. The archive dossier records that difference. A future vehicle context menu can expose a lighting status or local preference only; server-side vehicle ownership and state remain with the owning gameplay resource.
+
+The periodic updater reads the current `lights` state into local `state`, but the darkness normalization at line 146 references `new_state`, which is local to a separate callback. The condition therefore falls back to mode 1 in this function, including when the current state is mode 2. This source-confirmed issue is tracked in [Issue #392](https://github.com/itschase/OwlMTA-2026/issues/392); the visual impact needs runtime confirmation.
 
 ## Runtime verification
 

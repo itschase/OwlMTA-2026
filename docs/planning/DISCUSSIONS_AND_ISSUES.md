@@ -320,6 +320,11 @@ Issues #52 (MDC) and #55 (phone) were updated with the additional read, mutation
 - [Operator Notes #387: driveby settings and client startup](https://github.com/itschase/OwlMTA-2026/discussions/387)
 - [Script Resource #388: dynamic_lighting_flash](https://github.com/itschase/OwlMTA-2026/discussions/388)
 - [Issue #390: Resolve simulation for the target element in teleport checks](https://github.com/itschase/OwlMTA-2026/issues/390)
+- [Issue #391: Repair archived projectile-light cleanup before revival](https://github.com/itschase/OwlMTA-2026/issues/391)
+- [Issue #393: Bind license exam completion and issuance to server-owned state](https://github.com/itschase/OwlMTA-2026/issues/393)
+- [Issue #394: Derive license recovery items, prices, and payer identity on the server](https://github.com/itschase/OwlMTA-2026/issues/394)
+- [Issue #395: Enforce gun-license manager tier rules on the server](https://github.com/itschase/OwlMTA-2026/issues/395)
+- [Issue #392: Use the active vehicle light mode for darkness normalization](https://github.com/itschase/OwlMTA-2026/issues/392)
 
 The same-name archived copies have separate source identities. Their archive dossiers are indexed from [`docs/resources/README.md`](../resources/README.md); publish archive-specific Script Resource Discussions with a consistent suffix such as `(archived)` rather than reusing the active resource thread.
 - [Player Guide Q&A #389: How do I use and recharge a flashlight?](https://github.com/itschase/OwlMTA-2026/discussions/389)

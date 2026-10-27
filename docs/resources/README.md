@@ -47,8 +47,9 @@ Every dossier distinguishes source evidence from runtime verification. Presence 
 | Vehicle occupant drive-by controls | [`driveby`](driveby.md) ([Script Resource #386](https://github.com/itschase/OwlMTA-2026/discussions/386), [operator notes #387](https://github.com/itschase/OwlMTA-2026/discussions/387), [Issue #383](https://github.com/itschase/OwlMTA-2026/issues/383)) | Full manifest/client/server/export review; runtime unverified |
 | Rechargeable inventory flashlight and dynamic light | [`dynamic_lighting_flash`](dynamic_lighting_flash.md) ([Script Resource #388](https://github.com/itschase/OwlMTA-2026/discussions/388), [player Q&A #389](https://github.com/itschase/OwlMTA-2026/discussions/389), [Issues #384](https://github.com/itschase/OwlMTA-2026/issues/384)–[#385](https://github.com/itschase/OwlMTA-2026/issues/385)) | Full manifest/direct-caller review; runtime unverified |
 | Dynamic shader lighting provider | [`dynamic_lighting`](dynamic_lighting.md) | Partial manifest/API review; runtime unverified |
-| Vehicle headlight effects | [`dynamic_lighting_vehicles`](dynamic_lighting_vehicles.md) | Partial manifest/export review; runtime unverified |
+| Vehicle headlight effects | [`dynamic_lighting_vehicles`](dynamic_lighting_vehicles.md) ([Issue #392](https://github.com/itschase/OwlMTA-2026/issues/392)) | Full manifest/export review; runtime unverified |
 | Simulation region helpers | [`grid`](grid.md) ([Issue #390](https://github.com/itschase/OwlMTA-2026/issues/390)) | Full active manifest/export review; runtime unverified |
+| Player licensing and firearm-license management | [`license-system`](license-system.md) (Issues [#393](https://github.com/itschase/OwlMTA-2026/issues/393)–[#395](https://github.com/itschase/OwlMTA-2026/issues/395)) | Full manifest/client/server/staff review; runtime unverified |
 
 ## Archived resource variants
 
@@ -60,6 +61,7 @@ Archive dossiers describe source stored under `mods/deathmatch/resource-archive/
 | `dynamic_lighting_flash` | [`archive/dynamic_lighting_flash`](archive/dynamic_lighting_flash.md) | Archived shader/manifest and model assets differ from active copy |
 | `dynamic_lighting_vehicles` | [`archive/dynamic_lighting_vehicles`](archive/dynamic_lighting_vehicles.md) | One script differs from the active copy |
 | `grid` | [`archive/grid`](archive/grid.md) | Distinct crossing/map implementation; only the differently defined manifest shares a relative path |
+| `dynamic_lighting_projectiles` | [`archive/dynamic_lighting_projectiles`](archive/dynamic_lighting_projectiles.md) | Archived client-only effects; cleanup findings apply only if considered for revival |
 
 The complete manifest census remains in [`RESOURCE_CATALOG.md`](../reference/RESOURCE_CATALOG.md). The required review fields and completion states are defined in [`RESOURCE_AUDIT_PLAYBOOK.md`](../planning/RESOURCE_AUDIT_PLAYBOOK.md).
 

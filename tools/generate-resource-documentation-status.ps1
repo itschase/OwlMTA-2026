@@ -23,8 +23,9 @@ $published = @{
     "driveby" = @{ Number = 386; Dossier = "docs/resources/driveby.md"; State = "Full manifest/client/server/export source review; individual Discussion published" }
     "dynamic_lighting_flash" = @{ Number = 388; Dossier = "docs/resources/dynamic_lighting_flash.md"; State = "Full manifest-script and direct-caller source review; individual Discussion published" }
     "dynamic_lighting" = @{ Dossier = "docs/resources/dynamic_lighting.md"; State = "Partial manifest and consumer API review; individual Discussion pending" }
-    "dynamic_lighting_vehicles" = @{ Dossier = "docs/resources/dynamic_lighting_vehicles.md"; State = "Partial manifest and direct-export review; individual Discussion pending" }
+    "dynamic_lighting_vehicles" = @{ Dossier = "docs/resources/dynamic_lighting_vehicles.md"; State = "Full manifest and direct-export source review; individual Discussion pending" }
     "grid" = @{ Dossier = "docs/resources/grid.md"; State = "Full active manifest and exported-helper source review; runtime unverified" }
+    "license-system" = @{ Dossier = "docs/resources/license-system.md"; State = "Full manifest and client/server/staff flow source review; individual Discussion pending" }
     "factions" = @{ Number = 101; Dossier = "docs/resources/factions.md"; State = "Full manifest-script source review; individual Discussion published" }
     "item-system" = @{ Number = 102; Dossier = "docs/resources/item-system.md"; State = "Full manifest-script source review; individual Discussion published" }
     "vehicle" = @{ Number = 107; Dossier = "docs/resources/vehicle.md" }
@@ -102,6 +103,7 @@ $publishedByPath = @{
     "mods/deathmatch/resource-archive/dynamic_lighting_flash/meta.xml" = @{ Dossier = "docs/resources/archive/dynamic_lighting_flash.md"; State = "Partial archived-source comparison; archive-specific Discussion pending" }
     "mods/deathmatch/resource-archive/dynamic_lighting_vehicles/meta.xml" = @{ Dossier = "docs/resources/archive/dynamic_lighting_vehicles.md"; State = "Partial archived-source comparison; archive-specific Discussion pending" }
     "mods/deathmatch/resource-archive/grid/meta.xml" = @{ Dossier = "docs/resources/archive/grid.md"; State = "Partial archived-source comparison; archive-specific Discussion pending" }
+    "mods/deathmatch/resource-archive/dynamic_lighting_projectiles/meta.xml" = @{ Dossier = "docs/resources/archive/dynamic_lighting_projectiles.md"; State = "Partial archived manifest and cleanup review; archive-specific Discussion pending" }
 }
 
 $inventoryByPath = @{}
@@ -124,7 +126,7 @@ $statusRows = foreach ($manifest in ($manifestFiles | Sort-Object FullName)) {
     $resource = Split-Path -Leaf (Split-Path -Parent $manifest.FullName)
     $isArchived = $manifestPath -like "*resource-archive*"
     $isArchivedDuplicate = $isArchived -and $activeResourceNames.ContainsKey($resource)
-    $record = if ($isArchivedDuplicate) { $publishedByPath[$manifestPath] } else { $published[$resource] }
+    $record = if ($isArchived) { $publishedByPath[$manifestPath] } else { $published[$resource] }
     $inventoryRow = $inventoryByPath[$manifestPath]
     $discussionNumber = if ($record -and $record.Number) { [string] $record.Number } else { "" }
 
