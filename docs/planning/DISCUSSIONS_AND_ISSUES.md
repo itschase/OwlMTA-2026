@@ -45,6 +45,31 @@
 - The resource renders but does not own vehicle/interior/item state. Its vehicle admin description is currently displayed as shared overlay text; don't treat it as confidential.
 - Runtime remains unverified.
 
+## Current resource follow-up — `cards`
+
+- Resource guide: [`cards`](../resources/cards.md); standardized [Script Resource Discussion #356](https://github.com/itschase/OwlMTA-2026/discussions/356).
+- Player guide Q&A [#357](https://github.com/itschase/OwlMTA-2026/discussions/357), contextual/privacy/consent plan [#358](https://github.com/itschase/OwlMTA-2026/discussions/358), and operator notes [#359](https://github.com/itschase/OwlMTA-2026/discussions/359) document separate audiences and decisions.
+- Issues [#353](https://github.com/itschase/OwlMTA-2026/issues/353)–[#355](https://github.com/itschase/OwlMTA-2026/issues/355) track face-down card data disclosure, invite consent/world checks, and disabled debug output.
+- Card play is ordinary local gameplay and requires no Discord staff capability or donor tier. Runtime behavior remains unverified.
+
+## Current resource follow-up — `chance-system`
+
+- Resource guide: [`chance-system`](../resources/chance-system.md); standardized [Script Resource Discussion #362](https://github.com/itschase/OwlMTA-2026/discussions/362).
+- Issues [#360](https://github.com/itschase/OwlMTA-2026/issues/360) and [#361](https://github.com/itschase/OwlMTA-2026/issues/361) track probability boundary semantics and unchecked `/luck` maximum values.
+- All commands are ordinary player OOC utilities; they do not need Discord authorization. Invalid-argument and runtime behavior remain unverified.
+
+## Current resource follow-up — `cockpit`
+
+- Resource guide: [`cockpit`](../resources/cockpit.md); standardized [Script Resource Discussion #365](https://github.com/itschase/OwlMTA-2026/discussions/365).
+- [Issue #363](https://github.com/itschase/OwlMTA-2026/issues/363) covers repeated texture allocation from the global client-resource-start subscription; [#364](https://github.com/itschase/OwlMTA-2026/issues/364) covers stopping the variometer sampling timer when the aircraft session ends.
+- The HUD is passive client display, not staff authority; no Discord role or database state is involved. Official MTA event/texture guidance is linked in the dossier; runtime remains unverified.
+
+## Current resource follow-up — `colorblender`
+
+- Resource guide: [`colorblender`](../resources/colorblender.md); standardized [Script Resource Discussion #366](https://github.com/itschase/OwlMTA-2026/discussions/366).
+- The picker is a client UI helper used by mechanic paint/headlight workflows. It owns no server authority or persistence; mechanic server handlers own eligibility and save behavior.
+- No source-confirmed issue was identified in the picker. Multiple-window, cursor, cleanup, and mechanic integration behavior remain runtime-unverified.
+
 Use both GitHub Issues and Discussions as the project's public working record. Write in the project's voice. Record source-backed findings and decisions without mentioning the tools or people that produced them.
 
 Keep GitHub surfaces audience-specific: Issues are the actionable defect/security backlog; Discussions are split into resource architecture, simplified player Q&A/wiki, staff/admin operations, server-operator runbooks, Discord/API design, and enhancement planning. Version-controlled Markdown remains the detailed source of truth. Where a category is unavailable, use the closest existing category and label the audience at the top of each post.
@@ -280,6 +305,32 @@ Issues #52 (MDC) and #55 (phone) were updated with the additional read, mutation
 - [#238: Package the identity service and MTA adapter as a reusable standalone project](https://github.com/itschase/OwlMTA-2026/issues/238)
 
 ## Recent resource documentation and implementation records — 2026-10-27
+
+### Resource coverage continuation
+
+- [Script Resource #369: clubtec](https://github.com/itschase/OwlMTA-2026/discussions/369)
+- [Script Resource #376: customblips](https://github.com/itschase/OwlMTA-2026/discussions/376)
+- [Operator Notes #377: customblips dependencies and lifecycle](https://github.com/itschase/OwlMTA-2026/discussions/377)
+- [Script Resource #378: elections](https://github.com/itschase/OwlMTA-2026/discussions/378)
+- [Player Guide Q&A #379: How do I vote in an election?](https://github.com/itschase/OwlMTA-2026/discussions/379)
+- [Staff Guide #380: managing in-game elections](https://github.com/itschase/OwlMTA-2026/discussions/380)
+- [Script Resource #381: dancer-system](https://github.com/itschase/OwlMTA-2026/discussions/381)
+- [Staff Guide #382: placing and maintaining ambient dancers](https://github.com/itschase/OwlMTA-2026/discussions/382)
+- [Script Resource #386: driveby](https://github.com/itschase/OwlMTA-2026/discussions/386)
+- [Operator Notes #387: driveby settings and client startup](https://github.com/itschase/OwlMTA-2026/discussions/387)
+- [Script Resource #388: dynamic_lighting_flash](https://github.com/itschase/OwlMTA-2026/discussions/388)
+- [Player Guide Q&A #389: How do I use and recharge a flashlight?](https://github.com/itschase/OwlMTA-2026/discussions/389)
+- [#367: Authorize ClubTec video-player actions against caller and target](https://github.com/itschase/OwlMTA-2026/issues/367)
+- [#368: Validate ClubTec texture and shader settings before persistence](https://github.com/itschase/OwlMTA-2026/issues/368)
+- [#370: Make customblips widget cleanup decrement the visible counter exactly once](https://github.com/itschase/OwlMTA-2026/issues/370)
+- [#371: Handle failed customblips image creation and reject invalid paths](https://github.com/itschase/OwlMTA-2026/issues/371)
+- [#372: Enforce election eligibility and one-vote policy on the server](https://github.com/itschase/OwlMTA-2026/issues/372)
+- [#373: Validate election candidate selection before updating vote totals](https://github.com/itschase/OwlMTA-2026/issues/373)
+- [#374: Preserve dancer metadata and world placement when recreating a ped](https://github.com/itschase/OwlMTA-2026/issues/374)
+- [#375: Report dancer database deletion failures](https://github.com/itschase/OwlMTA-2026/issues/375)
+- [#383: Sanitize driveby passenger weapons without mutating the driver list](https://github.com/itschase/OwlMTA-2026/issues/383)
+- [#384: Bind dynamic flashlight changes to the authenticated player](https://github.com/itschase/OwlMTA-2026/issues/384)
+- [#385: Validate flashlight battery drain on the server](https://github.com/itschase/OwlMTA-2026/issues/385)
 
 ### Resource Discussions
 

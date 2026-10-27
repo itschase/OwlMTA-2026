@@ -9,6 +9,19 @@ $published = @{
     "global" = @{ Number = 73; Dossier = "docs/resources/global.md"; State = "Full manifest-script source review; individual Discussion published" }
     "account" = @{ Number = 99; Dossier = "docs/resources/account.md"; State = "Full manifest-script source review; individual Discussion published" }
     "bank" = @{ Number = 100; Dossier = "docs/resources/bank.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "cards" = @{ Number = 356; Dossier = "docs/resources/cards.md"; State = "Full manifest-script and direct-caller source review; individual Discussion published" }
+    "chance-system" = @{ Number = 362; Dossier = "docs/resources/chance-system.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "cockpit" = @{ Number = 365; Dossier = "docs/resources/cockpit.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "colorblender" = @{ Number = 366; Dossier = "docs/resources/colorblender.md"; State = "Full manifest and direct-caller source review; individual Discussion published" }
+    "clubtec" = @{ Number = 369; Dossier = "docs/resources/clubtec.md"; State = "Full manifest-script and direct-caller source review; individual Discussion published" }
+    "customblips" = @{ Number = 376; Dossier = "docs/resources/customblips.md"; State = "Full manifest and direct-caller source review; individual Discussion published" }
+    "death" = @{ Number = 347; Dossier = "docs/resources/death.md"; State = "Full manifest-script and direct-caller source review; individual Discussion published" }
+    "datetime" = @{ Number = 348; Dossier = "docs/resources/datetime.md"; State = "Full manifest-script and direct-caller source review; individual Discussion published" }
+    "description" = @{ Number = 352; Dossier = "docs/resources/description.md"; State = "Full manifest-script and direct-caller source review; individual Discussion published" }
+    "dancer-system" = @{ Number = 381; Dossier = "docs/resources/dancer-system.md"; State = "Full manifest and direct-caller source review; individual Discussion published" }
+    "elections" = @{ Number = 378; Dossier = "docs/resources/elections.md"; State = "Full manifest and direct-caller source review; individual Discussion published" }
+    "driveby" = @{ Number = 386; Dossier = "docs/resources/driveby.md"; State = "Full manifest/client/server/export source review; individual Discussion published" }
+    "dynamic_lighting_flash" = @{ Number = 388; Dossier = "docs/resources/dynamic_lighting_flash.md"; State = "Full manifest-script and direct-caller source review; individual Discussion published" }
     "factions" = @{ Number = 101; Dossier = "docs/resources/factions.md"; State = "Full manifest-script source review; individual Discussion published" }
     "item-system" = @{ Number = 102; Dossier = "docs/resources/item-system.md"; State = "Full manifest-script source review; individual Discussion published" }
     "vehicle" = @{ Number = 107; Dossier = "docs/resources/vehicle.md" }
@@ -89,14 +102,19 @@ foreach ($inventoryRow in (Import-Csv -LiteralPath $InventoryPath)) {
 $manifestFiles = foreach ($resourceRoot in @('mods/deathmatch/resources', 'mods/deathmatch/resource-archive')) {
     Get-ChildItem -LiteralPath $resourceRoot -Recurse -Filter 'meta.xml' -File
 }
+$activeResourceNames = @{}
+foreach ($manifest in ($manifestFiles | Where-Object { $_.FullName -notlike '*resource-archive*' })) {
+    $activeResourceNames[(Split-Path -Leaf (Split-Path -Parent $manifest.FullName))] = $true
+}
 
 $repositoryRootUri = [Uri]::new(((Resolve-Path -LiteralPath '.').Path.TrimEnd('\') + '\'))
 $statusRows = foreach ($manifest in ($manifestFiles | Sort-Object FullName)) {
     $manifestUri = [Uri]::new($manifest.FullName)
     $manifestPath = [Uri]::UnescapeDataString($repositoryRootUri.MakeRelativeUri($manifestUri).ToString()).Replace('\', '/')
     $resource = Split-Path -Leaf (Split-Path -Parent $manifest.FullName)
-    $record = $published[$resource]
     $isArchived = $manifestPath -like "*resource-archive*"
+    $isArchivedDuplicate = $isArchived -and $activeResourceNames.ContainsKey($resource)
+    $record = if ($isArchivedDuplicate) { $null } else { $published[$resource] }
     $inventoryRow = $inventoryByPath[$manifestPath]
     $discussionNumber = if ($record -and $record.Number) { [string] $record.Number } else { "" }
 
@@ -114,7 +132,7 @@ $statusRows = foreach ($manifest in ($manifestFiles | Sort-Object FullName)) {
             "Cataloged only"
         }
         RuntimeState = "Unverified"
-        NextAction = if (-not $record) { "Complete dossier and publish Script Resources topic" } elseif (-not $discussionNumber) { "Publish standardized Script Resource Discussion and link implementation tracking" } else { "Complete remaining source review and runtime gate" }
+        NextAction = if ($isArchivedDuplicate) { "Compare archived copy to active resource and record an identical-source exception or archive-specific dossier and Discussion" } elseif (-not $record) { "Complete dossier and publish Script Resources topic" } elseif (-not $discussionNumber) { "Publish standardized Script Resource Discussion and link implementation tracking" } else { "Complete remaining source review and runtime gate" }
     }
 }
 
