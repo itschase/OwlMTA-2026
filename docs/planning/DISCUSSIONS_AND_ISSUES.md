@@ -234,5 +234,48 @@ Issues #52 (MDC) and #55 (phone) were updated with the additional read, mutation
 - [#231: Make property purchase, transfer, sale, and cleanup recoverable](https://github.com/itschase/OwlMTA-2026/issues/231)
 - [#238: Package the identity service and MTA adapter as a reusable standalone project](https://github.com/itschase/OwlMTA-2026/issues/238)
 
+## Recent resource documentation and implementation records — 2026-10-27
+
+### Resource Discussions
+
+- [Script Resource #316: activities](https://github.com/itschase/OwlMTA-2026/discussions/316)
+- [Script Resource #317: bone_attach](https://github.com/itschase/OwlMTA-2026/discussions/317)
+- [Script Resource #318: clothes](https://github.com/itschase/OwlMTA-2026/discussions/318)
+- [Script Resource #319: official-interiors](https://github.com/itschase/OwlMTA-2026/discussions/319)
+- [Script Resource #328: artifacts](https://github.com/itschase/OwlMTA-2026/discussions/328)
+- [Plans & Enhancements #329: Command and interaction alternatives](https://github.com/itschase/OwlMTA-2026/discussions/329)
+- [Script Resource #334: gatekeepers-system](https://github.com/itschase/OwlMTA-2026/discussions/334)
+- [Script Resource #336: animation-system](https://github.com/itschase/OwlMTA-2026/discussions/336)
+- [Script Resource #339: help](https://github.com/itschase/OwlMTA-2026/discussions/339)
+- [Discord identity Discussion #239: per-resource capability review](https://github.com/itschase/OwlMTA-2026/discussions/239)
+
+### Recent Issues
+
+- [#64: Review interior-manager permissions and catalog data access](https://github.com/itschase/OwlMTA-2026/issues/64)
+- [#306: Bind activities snowball events to the authenticated player](https://github.com/itschase/OwlMTA-2026/issues/306)
+- [#307: Restrict persistent automatic official-interiors catalog repair](https://github.com/itschase/OwlMTA-2026/issues/307)
+- [#308: Repair official-interiors geometry instancing and invalid catalog entries](https://github.com/itschase/OwlMTA-2026/issues/308)
+- [#309: Load official-interiors custom geometry on demand](https://github.com/itschase/OwlMTA-2026/issues/309)
+- [#310: Define a recoverable bone attachment lifecycle contract](https://github.com/itschase/OwlMTA-2026/issues/310)
+- [#311: Attach the active phone object when entering talk state](https://github.com/itschase/OwlMTA-2026/issues/311)
+- [#312: Replace duplicate clothes uploads with one bounded design intake pipeline](https://github.com/itschase/OwlMTA-2026/issues/312)
+- [#313: Bind clothes purchases to shop context and settle outfit grants safely](https://github.com/itschase/OwlMTA-2026/issues/313)
+- [#314: Make clothes design manufacture, copies, and resale recoverable](https://github.com/itschase/OwlMTA-2026/issues/314)
+- [#315: Bound clothes texture delivery and repair cache failure handling](https://github.com/itschase/OwlMTA-2026/issues/315)
+- [#320: Restrict remote clothes resource restarts](https://github.com/itschase/OwlMTA-2026/issues/320)
+- [#321: Bind clothing lists and Dupont dialogue to server interaction state](https://github.com/itschase/OwlMTA-2026/issues/321)
+- [#322: Clear snowball input bindings across every exit path](https://github.com/itschase/OwlMTA-2026/issues/322)
+- [#323: Check and restore official-interiors collision replacements](https://github.com/itschase/OwlMTA-2026/issues/323)
+- [#324: Bind artifacts bulk cleanup to trusted server callers](https://github.com/itschase/OwlMTA-2026/issues/324)
+- [#325: Validate inventory and job entitlement before equipping artifacts](https://github.com/itschase/OwlMTA-2026/issues/325)
+- [#326: Handle /removeartifacts when no artifacts are worn](https://github.com/itschase/OwlMTA-2026/issues/326)
+- [#327: Inventory commands and map discoverable in-game alternatives](https://github.com/itschase/OwlMTA-2026/issues/327)
+- [#330: Track and release artifacts client texture resources](https://github.com/itschase/OwlMTA-2026/issues/330)
+- [#331: Make locksmith key duplication server-authoritative](https://github.com/itschase/OwlMTA-2026/issues/331)
+- [#332: Return an empty faction-key list for players outside factions](https://github.com/itschase/OwlMTA-2026/issues/332)
+- [#333: Scope gatekeepers ped damage protection to intended NPCs](https://github.com/itschase/OwlMTA-2026/issues/333)
+- [#335: Bind animation changes and synchronization to the requesting player](https://github.com/itschase/OwlMTA-2026/issues/335)
+- [#337: Validate help command catalog writes and align editor visibility with server policy](https://github.com/itschase/OwlMTA-2026/issues/337)
+- [#338: Bind help command-list refreshes to the requesting player](https://github.com/itschase/OwlMTA-2026/issues/338)
 Milestone [M4 — Organizations & Living Roleplay](https://github.com/itschase/OwlMTA-2026/milestone/6) groups the compatibility-first organization, contextual interaction, criminal opportunity, evidence, and connected-roleplay foundation work. M0/M1 portability and security gates remain prerequisites.
 

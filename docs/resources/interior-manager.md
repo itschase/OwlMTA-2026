@@ -2,7 +2,7 @@
 
 ## Status
 
-- Active resource; full manifest/caller review completed; runtime unverified.
+- Active resource; full manifest, caller, command, and interaction source review completed; runtime unverified.
 - Discussion: [Script Resource: interior-manager](https://github.com/itschase/OwlMTA-2026/discussions/264).
 
 ## What it does
@@ -10,6 +10,19 @@
 `interior-manager` supplies the staff property catalog and lifecycle controls. `/interiors` and `/ints` let staff search, inspect history/notes/occupants, teleport, soft-delete, restore, permanently remove, force-sell, and toggle properties. It also exposes `addInteriorLogs` for other resources. Owners can transfer a property to their faction when they meet the existing ownership and `manage_interiors` checks.
 
 Supporters and mapping roles receive limited inspection/navigation or lifecycle options under legacy role predicates. This makes role policy and privacy part of the resource contract, not merely UI details.
+
+## Commands and interaction opportunities
+
+The manifest loads `s_interior_manager.lua`; these command handlers are source-confirmed in that active script. The catalog command already opens a multi-tab staff window, so the useful modernization is to make that existing interface discoverable from a staff control center and complete workflows in the right context—not to build a duplicate interior dashboard.
+
+| Command | Current audience and task | Current entry point | Future interface and authorization direction |
+|---|---|---|---|
+| `/interiors`, `/ints` | `integration:isPlayerAdmin`; opens the complete interior catalog. | Command opens `createIntManagerWindow`; the existing UI has search and management actions. | Link the existing catalog from a staff control center and improve search/filter/map context there. Keep `/interiors` and `/ints` as fast aliases. Gate catalog data with a narrow proposed capability such as `interiors.catalog.read`; continue server-side role/capability, actor, and query checks. |
+| `/checkint [ID]`, `/checkinterior [ID]` | Trial Admin **or Supporter**; opens details including ownership, logs, notes, and occupants. Omitting or supplying an invalid ID falls back to the player's current dimension. | Command opens the details window; some catalog row actions also request it through `interiorManager:checkint`. | Open details by selecting a catalog row and offer a nearby-property shortcut where appropriate. Review the existing Supporter access because this view exposes account/character, occupant, and staff-note data: donor tier must not silently become staff authority, and any donor entitlement must be a separate, privacy-reviewed policy. A proposed staff capability could be `interiors.inspect`; do not use it as a substitute for local property/context checks. |
+| `/setintfaction [Faction Name or Faction ID]` | `integration:isPlayerAdmin`; while inside a property, transfers it to the selected eligible faction, unlocks it, changes key items, reloads it, and logs/notifies the transfer. | Server command, scoped to the property resolved from the actor's current interior. | A property details workflow could search/select the faction, preview the property and resulting key/ownership changes, then require confirmation. Keep a staff shortcut if it remains useful. A proposed capability such as `interiors.transfer.staff` must be checked server-side through Owl's adapter boundary; actor identity, current property, faction existence/eligibility, and recoverable persistence remain local checks. |
+| `/setinttomyfaction [Faction ID]` | Current character must own the property and hold that faction's `manage_interiors` permission; the player must be inside the property and the faction purchase rule must pass. | In-property command performs the ownership transfer. | Evaluate a guided transfer action in the property/ownership interface with clear faction and key consequences. This is character ownership plus faction-rank authority; it should not require a global Discord staff capability or let a Discord role replace local faction membership/rank checks. Keep the command available for experienced users. |
+
+These are proposed interface improvements, not implemented controls. Source line anchors: `s_interior_manager.lua` registers the catalog at lines 31–38, details at 150–215, and transfer commands at 275–400. The MTA [`addCommandHandler` reference](https://wiki.multitheftauto.com/wiki/AddCommandHandler) describes server command arguments and notes that a console invocation can have no player source; runtime/console behavior for these handlers has not been verified. Cross-resource command comparison is tracked by [Issue #327](https://github.com/itschase/OwlMTA-2026/issues/327).
 
 ## Technical workflow and persistence
 
