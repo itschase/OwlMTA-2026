@@ -2,6 +2,8 @@
 
 **Review state:** Partial source review of the manifest, injury command/consent flow, diagnosis request/response path, schema, and remotely registered treatment/ped events. Treatment transaction and all caller authorization semantics remain under review; runtime is unverified.
 
+**Discussion:** [Script Resource: health-addon #532](https://github.com/itschase/OwlMTA-2026/discussions/532).
+
 ## Gameplay purpose and player workflows
 
 `health-addon` models external and internal injuries by body region, stores diagnosis flags in a `health_diagnose` table keyed by character ID, and provides nearby diagnosis, injury, and treatment flows. `/injure` selects a sharp or blunt injury, a body region or named part, and light/heavy severity, then asks the target to accept or decline through `/irespond`. `/diagnose` lets a player inspect their own medical record or request permission to inspect a nearby player's record. `/treat` is used by a player at the hospital or a member of faction 2 to request treatment of themselves or another player. The exact treatment authority, price, and settlement flow still require caller-by-caller review.

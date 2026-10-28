@@ -1,5 +1,7 @@
 # `LSFD` resource
 
+**Discussion:** [Script Resource: LSFD #533](https://github.com/itschase/OwlMTA-2026/discussions/533).
+
 **Review state:** Full manifest, alarm, random-incident generation, faction/admin entry points, and resource lifecycle reviewed statically. Live dispatch, sound, fire-model behavior, and restart cleanup remain unverified.
 
 ## Player and staff experience

@@ -6,6 +6,8 @@ Last updated: 2026-10-28 after adding server-side authentication input bounds an
 
 The account login path now rejects non-string/empty/oversized credential fields before querying Core or verifying bcrypt. Registration mirrors the shipped UI's username/password rules and server email validator before hashing or querying. Process-memory budgets are enforced per player and IP: 10 login attempts/player/minute and 40/IP/minute; 3 registration attempts/player/10 minutes and 10/IP/hour. Player buckets are cleared on disconnect, stale buckets are swept, and debug outcomes omit credentials, raw email, and IP. This is source-only; no MTA runtime or tests were run. Issue #529 remains open for enumeration-resistant responses, deeper outcome diagnostics, and disposable-client/load validation; the fixed windows and shared-IP effects also need runtime review.
 
+Refreshed [account Discussion #99](https://github.com/itschase/OwlMTA-2026/discussions/99) with the new source state. Published [runcode #531](https://github.com/itschase/OwlMTA-2026/discussions/531), [health-addon #532](https://github.com/itschase/OwlMTA-2026/discussions/532), and [LSFD #533](https://github.com/itschase/OwlMTA-2026/discussions/533), linking their dossiers and existing Issues. The ledger now shows 135/179 dossiers, 118 full plus 17 partial; 122 have individual Discussions, 13 are pending, and all remain runtime-unverified.
+
 ## Latest continuation — login device gate before session effects
 
 The serial-whitelist check now uses the authenticated Core account row and runs before an existing session is displaced or any account/rank/session element data is committed. The exported check validates the account ID, distinguishes query failure from an empty result, fails closed on DB errors, escapes device identifiers, and emits account-scoped debug outcomes without logging secrets. The old UCP denial message is removed. This is a source fix only; MTA runtime behavior is unverified. Issue #158 remains open for device enrollment/revocation, privacy and policy decisions, and disposable-server validation. No server or tests were run.
@@ -14,14 +16,15 @@ Corrected Issues [#527](https://github.com/itschase/OwlMTA-2026/issues/527) and 
 
 ## Immediate priority order — core identity and playability
 
-1. **Login safety:** finish bounded server-side validation and abuse budgets for the legacy event path (#529), then reconcile the exact identity-service contract before any Discord login cutover (#2/#68). No automatic password fallback after a Discord authorization failure.
+1. **Login safety:** finish residual enumeration, diagnostics, and runtime work in #529, then reconcile the exact identity-service contract before any Discord login cutover (#2/#68). No automatic password fallback after a Discord authorization failure.
 2. **Account lifecycle:** make cross-schema registration recoverable and remove the missing local activation-service dependency (#43/#13); preserve the now-pre-session device gate while completing its operator workflow (#158).
 3. **Session authority:** bind session creation, resource-restart behavior, unlink/revocation, and expiry to one account/session contract (#68/#96). Existing restart behavior and disconnect-dependent logout remain source-level gaps, not solved by the device-gate fix.
 4. **Character continuity:** resolve client-shipped account hash material, atomic character creation, staged spawn hydration, and server-derived spawn correction (#201–#204) before broad feature work.
 5. **Staff authority:** reconcile role-to-capability policy and durable GameMaster grants (#3/#14), while preserving local character, faction, duty, ownership, and action checks. Donor tiers remain separate from staff authority.
-6. **Safe-start gate:** complete the static resource/config/schema/dependency review and the disposable boot preflight in [`SAFE_START_PREFLIGHT.md`](SAFE_START_PREFLIGHT.md) before starting MTA.
+6. **Privileged tooling:** resolve [#443](https://github.com/itschase/OwlMTA-2026/issues/443) or explicitly verify `runcode` is disabled and its exports/ACL are not available before any public test server is started.
+7. **Safe-start gate:** complete the static resource/config/schema/dependency review and the disposable boot preflight in [`SAFE_START_PREFLIGHT.md`](SAFE_START_PREFLIGHT.md) before starting MTA.
 
-This ordering puts cross-cutting identity, session, character, and startup guarantees ahead of lower-impact individual resource catalog entries. Issue and resource status remains source-confirmed unless a later disposable runtime record says otherwise.
+This ordering puts cross-cutting identity, session, character, and privileged execution guarantees ahead of lower-impact individual resource catalog entries. Issue and resource status remains source-confirmed unless a later disposable runtime record says otherwise.
 
 ## Latest continuation — account identity and staff authority
 
@@ -97,7 +100,7 @@ The `realism` resource audit covers its bundled vehicle, item, ambient, and pres
 
 The `hud` dossier covers player panels, statistics, staff/supporter display separation, commands, notification exports, and its high fan-in dependencies. Issues #410–#413 track stats caller/privacy binding, forced blur state, overlapping achievement timers, and the compiled-only interface source/build gap. The `/stats` owner activity timestamp side effect is documented for policy review, not filed as a confirmed defect.
 
-The regenerated ledger maps 101 of 179 manifest rows to dossiers: 89 full reviews and 12 partial reviews; all runtime-unverified. The five archive dossiers are comparisons rather than full per-script audits. Published one-to-one Script Resource Discussions for active `grid`, `dynamic_lighting`, `dynamic_lighting_vehicles`, `license-system`, `gps`, `lottery-system`, `report`, `id-system`, `realism`, and `hud`, plus archive-specific threads for `dynamic_lighting`, `dynamic_lighting_flash`, `dynamic_lighting_vehicles`, `grid`, and `dynamic_lighting_projectiles`. The discussion tracker and resource index link all 15 threads. Remaining cataloged-only resources should be audited next, beginning with their loaded scripts, caller graph, player/staff/operator use, persistence, and existing issue coverage.
+The regenerated ledger maps 135 of 179 manifest rows to dossiers: 118 full reviews and 17 partial reviews; all runtime-unverified. The five archive dossiers are comparisons rather than full per-script audits. Of the 135 documented rows, 122 now have individual Script Resource Discussions and 13 are waiting for publication. Forty-four resources remain catalog-only (14 active-tree and 30 archived). Use the ledger as the source of truth and continue with active core/playability/security resources before low-impact archive catalog work.
 
 ## Latest continuation — 2026-10-27
 

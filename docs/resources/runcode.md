@@ -2,6 +2,8 @@
 
 **Review state:** Manifest, command/UI path, server remotes, exports, and ACL resource identity reviewed. Runtime behavior remains unverified.
 
+**Discussion:** [Script Resource: runcode #531](https://github.com/itschase/OwlMTA-2026/discussions/531).
+
 ## Purpose and operator workflow
 
 This developer utility opens a GUI with `/runcode` for players recognized by `integration:isPlayerLeadScripter`. The operator can execute Lua on the client or server and view return/error text. Client execution runs locally; server execution sends the code text to the server. Both sides call `loadstring` and `pcall`. The server logs submitted code through debug output and the server log. The resource exports `runString` on both sides for resource callers.

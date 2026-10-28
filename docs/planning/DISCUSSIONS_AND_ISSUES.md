@@ -416,6 +416,9 @@ The same-name archived copies have separate source identities. Their archive dos
 - [Script Resource #334: gatekeepers-system](https://github.com/itschase/OwlMTA-2026/discussions/334)
 - [Script Resource #336: animation-system](https://github.com/itschase/OwlMTA-2026/discussions/336)
 - [Script Resource #339: help](https://github.com/itschase/OwlMTA-2026/discussions/339)
+- [Script Resource #531: runcode](https://github.com/itschase/OwlMTA-2026/discussions/531)
+- [Script Resource #532: health-addon](https://github.com/itschase/OwlMTA-2026/discussions/532)
+- [Script Resource #533: LSFD](https://github.com/itschase/OwlMTA-2026/discussions/533)
 - [Discord identity Discussion #239: per-resource capability review](https://github.com/itschase/OwlMTA-2026/discussions/239)
 
 ### Recent Issues
