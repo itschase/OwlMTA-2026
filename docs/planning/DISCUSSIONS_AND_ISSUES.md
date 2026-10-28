@@ -377,6 +377,7 @@ Issues #52 (MDC) and #55 (phone) were updated with the additional read, mutation
 - [Issue #459: Restore bike knock-off state when the FPS display is disabled](https://github.com/itschase/OwlMTA-2026/issues/459)
 - [Issue #460: Remove database credential getters from the mysql export API](https://github.com/itschase/OwlMTA-2026/issues/460)
 - [Issue #461: Remove hard-coded server password changes from the mysql maintenance script](https://github.com/itschase/OwlMTA-2026/issues/461)
+- [Issue #462: Repair or retire the unimplemented legacy forum database exports](https://github.com/itschase/OwlMTA-2026/issues/462)
 
 The same-name archived copies have separate source identities. Their archive dossiers and separate `(archived)` Script Resource Discussions are indexed from [`docs/resources/README.md`](../resources/README.md). Archive reviews remain partial comparisons, not evidence of current availability or runtime behavior.
 - [Player Guide Q&A #389: How do I use and recharge a flashlight?](https://github.com/itschase/OwlMTA-2026/discussions/389)
