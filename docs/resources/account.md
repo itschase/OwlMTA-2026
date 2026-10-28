@@ -17,7 +17,7 @@ This is not yet Discord authentication. Discord-first identity, role-to-capabili
 
 ## Player, staff, and operator use
 
-- The login panel accepts registration or returning credentials and can remember them locally. Character selection lists owned active characters; creation collects roleplay identity and appearance before a server-selected starting location.
+- The login panel accepts registration or returning credentials and can remember only the username locally. Character selection lists owned active characters; creation collects roleplay identity and appearance before a server-selected starting location.
 - Normal character selection binds the requested character ID to the authenticated account. Recent F10 settings code uses server-side actor/account/character binding plus per-setting allowlists and normalization; Issue #79 remains open until runtime validation and every writer are reconciled.
 - Authorized staff can use `/loginto` to enter another account's character. Rules, news, and patch-note update commands are also present. These actions require capability/audit redesign; donor/supporter status must remain separate from staff authority.
 - Operators need both Core and MTA schemas plus a long dependency chain including `mysql`, `anticheat`, `global`, `integration`, `cache`, `pool`, `item-system`, `factions`, `logs`, `donators`, `bans`, `serialwhitelist`, `prison-system`, and spawn-time feature resources.
@@ -46,6 +46,8 @@ This is not yet Discord authentication. Discord-first identity, role-to-capabili
 - Character spawn is a long side-effectful hydration sequence. Dependency/DB failure after state is cleared can strand a partial character session.
 - The spawn-correction remote accepts a client-provided expected location and can teleport from the selection area; correction must come from stored server state or a server-issued one-use context.
 - The obsolete forum-login path transmits a forum password and depends on missing legacy integration. It should be retired under the Discord/website-independent identity work, not rebuilt as a parallel login system.
+
+The account login preference cleanup uses MTA's XML node and file APIs: [xmlDestroyNode](https://wiki.multitheftauto.com/wiki/XmlDestroyNode) removes the legacy password node from the loaded tree, and [xmlSaveFile](https://wiki.multitheftauto.com/wiki/XmlSaveFile) persists that change. The server-to-client preference event now passes only the username; [triggerClientEvent](https://wiki.multitheftauto.com/wiki/TriggerClientEvent) documents its argument-passing behavior. This API review does not substitute for a disposable-client migration check.
 
 ## Target direction
 
