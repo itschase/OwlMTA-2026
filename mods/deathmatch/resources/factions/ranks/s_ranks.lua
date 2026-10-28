@@ -48,7 +48,8 @@ end
 
 
 function getRankInfo(factionID, player)
-	player = player or client
+	-- Remote callers may supply a second argument, so prefer MTA's trusted client.
+	player = client or player
 	local fID = authorizeRankAction(player, factionID, "view rank configuration")
 	if not fID then return false end
 	local ranks_ = getFactionRanks(fID, true)

@@ -42,6 +42,19 @@ local function authorizeFactionAction(player, factionID, permission, action)
 	return true, id
 end
 
+local function getFactionMemberCharacterID(playerName, factionID)
+	if type(playerName) ~= "string" or #playerName < 1 or #playerName > 64 then return false end
+	local characterID = exports.global:getCharacterIDFromName(playerName)
+	if not characterID then return false end
+	local query = dbQuery(mysql:getConn("mta"), "SELECT id FROM characters_faction WHERE character_id=? AND faction_id=? LIMIT 1", characterID, factionID)
+	local rows = query and dbPoll(query, 10000)
+	if not rows then
+		if query then dbFree(query) end
+		return false
+	end
+	return #rows > 0 and characterID or false
+end
+
 function loadOneFaction(row)
 	local id = tonumber(row.id)
 	local theTeam = exports.pool:getElement('team', id)
@@ -495,12 +508,13 @@ addEvent("faction:loadFaction", true)
 addEventHandler("faction:loadFaction", resourceRoot, loadFaction)
 
 function callbackRespawnVehicles(factionID)
+	local allowed, factionID = authorizeFactionAction(client, factionID, "respawn_vehs", "respawn faction vehicles")
+	if not allowed then
+		outputChatBox("Not allowed, sorry.", client)
+		return false
+	end
 	local theTeam = getFactionFromID(factionID)
 	local factionCooldown = getElementData(theTeam, "cooldown")
-	if not hasMemberPermissionTo(client, factionID, "respawn_vehs") then
-		outputChatBox("Not allowed, sorry.", client)
-		return
-	end
 
 	if not (factionCooldown) then
 		for key, value in ipairs(exports.pool:getPoolElementsByType("vehicle")) do
@@ -523,7 +537,7 @@ function callbackRespawnVehicles(factionID)
 
 		-- Send message to everyone in the faction
 		local teamPlayers = getPlayersInFaction(factionID)
-		local username = getPlayerName(source)
+		local username = getPlayerName(client)
 		for k, v in ipairs(teamPlayers) do
 			outputChatBox(username:gsub("_", " ") .. " respawned all unoccupied faction vehicles.", v, 255, 194, 14)
 		end
@@ -531,7 +545,7 @@ function callbackRespawnVehicles(factionID)
 		setTimer(resetFactionCooldown, 60000, 1, theTeam)
 		exports.anticheat:changeProtectedElementDataEx(theTeam, "cooldown", true, false)
 	else
-		outputChatBox("You currently cannot respawn your factions vehicles, Please wait a while.", source, 255, 0, 0)
+		outputChatBox("You currently cannot respawn your factions vehicles, Please wait a while.", client, 255, 0, 0)
 	end
 end
 
@@ -543,19 +557,21 @@ function resetFactionCooldown(theTeam)
 end
 
 function callbackRespawnOneVehicle(vehicleID, factionID)
-	local theTeam = getFactionFromID(factionID)
-	local theVehicle = exports.pool:getElement("vehicle", tonumber(vehicleID))
-	if not hasMemberPermissionTo(client, factionID, "respawn_vehs") then
-		outputChatBox("Not allowed, sorry.", source, 255, 0, 0)
-		return
+	local allowed, factionID = authorizeFactionAction(client, factionID, "respawn_vehs", "respawn faction vehicle")
+	if not allowed then
+		outputChatBox("Not allowed, sorry.", client, 255, 0, 0)
+		return false
 	end
+	local theTeam = getFactionFromID(factionID)
+	local vehicleID = tonumber(vehicleID)
+	local theVehicle = vehicleID and exports.pool:getElement("vehicle", vehicleID)
 	if theVehicle then
 		local theVehicleID = getElementData(theVehicle, "faction")
 		if (factionID == theVehicleID and not getVehicleOccupant(theVehicle, 0) and not getVehicleOccupant(theVehicle, 1) and not getVehicleOccupant(theVehicle, 2) and not getVehicleOccupant(theVehicle, 3) and not getVehicleTowingVehicle(theVehicle)) then
 			if isElementAttached(theVehicle) then
 				detachElements(theVehicle)
 			end
-			exports.logs:dbLog(source, 6, theVehicle, "FACTIONRESPAWN")
+			exports.logs:dbLog(client, 6, theVehicle, "FACTIONRESPAWN")
 			respawnVehicle(theVehicle)
 			setElementInterior(theVehicle, getElementData(theVehicle, "interior"))
 			setElementDimension(theVehicle, getElementData(theVehicle, "dimension"))
@@ -569,17 +585,17 @@ function callbackRespawnOneVehicle(vehicleID, factionID)
 				setVehicleDamageProof(theVehicle, false)
 			end
 
-			outputChatBox("Vehicle Respawned.", source, 0, 255, 0)
+			outputChatBox("Vehicle Respawned.", client, 0, 255, 0)
 			local teamPlayers = getPlayersInFaction(factionID)
-			local playerName = getPlayerName(source)
+			local playerName = getPlayerName(client)
 			for k, v in ipairs(teamPlayers) do
 				outputChatBox(playerName:gsub("_", " ") .. " respawned faction vehicle " .. vehicleID .. ".", v, 255, 194, 14)
 			end
 		else
-			outputChatBox("That vehicle is currently occupied.", source, 255, 0, 0)
+			outputChatBox("That vehicle is currently occupied.", client, 255, 0, 0)
 		end
 	else
-		outputChatBox("Please select a vehicle you wish to respawn.", source, 255, 0, 0)
+		outputChatBox("Please select a vehicle you wish to respawn.", client, 255, 0, 0)
 	end
 end
 
@@ -647,19 +663,23 @@ addEvent("faction:fnote", true)
 addEventHandler("faction:fnote", getRootElement(), callbackUpdateFNote)
 
 function callbackRemovePlayer(removedPlayerName, factionID)
-	local theTeam = getFactionFromID(factionID)
-	if not hasMemberPermissionTo(client, factionID, "del_member") then
+	local allowed, factionID = authorizeFactionAction(client, factionID, "del_member", "remove faction member")
+	if not allowed then
 		outputChatBox("Not allowed, sorry.", client)
-		return
+		return false
 	end
 
-	local _, factionDetails, removedPlayer = getPlayerFactions(removedPlayerName)
-	if removedPlayer and not factionDetails[factionID] then
-		outputChatBox("Newp, not going to happen, sorry.", client)
-		return
+	local targetCharacterID = getFactionMemberCharacterID(removedPlayerName, factionID)
+	if not targetCharacterID then
+		outputChatBox("That character is not a member of this faction.", client, 255, 0, 0)
+		return false
 	end
+	local theTeam = getFactionFromID(factionID)
+	local removedPlayer = exports.global:getPlayerFromCharacterID(targetCharacterID)
+	local factionDetails = removedPlayer and getElementData(removedPlayer, "faction") or nil
+	if removedPlayer and (type(factionDetails) ~= "table" or not factionDetails[factionID]) then return false end
 
-	if dbExec(mysql:getConn("mta"), "DELETE FROM characters_faction WHERE character_id=(SELECT id FROM characters WHERE charactername=?) AND faction_id=?", removedPlayerName, factionID) then
+	if dbExec(mysql:getConn("mta"), "DELETE FROM characters_faction WHERE character_id=? AND faction_id=?", targetCharacterID, factionID) then
 		local theTeamName = "None"
 		if (theTeam) then
 			theTeamName = getTeamName(theTeam)
@@ -697,7 +717,7 @@ function callbackRemovePlayer(removedPlayerName, factionID)
 		-- Send message to everyone in the faction
 		exports.factions:sendNotiToAllFactionMembers(factionID, removedPlayerName:gsub("_", " ") .. " was removed from faction '" .. tostring(theTeamName) .. "'.", "Removed by " .. username:gsub("_", " ") .. ".")
 	else
-		outputChatBox("Failed to remove " .. removedPlayerName:gsub("_", " ") .. " from the faction, Contact an admin.", source, 255, 0, 0)
+		outputChatBox("Failed to remove " .. removedPlayerName:gsub("_", " ") .. " from the faction, Contact an admin.", client, 255, 0, 0)
 	end
 end
 
@@ -705,26 +725,44 @@ addEvent("cguiKickPlayer", true)
 addEventHandler("cguiKickPlayer", getRootElement(), callbackRemovePlayer)
 
 function callbackPerkEdit(perkIDTable, playerName, factionID)
-	if not hasMemberPermissionTo(client, factionID, "set_member_duty") then
+	local allowed, factionID = authorizeFactionAction(client, factionID, "set_member_duty", "set faction member duty packages")
+	if not allowed or type(perkIDTable) ~= "table" then
 		outputChatBox("Not allowed, sorry.", client)
-		return
+		return false
 	end
 
-	local _, factionInfo, targetPlayer = getPlayerFactions(playerName)
-	if targetPlayer and not factionInfo[factionID] then
-		outputChatBox("Newp, not going to happen, sorry.", client)
-		return
-	end
+	local targetCharacterID = getFactionMemberCharacterID(playerName, factionID)
+	if not targetCharacterID then return false end
 
-	local jsonPerkIDTable = toJSON(perkIDTable)
-	if dbExec(mysql:getConn("mta"), "UPDATE `characters_faction` SET `faction_perks`=? WHERE character_id=(SELECT id FROM characters WHERE charactername=?) AND faction_id=?", jsonPerkIDTable, playerName, factionID) then
+	local normalizedPerks, seen, count, highestIndex = {}, {}, 0, 0
+	for key, value in pairs(perkIDTable) do
+		local packageID = tonumber(value)
+		count = count + 1
+		if type(key) ~= "number" or key < 1 or key ~= math.floor(key) or count > 256
+			or not packageID or packageID < 1 or packageID ~= math.floor(packageID)
+			or seen[packageID] or not custom[factionID] or not custom[factionID][packageID] then
+			return false
+		end
+		highestIndex = math.max(highestIndex, key)
+		seen[packageID] = true
+		normalizedPerks[#normalizedPerks + 1] = packageID
+	end
+	if highestIndex ~= count then return false end
+
+	local jsonPerkIDTable = toJSON(normalizedPerks)
+	if dbExec(mysql:getConn("mta"), "UPDATE `characters_faction` SET `faction_perks`=? WHERE character_id=? AND faction_id=?", jsonPerkIDTable, targetCharacterID, factionID) then
 		outputChatBox(" Duty perks updated for " .. playerName:gsub("_", " ") .. ".", client, 255, 0, 0)
+		local targetPlayer = exports.global:getPlayerFromCharacterID(targetCharacterID)
 		if targetPlayer then
-			factionInfo[factionID].perks = perkIDTable
-			setElementData(targetPlayer, "faction", factionInfo)
+			local factionInfo = getElementData(targetPlayer, "faction")
+			if type(factionInfo) == "table" and factionInfo[factionID] then
+				factionInfo[factionID].perks = normalizedPerks
+				setElementData(targetPlayer, "faction", factionInfo)
+			end
 
 			outputChatBox(" Your duty perks have been updated by " .. getPlayerName(client):gsub("_", " ") .. ".", targetPlayer, 255, 0, 0)
 		end
+		exports.logs:dbLog(client, 35, "fa" .. tostring(factionID), "Updated duty packages for " .. playerName)
 	end
 end
 
@@ -1100,17 +1138,19 @@ addEventHandler("Duty:GetPackages", resourceRoot, function(factionID)
 end)
 
 function refreshClient(message, factionID, dontSendToClient)
-	for k, v in pairs(getElementData(resourceRoot, "DutyGUI")) do
-		if dontSendToClient then
-			if v == factionID and k ~= dontSendToClient then
-				triggerClientEvent(k, "importDutyData", resourceRoot, custom[tonumber(factionID)], locations[tonumber(factionID)], factionID, message)
-			end
-		else
-			if v == factionID then
-				triggerClientEvent(k, "importDutyData", resourceRoot, custom[tonumber(factionID)], locations[tonumber(factionID)], factionID, message)
-			end
+	local subscribers = getElementData(resourceRoot, "DutyGUI") or {}
+	local changed = false
+	for player, subscribedFactionID in pairs(subscribers) do
+		local isMember, validFactionID = isActiveFactionMember(player, subscribedFactionID)
+		local authorized = isMember and hasMemberPermissionTo(player, validFactionID, "modify_duty_settings")
+		if not authorized then
+			subscribers[player] = nil
+			changed = true
+		elseif validFactionID == tonumber(factionID) and player ~= dontSendToClient then
+			triggerClientEvent(player, "importDutyData", resourceRoot, custom[validFactionID], locations[validFactionID], validFactionID, message)
 		end
 	end
+	if changed then setElementData(resourceRoot, "DutyGUI", subscribers) end
 	local resource = getResourceRootElement(getResourceFromName("duty"))
 	if resource then
 		setElementData(resource, "factionDuty", custom)
