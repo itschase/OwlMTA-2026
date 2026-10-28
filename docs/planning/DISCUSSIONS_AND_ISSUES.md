@@ -380,6 +380,7 @@ Issues #52 (MDC) and #55 (phone) were updated with the additional read, mutation
 - [Issue #462: Repair or retire the unimplemented legacy forum database exports](https://github.com/itschase/OwlMTA-2026/issues/462)
 - [Issue #463: Preserve MySQL result-handle IDs when freeing pooled results](https://github.com/itschase/OwlMTA-2026/issues/463)
 - [Issue #464: Restore camera and cursor state when object-browser stops](https://github.com/itschase/OwlMTA-2026/issues/464) — Milestone #7
+- [Issue #465: Keep private phone message content out of server logs and make local logging explicit](https://github.com/itschase/OwlMTA-2026/issues/465) — Milestone #7; related to #340
 
 The same-name archived copies have separate source identities. Their archive dossiers and separate `(archived)` Script Resource Discussions are indexed from [`docs/resources/README.md`](../resources/README.md). Archive reviews remain partial comparisons, not evidence of current availability or runtime behavior.
 - [Player Guide Q&A #389: How do I use and recharge a flashlight?](https://github.com/itschase/OwlMTA-2026/discussions/389)

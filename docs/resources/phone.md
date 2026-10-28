@@ -51,10 +51,13 @@ Primary tables include `phones`, `phone_contacts`, `phone_sms`, `phone_history`,
 - Settings: [`phone_settings_s.lua`](../../mods/deathmatch/resources/phone/phone_settings_s.lua)
 - Important direct connections include `mysql`, `global`, `item-system`, `bank`, `factions`, `donators`, `anticheat`, `bone_attach`, `computers-system`, `logs`, `datetime`, `vehicle`, `pool`, `gps`, `integration`, `OwlGamingLogs`, and emergency/hotline systems.
 
+Phone transcript details are documented in [`OwlGamingLogs`](OwlGamingLogs.md). Source review found that `phone_logs_s.lua` includes private call/SMS message text in `outputDebugString`, while the client transcript setting treats any value other than `0` as enabled. [Issue #465](https://github.com/itschase/OwlMTA-2026/issues/465) tracks redaction, explicit consent/defaults, and retention. This is separate from staff access to 911 history under [Issue #340](https://github.com/itschase/OwlMTA-2026/issues/340).
+
 ## Known risks and next work
 
 - [Issue #55](https://github.com/itschase/OwlMTA-2026/issues/55) tracks owned-phone boundaries. In the current source, SMS requester/line ownership, sender privacy state, contact-row ownership, and contact field limits are fixed in source; the contact editor now sends its email field correctly. These changes are static-only and unverified in MTA. Remaining work includes contact/settings reads, power state, private-number charging order, positive/integer recipient policy, SMS throttling, and failure-safe persistence/feedback.
 - [Issue #340](https://github.com/itschase/OwlMTA-2026/issues/340) tracks separating 911-log read access from donor/supporter entitlement and defining a named staff capability.
+- [Issue #465](https://github.com/itschase/OwlMTA-2026/issues/465) tracks phone transcript privacy, server debug redaction, and explicit local retention controls.
 - [Issue #83](https://github.com/itschase/OwlMTA-2026/issues/83) requires server-owned call ID/timestamps, one-time finalization, and failure-safe billing. The client-calculated cost cannot be made authoritative.
 - Rejected operations often fail silently, leaving UI state ambiguous.
 

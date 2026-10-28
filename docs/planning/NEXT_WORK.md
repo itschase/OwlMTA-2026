@@ -26,7 +26,9 @@ The API/Discord architecture consolidation landed in `25f9407`; it separates sta
 
 The optional `object-browser` is now documented in `docs/resources/object-browser.md`: a client-only catalog of 7,525 objects across nine groups, manually started and not referenced by other resources. Issue #464 tracks camera/cursor cleanup for resource stop and is assigned to Milestone #7. Runtime remains unverified.
 
-Next active cataloged resource: `OwlGamingLogs`. Then continue the `mysql` exported API and caller/SQL review before moving into its high-impact dependents. Deeper `guied` event/client audit and the remaining `item-texture` client shader lifecycle review are also queued. Search Issues before adding findings, give every dossier an explicit review state, distinguish runtime-verifiable claims from source facts, and update the index, generator, CSV, and issue tracker together. Keep the MTA server stopped until the static safe-start gates are complete.
+`OwlGamingLogs` is now documented with its account-settings and phone transcript flows. Issue #465 records a source-confirmed privacy concern: phone message bodies enter server debug output, while client transcript logging is enabled unless the setting is `0`. It is assigned to Milestone #7 and linked to the phone dossier; it remains distinct from 911 history access Issue #340. Runtime and actual external log sinks are unverified.
+
+Next active cataloged resource: `parachute`. Then continue the `mysql` exported API and caller/SQL review before moving into its high-impact dependents. Deeper `guied` event/client audit and the remaining `item-texture` client shader lifecycle review are also queued. Search Issues before adding findings, give every dossier an explicit review state, distinguish runtime-verifiable claims from source facts, and update the index, generator, CSV, and issue tracker together. Keep the MTA server stopped until the static safe-start gates are complete.
 
 ## Latest continuation — staff camera, faction TV, and language systems
 
