@@ -254,6 +254,11 @@ function getImage(id, url)
 		return false
 	end
 	local requester = client
+	if not requester and source and isElement(source) and getElementType(source) == 'player' then
+		-- A server-originated event may deliberately target a player source. Remote
+		-- requests always use the authenticated MTA client validated above instead.
+		requester = source
+	end
 	if not images[id] then
 		-- Check file system
 		local filename = getPath(id)
@@ -295,7 +300,7 @@ function getImage(id, url)
 		end
 		-- Send the current image to client who requested for this.
 		if not recached then
-			sendImageToClient(source, id, images[id])
+			sendImageToClient(requester, id, images[id])
 		end
 	else -- if image is NOT found anywhere on server, fetch it from URL again then send to client who requested it.
 		--outputDebugString("[CACHE] images / Server / getImage / fetching image from URL: "..url)
