@@ -12,6 +12,54 @@ local mysql = exports.mysql
 local accountCharacters = {}
 local tutorialSessions = {}
 local tutorialSessionSequence = 0
+local authenticationBudgets = { login = {}, registration = {} }
+
+local function consumeAuthenticationBudget(player, action, playerLimit, playerWindow, ipLimit, ipWindow)
+	local now = os.time()
+	local ip = getPlayerIP(player)
+	local ipKey = type(ip) == "string" and ip ~= "" and ip or tostring(player)
+	local actionBudgets = authenticationBudgets[action]
+	local playerBudget = actionBudgets[player]
+	local ipBudget = actionBudgets[ipKey]
+
+	local function isAvailable(budget, limit, window)
+		return not budget or now < budget.startedAt or now - budget.startedAt >= window or budget.count < limit
+	end
+
+	if not isAvailable(playerBudget, playerLimit, playerWindow) or not isAvailable(ipBudget, ipLimit, ipWindow) then
+		return false
+	end
+
+	local function consume(budget, limit, window)
+		if not budget or now < budget.startedAt or now - budget.startedAt >= window then
+			return { startedAt = now, count = 1 }
+		end
+		budget.count = budget.count + 1
+		return budget
+	end
+
+	actionBudgets[player] = consume(playerBudget, playerLimit, playerWindow)
+	actionBudgets[ipKey] = consume(ipBudget, ipLimit, ipWindow)
+	return true
+end
+
+-- Keep the IP buckets bounded when many transient addresses connect.
+setTimer(function()
+	local now = os.time()
+	for _, actionBudgets in pairs(authenticationBudgets) do
+		for key, budget in pairs(actionBudgets) do
+			if now < budget.startedAt or now - budget.startedAt > 3600 then
+				actionBudgets[key] = nil
+			end
+		end
+	end
+end, 300000, 0)
+
+addEventHandler("onPlayerQuit", root, function()
+	for _, actionBudgets in pairs(authenticationBudgets) do
+		actionBudgets[source] = nil
+	end
+end)
 
 local function getAuthenticatedAccountID(player)
 	if not isElement(player) or getElementType(player) ~= "player" or getElementData(player, "account:loggedin") ~= true then
@@ -37,21 +85,25 @@ local function getCharacterCount(accountID)
 end
 
 function validateCredentials(username,password,checksave)
-	if not (username == "") then
-		if not (password == "") then
-			if checksave == true then
-				triggerClientEvent(client,"saveLoginToXML",client,username)
-			else
-				triggerClientEvent(client,"resetSaveXML",client)
-			end
-			return true
-		else
-			triggerClientEvent(client,"set_warning_text",client,"Login","Please enter your password!")
-		end
-	else
-		triggerClientEvent(client,"set_warning_text",client,"Login","Please enter your username!")
+	if not isElement(client) or getElementType(client) ~= "player" then
+		return false
 	end
-	return false
+	if type(username) ~= "string" or #username < 1 or #username > 64 then
+		outputDebugString("[ACCOUNT][LOGIN] rejected invalid username field", 2)
+		triggerClientEvent(client,"set_warning_text",client,"Login","Please enter a valid username.")
+		return false
+	end
+	if type(password) ~= "string" or #password < 1 or #password > 256 then
+		outputDebugString("[ACCOUNT][LOGIN] rejected invalid password field", 2)
+		triggerClientEvent(client,"set_warning_text",client,"Login","Please enter a valid password.")
+		return false
+	end
+	if checksave == true then
+		triggerClientEvent(client,"saveLoginToXML",client,username)
+	else
+		triggerClientEvent(client,"resetSaveXML",client)
+	end
+	return true
 end
 addEvent("onRequestLogin",true)
 addEventHandler("onRequestLogin",getRootElement(),validateCredentials)
@@ -79,12 +131,21 @@ function getAccountDetails(id)
 end
 
 function playerLogin(username,password,checksave)
+	if not isElement(client) or getElementType(client) ~= "player" then
+		outputDebugString("[ACCOUNT][LOGIN] rejected request without player event client", 2)
+		return false
+	end
 	if isElement(client) then
 		tutorialSessions[client] = nil
 	end
 	local encryptionRuleData, encryptionRuleQuery, accountCheckQuery, preparedQuery, accountData,newAccountHash,safeusername,safepassword = nil
 
 	if not validateCredentials(username,password,checksave) then
+		return false
+	end
+	if not consumeAuthenticationBudget(client, "login", 10, 60, 40, 60) then
+		outputDebugString("[ACCOUNT][LOGIN] throttled authentication request", 2)
+		triggerClientEvent(client,"set_warning_text",client,"Login","Too many login attempts. Please wait before trying again.")
 		return false
 	end
 
@@ -403,9 +464,22 @@ function playerRegister(username,password,confirmPassword, email)
 		return false
 	end
 	if type(username) ~= "string" or type(password) ~= "string" or type(confirmPassword) ~= "string" or type(email) ~= "string"
-		or username == "" or password == "" or email == "" or password ~= confirmPassword then
-		outputDebugString("[ACCOUNT][REGISTER] rejected empty or mismatched registration fields", 2)
+		or #username < 3 or #username > 18 or not username:match("^%w+$")
+		or #password < 8 or #password > 25 or password:find("['\"]")
+		or #email < 1 or #email > 100 or password ~= confirmPassword then
+		outputDebugString("[ACCOUNT][REGISTER] rejected invalid or mismatched registration fields", 2)
 		triggerClientEvent(client, "set_warning_text", client, "Register", "Please check your username, password confirmation, and email.")
+		return false
+	end
+	local validEmail = exports.global:isEmail(email)
+	if not validEmail then
+		outputDebugString("[ACCOUNT][REGISTER] rejected invalid email field", 2)
+		triggerClientEvent(client, "set_warning_text", client, "Register", "Please enter a valid email address.")
+		return false
+	end
+	if not consumeAuthenticationBudget(client, "registration", 3, 600, 10, 3600) then
+		outputDebugString("[ACCOUNT][REGISTER] throttled registration request", 2)
+		triggerClientEvent(client, "set_warning_text", client, "Register", "Too many registration attempts. Please wait before trying again.")
 		return false
 	end
 	--CHECK FOR EXISTANCE OF USERNAME AND EMAIL ADDRESS / MAXIME

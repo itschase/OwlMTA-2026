@@ -1,6 +1,10 @@
 # Next work record
 
-Last updated: 2026-10-28 after the GameMaster authority correction and account/admin lifecycle re-review.
+Last updated: 2026-10-28 after adding server-side authentication input bounds and request budgets.
+
+## Latest continuation — authentication boundary guards
+
+The account login path now rejects non-string/empty/oversized credential fields before querying Core or verifying bcrypt. Registration mirrors the shipped UI's username/password rules and server email validator before hashing or querying. Process-memory budgets are enforced per player and IP: 10 login attempts/player/minute and 40/IP/minute; 3 registration attempts/player/10 minutes and 10/IP/hour. Player buckets are cleared on disconnect, stale buckets are swept, and debug outcomes omit credentials, raw email, and IP. This is source-only; no MTA runtime or tests were run. Issue #529 remains open for enumeration-resistant responses, deeper outcome diagnostics, and disposable-client/load validation; the fixed windows and shared-IP effects also need runtime review.
 
 ## Latest continuation — login device gate before session effects
 
