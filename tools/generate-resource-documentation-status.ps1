@@ -50,6 +50,7 @@ $published = @{
     "guied" = @{ Dossier = "docs/resources/guied.md"; State = "Partial developer-tool manifest, startup, ACL, remote-file, and client workflow review; issue #450; Discussion pending" }
     "hardwaresurvey" = @{ Dossier = "docs/resources/hardwaresurvey.md"; State = "Full manifest/client/server/JSON persistence and staff-read review; issues #451-#452; Discussion pending" }
     "item-texture" = @{ Dossier = "docs/resources/item-texture.md"; State = "Partial manifest/caller/persistence/remote-stream and vehicle-mutation review; issues #453-#455; Discussion pending" }
+    "LSFD" = @{ Dossier = "docs/resources/LSFD.md"; State = "Full manifest/incident/alarm/faction/admin workflow review; issues #456-#457; Discussion pending" }
     "factions" = @{ Number = 101; Dossier = "docs/resources/factions.md"; State = "Full manifest-script source review; individual Discussion published" }
     "item-system" = @{ Number = 102; Dossier = "docs/resources/item-system.md"; State = "Full manifest-script source review; individual Discussion published" }
     "vehicle" = @{ Number = 107; Dossier = "docs/resources/vehicle.md" }

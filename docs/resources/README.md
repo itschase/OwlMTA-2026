@@ -74,6 +74,7 @@ Every dossier distinguishes source evidence from runtime verification. Presence 
 | In-game GUI design and Lua code generation tool | [`guied`](guied.md) ([Issue #450](https://github.com/itschase/OwlMTA-2026/issues/450)) | Partial developer-tool/ACL/event review; runtime unverified |
 | Aggregate client display-resolution survey | [`hardwaresurvey`](hardwaresurvey.md) ([Issues #451](https://github.com/itschase/OwlMTA-2026/issues/451) and [#452](https://github.com/itschase/OwlMTA-2026/issues/452)) | Full manifest/event/persistence review; runtime unverified |
 | Item, artifact, and vehicle texture replacement and streaming | [`item-texture`](item-texture.md) ([Issues #453](https://github.com/itschase/OwlMTA-2026/issues/453)–[#455](https://github.com/itschase/OwlMTA-2026/issues/455)) | Partial caller/persistence/remote-event review; runtime unverified |
+| LSFD incident dispatch, scene spawning, and pager/alarm | [`LSFD`](LSFD.md) ([Issues #456](https://github.com/itschase/OwlMTA-2026/issues/456) and [#457](https://github.com/itschase/OwlMTA-2026/issues/457)) | Full manifest/event workflow review; runtime unverified |
 
 ## Archived resource variants
 
