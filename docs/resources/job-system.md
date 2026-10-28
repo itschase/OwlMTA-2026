@@ -19,7 +19,7 @@ The selected job is stored in `characters.job`. The MyISAM `jobs` table stores p
 - The City Hall employment UI offers delivery driver, taxi driver, bus driver, city maintenance, mechanic, locksmith, and long-haul truck driver. `/myjob` displays the current title and progression; `/endjob` and `/quitjob` clear the selection.
 - City maintenance grants a spray-can item and changes graffiti-tag state. Job-marked vehicles temporarily reject a mismatched driver.
 - `/fish` starts the client fishing minigame. Caught fish become item `273`; the fisherman NPC quotes and buys the inventory.
-- Photography values camera shots on the client and submits the collection to pay faction `20`. `/totalvalue` shows the collection and `/photoheli` enables the faction helicopter camera flow.
+- Photography's client scoring loop and `/totalvalue` command are inside a block comment, and the old photographer NPC creation is commented out. The active `cPhotoOption` UI event has no caller in the source tree; if invoked, it reads `getElementDimension(victoria)` even though `victoria` is only declared in the commented block. The separate `/photoheli` flow remains active. The old player interaction gap is tracked in [Issue #495](https://github.com/itschase/OwlMTA-2026/issues/495); server-authoritative photo totals and payouts remain covered by [Issue #181](https://github.com/itschase/OwlMTA-2026/issues/181).
 - Mechanics service vehicles, change tires, paint, colors and headlights, install upgrades, and preview appearance. Fixed prices are paid from character cash.
 - Taxi drivers use `/taxilight`; the taximeter synchronizes displayed fare, distance, running state, and light state between driver and passengers. This module does not perform a final fare settlement.
 - Bus drivers use `/startbus`, follow a client-rendered route, and receive a direct cash reward at reported stops. Passenger entry invokes a $5 fare transfer.
@@ -54,7 +54,8 @@ The selected job is stored in `characters.job`. The MyISAM `jobs` table stores p
 
 - [Issue #47](https://github.com/itschase/OwlMTA-2026/issues/47): authoritative job selection and transition validation.
 - [Issue #77](https://github.com/itschase/OwlMTA-2026/issues/77): server-owned bus progression and bound fare transfer.
-- [Issue #181](https://github.com/itschase/OwlMTA-2026/issues/181): server-owned fishing and photography work and rewards.
+- [Issue #181](https://github.com/itschase/OwlMTA-2026/issues/181): server-owned fishing and photography work and rewards, including arbitrary client photo totals and faction payout values.
+- [Issue #495](https://github.com/itschase/OwlMTA-2026/issues/495): restore or retire the disconnected photographer interaction flow without conflating the SAN front desk.
 - [Issue #48](https://github.com/itschase/OwlMTA-2026/issues/48) remains the payday/shop-wage event parent; it does not own these direct job payouts.
 - [Issue #3](https://github.com/itschase/OwlMTA-2026/issues/3) owns replacement of legacy staff/supporter bypasses with named capabilities.
 - [Issue #241](https://github.com/itschase/OwlMTA-2026/issues/241) owns mechanic, taxi/taximeter, and locksmith authorization and failure-safe settlement.

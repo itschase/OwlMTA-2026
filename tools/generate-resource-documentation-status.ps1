@@ -59,6 +59,7 @@ $published = @{
     "realtime-system" = @{ Number = 483; Dossier = "docs/resources/realtime-system.md"; State = "Full manifest/configuration/interior caller review; issues #480-#482; individual Discussion published" }
     "release-notes" = @{ Number = 486; Dossier = "docs/resources/release-notes.md"; State = "Full manifest/player/server/SQL snapshot/caller review; issues #484-#485; individual Discussion published" }
     "roadblock-system" = @{ Number = 490; Dossier = "docs/resources/roadblock-system.md"; State = "Full manifest/player/staff/dependency and direct spike-consumer review; issues #487-#489; individual Discussion published" }
+    "san" = @{ Number = 494; Dossier = "docs/resources/san.md"; State = "Full manifest/player/staff/direct-caller review; issues #491-#493; individual Discussion published" }
     "mods" = @{ Dossier = "docs/resources/mods.md"; State = "Full manifest/two client scripts/server mall script review; issue #459; Discussion pending" }
     "factions" = @{ Number = 101; Dossier = "docs/resources/factions.md"; State = "Full manifest-script source review; individual Discussion published" }
     "item-system" = @{ Number = 102; Dossier = "docs/resources/item-system.md"; State = "Full manifest-script source review; individual Discussion published" }
@@ -100,7 +101,7 @@ $published = @{
     "interior_system" = @{ Number = 237; Dossier = "docs/resources/interior_system.md"; State = "Full manifest-script source review; individual Discussion published" }
     "usercontrolpanel" = @{ Number = 247; Dossier = "docs/resources/usercontrolpanel.md"; State = "Full manifest-script source review; individual Discussion published" }
     "insurance" = @{ Number = 248; Dossier = "docs/resources/insurance.md"; State = "Full manifest-script source review; individual Discussion published" }
-    "job-system" = @{ Number = 249; Dossier = "docs/resources/job-system.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "job-system" = @{ Number = 249; Dossier = "docs/resources/job-system.md"; State = "Full manifest-script source review; issues #181 and #495; individual Discussion published" }
     "tow-system" = @{ Number = 250; Dossier = "docs/resources/tow-system.md"; State = "Full manifest-script source review; individual Discussion published" }
     "item-world" = @{ Number = 251; Dossier = "docs/resources/item-world.md"; State = "Full manifest-script source review; individual Discussion published" }
     "rightclick" = @{ Number = 252; Dossier = "docs/resources/rightclick.md"; State = "Full manifest-script source review; individual Discussion published" }

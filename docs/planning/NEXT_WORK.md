@@ -1,6 +1,6 @@
 # Next work record
 
-Last updated: 2026-10-27 after publishing the `roadblock-system` Discussion.
+Last updated: 2026-10-27 after publishing the `san` Discussion.
 
 ## Latest continuation — attachment, legacy forum, and GUI development tools
 
@@ -258,4 +258,10 @@ Next cataloged-only active resource: `san`. Inspect its manifest-loaded player/a
 
 Completed the `roadblock-system` dossier and published [Script Resource: roadblock-system #490](https://github.com/itschase/OwlMTA-2026/discussions/490). The source review follows the `/rbs` placement flow, configured faction model sets, temporary in-memory object tracking, staff listing/removal/global cleanup commands, and the spikestrip handoff to `spike-system`. Existing Issue [#88](https://github.com/itschase/OwlMTA-2026/issues/88) already tracks placement request authorization. Added Issues [#487](https://github.com/itschase/OwlMTA-2026/issues/487)–[#489](https://github.com/itschase/OwlMTA-2026/issues/489) for world/proximity/removal scoping, collision-shape world context, and nil faction membership handling. The new issues are assigned and in Milestone #7; their source finding and runtime verification boundaries are recorded in the dossier. No MTA runtime was started.
 
-Next active cataloged-only resource: `san`. Trace its manifest, client/server/admin usage, dependencies, persistence, and callers; search the existing tracker before filing new implementation work.
+Next active cataloged-only resource: `sapt-system`. Trace its manifest, player/staff/operator workflows, persistence, dependencies, and direct callers; search the existing tracker before filing non-duplicate follow-up work.
+
+## Latest continuation — SAN reception resource
+
+Completed the `san` resource dossier and published [Script Resource: san #494](https://github.com/itschase/OwlMTA-2026/discussions/494). The review follows the client-created Victoria NPC through `gatekeepers-system`, the player contact/recruitment choices, and the server's faction-20 radio notification. Issues [#491](https://github.com/itschase/OwlMTA-2026/issues/491)–[#493](https://github.com/itschase/OwlMTA-2026/issues/493) track trusted caller binding, validation/location/rate limits, and a website-independent in-game recruitment path. Cross-resource Issue [#495](https://github.com/itschase/OwlMTA-2026/issues/495) covers the disconnected photographer interaction; existing [Issue #181](https://github.com/itschase/OwlMTA-2026/issues/181) remains the owner for server-authoritative photography totals/rewards. The issues are assigned under Milestone #7. The resource ledger has one row per its 179 distinct manifest paths after removing a duplicate catalog-only `roadblock-system` row. Runtime behavior remains unverified and MTA was not started.
+
+Next active cataloged-only resource: `sapt-system`.
