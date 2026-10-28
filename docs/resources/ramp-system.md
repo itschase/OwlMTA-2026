@@ -6,7 +6,7 @@
 - Startup snapshot: enabled in `mods/deathmatch/mtaserver.conf.bak`; snapshot only.
 - Source review: full manifest/schema/client/server/caller review. Runtime movement, collision, and asset appearance are unverified.
 - GitHub tracking: [Issue #476](https://github.com/itschase/OwlMTA-2026/issues/476) (remote lift control authorization and bounds), [#477](https://github.com/itschase/OwlMTA-2026/issues/477) (ramp command SQL inputs), and [#478](https://github.com/itschase/OwlMTA-2026/issues/478) (nearby listing ignores interior). All are assigned to [Milestone #7: Resource Audit and Security Baseline](https://github.com/itschase/OwlMTA-2026/milestone/7).
-- Discussion: pending; title should be `Script Resource: ramp-system` in `Script Resources`.
+- Discussion: [Script Resource: ramp-system #479](https://github.com/itschase/OwlMTA-2026/discussions/479) in `Script Resources`.
 - Runtime: unverified; no MTA server/client was started.
 
 ## What players and operators use it for

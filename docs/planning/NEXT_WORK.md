@@ -1,6 +1,6 @@
 # Next work record
 
-Last updated: 2026-10-28 after the `ramp-system` audit.
+Last updated: 2026-10-28 after publishing the `ramp-system` Discussion.
 
 ## Latest continuation — attachment, legacy forum, and GUI development tools
 
@@ -32,7 +32,7 @@ The optional `object-browser` is now documented in `docs/resources/object-browse
 
 `ped-system` is documented as the persistent NPC registry and the router for service/mission right-click actions and published as [Script Resource Discussion #475](https://github.com/itschase/OwlMTA-2026/discussions/475). Issues #469–#474 are assigned to Milestone #7 and cover remote staff authorization, medic caller/target validation, final-kit consumption, fake-name gender lookup, disconnected legacy events, and the missing public-transport provider contract. Runtime and external provider behavior remain unverified.
 
-`ramp-system` is documented as the persistent garage-lift resource, distinct from the separate item-117 DFT-30 deployment ramp. Issues #476–#478 are assigned to Milestone #7 for remote lift movement authorization/bounds, raw ramp command SQL inputs, and interior-aware nearby lookup. The resource Discussion is pending. Runtime movement, model replacement, and DB behavior remain unverified.
+`ramp-system` is documented as the persistent garage-lift resource, distinct from the separate item-117 DFT-30 deployment ramp. Issues #476–#478 are assigned to Milestone #7 for remote lift movement authorization/bounds, raw ramp command SQL inputs, and interior-aware nearby lookup. The resource Discussion is [published as #479](https://github.com/itschase/OwlMTA-2026/discussions/479). Runtime movement, model replacement, and DB behavior remain unverified.
 
 ## Latest continuation — staff camera, faction TV, and language systems
 
@@ -234,3 +234,8 @@ The reusable Discord/MTA identity service is now being developed in a separate p
 Before starting MTA, produce a reproducible disposable environment plan: sanitized configuration and secrets, schema import/migration order, resource start graph, optional-service stubs, least-privilege database accounts, seeded test identities, backup/rollback steps, logging destinations, and a smoke-test matrix. Starting the server is a later explicit phase and must not be represented as completed by static inspection.
 
 The first static plan is now maintained in [Static Safe-Start Preflight](SAFE_START_PREFLIGHT.md) and discussed in [Server Operators #215](https://github.com/itschase/OwlMTA-2026/discussions/215). Its gates are requirements, not runtime results.
+
+
+## Latest continuation — ramp-system documentation publication
+
+Published and verified [Script Resource: ramp-system #479](https://github.com/itschase/OwlMTA-2026/discussions/479). The dossier, resource index, and generated status ledger now point to the thread. Issues [#476](https://github.com/itschase/OwlMTA-2026/issues/476)–[#478](https://github.com/itschase/OwlMTA-2026/issues/478) are assigned to itschase, linked to the dossier and discussion, and associated with Milestone #7. Static source review only; runtime remains unverified. Continue the active manifest census with the next cataloged-only resource, tracing loaded scripts, callers, persistence, player/staff/operator workflows, and duplicate issue coverage before publishing.
