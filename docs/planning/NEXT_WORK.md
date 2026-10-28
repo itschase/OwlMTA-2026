@@ -1,6 +1,6 @@
 # Next work record
 
-Last updated: 2026-10-27 after the `heligrab`, `forums`, `guied`, and `hardwaresurvey` audits.
+Last updated: 2026-10-27 after the `model-system` audit.
 
 ## Latest continuation — attachment, legacy forum, and GUI development tools
 
@@ -14,9 +14,11 @@ The `item-texture` batch was pushed in commit `de361d4` as a partial caller/pers
 
 The resource Discussion approvals for `id-system`, `realism`, and `hud` remain outstanding for publication. The GitHub connector exposes no Discussion-creation action, and no Brave window was available in the active desktop session during the last check. Do not record these topics as published until their GitHub URLs and contents are verified. Continue authoring/publishing other repo artifacts through available channels.
 
-The current unpushed batch documents startup-listed `LSFD`: staff-triggered fire scenarios, faction dispatch messages, scene objects, a station bell and beeper notifications, plus an admin resource-restart cancellation path. Issues #456–#457 are self-assigned and track special-scene object references and alarm location/rate policy. Runtime remains unverified. The source uses faction ID 2 and calls `factions`, `integration`, and `global` without manifest dependency declarations.
+The `LSFD` batch is pushed in commit `b8ae303`: staff-triggered fire scenarios, faction dispatch messages, scene objects, a station bell and beeper notifications, plus an admin resource-restart cancellation path. Issues #456–#457 are self-assigned and track special-scene object references and alarm location/rate policy. Runtime remains unverified. The source uses faction ID 2 and calls `factions`, `integration`, and `global` without manifest dependency declarations.
 
-Next active cataloged-only resource after this batch: `model-system`. Continue in manifest/caller order, with deeper `guied` event and client code audit and the remaining `item-texture` client shader lifecycle review queued because those first passes did not inspect every implementation path. Search Issues before adding findings, give every dossier an explicit review state, distinguish runtime-verifiable claims from source facts, and update the index, generator, CSV, and issue tracker together. Keep the MTA server stopped until the static safe-start gates are complete.
+The `model-system` client model loader is now documented in `docs/resources/model-system.md`; Issue #458 tracks missing per-model load/replacement diagnostics. Its eight active model IDs, dormant/commented assets, operator and player boundaries, and runtime follow-up are recorded. Runtime remains unverified. The standardized Script Resource Discussion is pending because the connected GitHub tool does not expose discussion creation and Brave is unavailable in this session.
+
+Next: continue in manifest/caller order, with deeper `guied` event and client code audit and the remaining `item-texture` client shader lifecycle review queued because those first passes did not inspect every implementation path. Search Issues before adding findings, give every dossier an explicit review state, distinguish runtime-verifiable claims from source facts, and update the index, generator, CSV, and issue tracker together. Keep the MTA server stopped until the static safe-start gates are complete.
 
 ## Latest continuation — staff camera, faction TV, and language systems
 

@@ -373,6 +373,7 @@ Issues #52 (MDC) and #55 (phone) were updated with the additional read, mutation
 - [Issue #455: Authorize and constrain client-requested texture streams](https://github.com/itschase/OwlMTA-2026/issues/455)
 - [Issue #456: Disable collisions on each special-fire object](https://github.com/itschase/OwlMTA-2026/issues/456)
 - [Issue #457: Define station alarm range and rate limits](https://github.com/itschase/OwlMTA-2026/issues/457)
+- [Issue #458: Add per-model load and replacement diagnostics to model-system](https://github.com/itschase/OwlMTA-2026/issues/458)
 
 The same-name archived copies have separate source identities. Their archive dossiers and separate `(archived)` Script Resource Discussions are indexed from [`docs/resources/README.md`](../resources/README.md). Archive reviews remain partial comparisons, not evidence of current availability or runtime behavior.
 - [Player Guide Q&A #389: How do I use and recharge a flashlight?](https://github.com/itschase/OwlMTA-2026/discussions/389)
