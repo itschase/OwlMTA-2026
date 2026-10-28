@@ -69,6 +69,7 @@ Every dossier distinguishes source evidence from runtime verification. Presence 
 | Character injury, diagnosis, and treatment roleplay | [`health-addon`](health-addon.md) (Issues [#444](https://github.com/itschase/OwlMTA-2026/issues/444)–[#446](https://github.com/itschase/OwlMTA-2026/issues/446)) | Partial injury/diagnosis/treatment event review; runtime verification pending |
 | Animated textures for in-world video players | [`fakevideo`](fakevideo.md) ([Issue #447](https://github.com/itschase/OwlMTA-2026/issues/447)) | Partial streaming/catalog/caller review; runtime unverified |
 | Player and vehicle attachment through `/glue` | [`glue-system`](glue-system.md) ([Issue #448](https://github.com/itschase/OwlMTA-2026/issues/448)) | Full manifest/client/server event-flow review; runtime unverified |
+| Helicopter passenger grabbing and hanging | [`heligrab`](heligrab.md) ([Issue #449](https://github.com/itschase/OwlMTA-2026/issues/449)) | Full manifest/player/export/event-flow review; runtime unverified |
 
 ## Archived resource variants
 
