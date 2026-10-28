@@ -6,7 +6,7 @@
 - Source review: manifest, connection bootstrap, exported legacy query helpers, lazy query writer, migration helper, and daily maintenance script reviewed as an initial API/security pass. Complete call-site and SQL/schema audit is still required.
 - Runtime: unverified. No database connection or MTA server was started.
 - Startup snapshot: enabled in `mtaserver.conf.bak`; this is not proof of live configuration.
-- GitHub record: [Script Resources Discussion #123](https://github.com/itschase/OwlMTA-2026/discussions/123); findings tracked by [Issues #460](https://github.com/itschase/OwlMTA-2026/issues/460)–[#463](https://github.com/itschase/OwlMTA-2026/issues/463).
+- GitHub record: [Script Resources Discussion #123](https://github.com/itschase/OwlMTA-2026/discussions/123); findings tracked by [Issues #460](https://github.com/itschase/OwlMTA-2026/issues/460)–[#463](https://github.com/itschase/OwlMTA-2026/issues/463), all assigned to [Milestone #7: Resource Audit and Security Baseline](https://github.com/itschase/OwlMTA-2026/milestone/7).
 
 ## Purpose in everyday terms
 
