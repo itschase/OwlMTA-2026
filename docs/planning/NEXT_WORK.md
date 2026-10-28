@@ -6,6 +6,8 @@ Last updated: 2026-10-28 after the GameMaster authority correction and account/a
 
 The serial-whitelist check now uses the authenticated Core account row and runs before an existing session is displaced or any account/rank/session element data is committed. The exported check validates the account ID, distinguishes query failure from an empty result, fails closed on DB errors, escapes device identifiers, and emits account-scoped debug outcomes without logging secrets. The old UCP denial message is removed. This is a source fix only; MTA runtime behavior is unverified. Issue #158 remains open for device enrollment/revocation, privacy and policy decisions, and disposable-server validation. No server or tests were run.
 
+Corrected Issues [#527](https://github.com/itschase/OwlMTA-2026/issues/527) and [#528](https://github.com/itschase/OwlMTA-2026/issues/528) so their bodies reflect the current email-ownership and username-only preference fixes instead of reporting the old source as current. Refreshed [Script Resource Discussion #176](https://github.com/itschase/OwlMTA-2026/discussions/176) and linked it from the whitelist dossier. Disposable-client/database behavior remains unverified.
+
 ## Immediate priority order — core identity and playability
 
 1. **Login safety:** finish bounded server-side validation and abuse budgets for the legacy event path (#529), then reconcile the exact identity-service contract before any Discord login cutover (#2/#68). No automatic password fallback after a Discord authorization failure.

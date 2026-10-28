@@ -20,6 +20,7 @@ The policy mixes supporters into a staff-device restriction while omitting some 
 
 - Manifest: [`mods/deathmatch/resources/serialwhitelist/meta.xml`](../../mods/deathmatch/resources/serialwhitelist/meta.xml)
 - Implementation: [`script.lua`](../../mods/deathmatch/resources/serialwhitelist/script.lua)
+- Public resource record: [Script Resource Discussion #176](https://github.com/itschase/OwlMTA-2026/discussions/176).
 - Export: `check`.
 - Dependencies: `mysql`, `global`, the authenticated account row passed by `account/login-panel`, the MTA player serial/IP APIs, and the `mta.serial_whitelist` table.
 - Rows contain account, raw serial, last IP/date, and status; the table has no account/serial uniqueness or foreign-key constraint and defaults new rows inactive.
