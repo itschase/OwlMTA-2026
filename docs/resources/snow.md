@@ -12,7 +12,7 @@ The settings GUI lets a player choose real/cartoon flakes and adjust density, wi
 
 The F10 graphics panel separately shows an account-persisted “Enable snowfall” checkbox when this resource is running. Static review found that the value is saved and replicated as local-player data but is not applied to the snow effect; see [Issue #526](https://github.com/itschase/OwlMTA-2026/issues/526). Do not confuse this stored account preference with the detailed local XML settings or the server's `snow_toggle` permission setting.
 
-The commands `/ssize`, `/swdir`, `/swspeed`, `/sdensity`, and `/salpha` are also registered in the particle script as direct client-side tuning controls. `/sdensity` can hit a source-confirmed nil loop-bound defect when reducing density without blending; see [Issue #525](https://github.com/itschase/OwlMTA-2026/issues/525).
+The commands `/ssize`, `/swdir`, `/swspeed`, `/sdensity`, and `/salpha` are also registered in the particle script as direct client-side tuning controls. The `/sdensity` immediate-decrease loop bound was corrected in source; [Issue #525](https://github.com/itschase/OwlMTA-2026/issues/525) remains runtime-unverified.
 
 ## Staff and operator behavior
 
@@ -36,7 +36,7 @@ Ground appearance is a separate feature in [`shader_snow_ground`](shader_snow_gr
 - Keep player visual preferences local. Server-wide policy should only decide whether the GUI and toggle are allowed; it should not trust client visual settings as gameplay authority.
 - The client event only returns settings to its actual MTA `client`. Future Discord authorization is not needed for this player preference flow. Staff-only server controls, if added later, should use a separate capability boundary.
 - A future context interaction could expose visual options without adding more commands, but `/snow` and `/snowsettings` remain current interfaces until a replacement is designed.
-- See [Issue #525](https://github.com/itschase/OwlMTA-2026/issues/525) for the direct density-decrease defect. No fix or runtime result is claimed here.
+- [Issue #525](https://github.com/itschase/OwlMTA-2026/issues/525) tracks the corrected density-decrease defect; static source fix is not a runtime verification.
 
 ## Source map
 

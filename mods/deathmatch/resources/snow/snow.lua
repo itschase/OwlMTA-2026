@@ -155,7 +155,7 @@ function updateSnowDensity(dense,blend,speed)
 						createFlake(x-box_width,y-box_depth,box_height,0)				
 					end
 				elseif dense < settings.density then
-					for i=density, dense+1, -1 do
+					for i=settings.density, dense+1, -1 do
 						table.remove(snowflakes,i)
 					end
 				end
