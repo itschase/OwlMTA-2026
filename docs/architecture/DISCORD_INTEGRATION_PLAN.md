@@ -2,7 +2,7 @@
 
 ## Goal and boundaries
 
-Discord authorization is the planned primary identity path for production registration and login. The gamemode remains manageable in-game and does not require a UCP website. Operators self-host or select the documented authorization service and configure their own guild. Role IDs ship blank; identity authentication and role-based staff/donor grants are separate, so unmapped roles grant no elevated access. The API defined in [`API_CONTRACT.md`](API_CONTRACT.md) owns Discord verification, account resolution, and role mapping. MTA receives only minimal identity and named-grant results through authenticated server-to-server calls.
+Discord authorization is the planned primary identity path for production registration and login. The gamemode remains manageable in-game and does not require a UCP website; the browser OAuth page is an authorization step, not a management dependency. Operators self-host or select the documented authorization service and configure their own guild. Role IDs ship blank; identity authentication and role-based staff/donor grants are separate, so unmapped roles grant no elevated access. The standalone service owns Discord verification, installation-scoped identity links, and role mapping; Owl owns local account resolution and provisioning through the host integration defined in [`API_CONTRACT.md`](API_CONTRACT.md). MTA receives only minimal identity and named-grant results through authenticated server-to-server calls.
 
 Keep these authorities distinct:
 
@@ -26,6 +26,18 @@ Use three layers:
 The current standalone implementation is in [`itschase/mta-discord-identity`](https://github.com/itschase/mta-discord-identity) (source reviewed at revision `619d18f`). The generic MTA resource exports `beginLink`, `exchangeTicket`, `hasCapability`, `getDonorTier`, and `clearPlayerSession`. Owl's host adapter must implement the server-only `mta-discord-identity:resolve-account` callback from the validated, logged-in account session. Resource scripts should not each call Discord or interpret role IDs; use one Owl-side authorization facade that consumes the adapter's named-grant check and then composes the resource's own local checks. This repository does not yet contain that host integration, and the external service/configuration has not been deployed or runtime-verified with Owl.
 
 Other MTA servers should be able to implement only the small host interface and use the same service/adapter without importing Owl resources or schemas. Publish the protocol, adapter contract, version compatibility, threat model, example integration, migrations, and conformance tests independently. Keep provider-specific Discord code behind the service boundary so the MTA adapter consumes a stable identity/grant API rather than Discord APIs or raw role IDs.
+
+### Implementation and issue ownership
+
+| Slice | Decision | Existing owner |
+|---|---|---|
+| Protocol compatibility and Owl facade | Pin exact service/adapter versions, reconcile implemented `/v1` with the proposed Owl `/api/v1`, then add one server-only Owl account/capability facade. Do not let individual resources call Discord or interpret role IDs. | [Issue #68](https://github.com/itschase/OwlMTA-2026/issues/68); standalone release packaging and generic conformance belong to [Issue #238](https://github.com/itschase/OwlMTA-2026/issues/238). |
+| Discord-first registration/login | Use a connection-bound, one-use verified result. The standalone service verifies identity; Owl provisions the local account and runs ban, activation, recovery, and character checks. Existing-account linking requires separate proof of control. | [Issue #2](https://github.com/itschase/OwlMTA-2026/issues/2). |
+| Capability migration | Map blank operator-owned role-ID slots to named capabilities. Keep supporter/donor tiers separate and retain every resource's local gameplay checks. Migrate action by action with shadow comparison and rollback. | [Issue #3](https://github.com/itschase/OwlMTA-2026/issues/3); GameMaster/supporter overlap remains under [Issue #14](https://github.com/itschase/OwlMTA-2026/issues/14). |
+| Logout, account switch, unlink, and revocation | Rebind the current account at action boundaries; invalidate cached grants and pending callbacks on lifecycle changes; disconnect on confirmed authorization revocation within the documented lease. | [Issue #96](https://github.com/itschase/OwlMTA-2026/issues/96). |
+| Transport, secrets, and optional providers | Keep server boot independent, use bounded asynchronous `fetchRemote` with a narrow ACL request, and store credentials outside Lua/client-visible files. FiveManage, Grafana/Loki, and outbound webhooks remain replaceable non-authoritative adapters. | ACL inheritance is related to [Issue #22](https://github.com/itschase/OwlMTA-2026/issues/22); optional adapters remain in [Discussion #105](https://github.com/itschase/OwlMTA-2026/discussions/105). |
+
+These rows consolidate ownership; they do not claim that the Owl integration, external provider configuration, or MTA transport behavior is implemented or runtime-verified.
 
 ## Operator configuration
 
@@ -60,7 +72,7 @@ The service validates Discord Snowflake strings, rejects duplicate or conflictin
 
 ## Link and unlink flow
 
-1. For an existing legacy account, the player proves account control through the controlled migration flow and explicitly requests linking. MTA derives the account ID from a validated server session. New accounts start with Discord authorization and are provisioned after identity and consent checks.
+1. For an existing legacy account, the player proves account control through the controlled migration flow and explicitly requests linking. MTA derives the account ID from a validated server session. New accounts start with Discord authorization; the service returns a verified, one-use registration result and the Owl host provisions the local account after consent, uniqueness, and policy checks.
 2. MTA asynchronously creates a challenge with `POST /api/v1/game/link-challenges`. The API binds it to the authenticated installation and account, stores only a hash of a cryptographically random code, expires it within 10 minutes, and allows only one pending challenge per account.
 3. The player redeems the code through an operator-controlled Discord bot interaction. The trusted bot/service derives the immutable Discord user ID from the authenticated interaction and verifies guild membership against the service's configured guild. A website consent page is optional and is not a UCP.
 4. The service atomically consumes the code and commits the link, enforcing one account per Discord identity and one Discord identity per account within that installation. A conflicting link requires unlink or audited recovery; it is never overwritten silently.
@@ -94,7 +106,7 @@ The adapter resource must request only `function.fetchRemote` through its `<aclr
 
 Discord login is part of the target identity flow, while legacy-account linking and role-capability migration remain separately testable stages. [Issue #2](https://github.com/itschase/OwlMTA-2026/issues/2) tracks primary production authentication; [issue #96](https://github.com/itschase/OwlMTA-2026/issues/96) tracks active-session revocation so a revoked Discord authorization cannot leave a player connected indefinitely.
 
-FiveManage media storage and Grafana log search are separate optional adapters described in `API_CONTRACT.md`; neither is required for this first slice.
+FiveManage media storage, Grafana/Loki log search, and outbound notification webhooks are separate optional adapters described in `API_CONTRACT.md`; none is required for this first slice. Webhooks report allowlisted, redacted outcomes after local authorization and persistence; they never establish identity, grant a capability, or authorize an inbound mutation.
 
 ## Current code evidence and migration caution
 
