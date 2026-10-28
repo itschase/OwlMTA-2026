@@ -32,7 +32,6 @@ local function prisonMutationAllowed(actor, targetOnline, operation)
     local active, admin, law, offlineManager = getPrisonActorAccess(actor)
     if not active then return false end
     if admin then return true end
-	if operation ~= "add" and offlineManager then return true end
 	if targetOnline then return law end
     if operation == "add" then return pd_offline_jail == true and law end
     return offlineManager
@@ -61,6 +60,7 @@ local function validateSentence(days, hours, allowSpecial)
         return false
     end
     local totalHours = days * 24 + hours
+    if not allowSpecial and totalHours < 1 then return false end
     if hourLimit > 0 and totalHours > hourLimit then return false end
     return days, hours
 end
@@ -72,7 +72,7 @@ local function validatePrisonFields(cell, days, hours, charges, fine, allowSpeci
     if validDays == false then return false end
     if fine ~= nil then
         fine = tonumber(fine)
-        if not fine or fine < 0 or fine > 2147483647 or fine ~= math.floor(fine) then return false end
+        if not fine or fine < 0 or fine > 100000 or fine ~= math.floor(fine) then return false end
     end
     return validDays, validHours, fine
 end
@@ -232,12 +232,13 @@ addEventHandler("addPrisoner", resourceRoot,
 		days, hours, fine = validDays, validHours, validFine
 		local r = getRealTime()
 
-		if duplicateCheck(returnWhat(name, online)) then
+		if duplicateCheck(returnWhat(target or name, online)) then
 			outputChatBox("This player is already serving a sentence, use update prisoner instead.", client, 255, 0, 0)
 			return
 		end
 
 		local days = tonumber(days)*24
+		local onlineTime, offlineTime, jailTime
         if cells[cell].type == 1 then
             onlineTime = ( (days + tonumber(hours)) * 60 ) * onlineRatio -- In minutes
             offlineTime = ( (days + tonumber(hours)) * 60 ) * offlineRatio -- In minutes
@@ -246,15 +247,21 @@ addEventHandler("addPrisoner", resourceRoot,
             jailTime = ( r.timestamp + (tonumber(hours) + days) * 60 * 60  )
             onlineTime = 0
         end
-		local query = mysql:query_free("INSERT INTO jailed SET charid=(SELECT id FROM characters WHERE charactername='".. mysql:escape_string(returnWhat(name, online)) .. "'), charactername='" .. mysql:escape_string(returnWhat(name, online)) .. "', jail_time=".. mysql:escape_string(jailTime) ..", jail_time_online=".. mysql:escape_string(onlineTime) ..", updatedBy='".. mysql:escape_string(updatedWho(client, online)) .."', charges='" .. mysql:escape_string(charges) .. "', cell='" .. mysql:escape_string(cell) .. "', fine='" .. mysql:escape_string(fine) .. "'")
+		local prisonerName = returnWhat(target or name, online)
+		local query = mysql:query_free("INSERT INTO jailed SET charid=(SELECT id FROM characters WHERE charactername='".. mysql:escape_string(prisonerName) .. "'), charactername='" .. mysql:escape_string(prisonerName) .. "', jail_time=".. mysql:escape_string(jailTime) ..", jail_time_online=".. mysql:escape_string(onlineTime) ..", updatedBy='".. mysql:escape_string(updatedWho(client, online)) .."', charges='" .. mysql:escape_string(charges) .. "', cell='" .. mysql:escape_string(cell) .. "', fine='" .. mysql:escape_string(fine) .. "'")
 		if query then
-			mysql:query_free("UPDATE characters SET pdjail=1 WHERE charactername='".. mysql:escape_string(returnWhat(name, online)) .. "'")
+			mysql:query_free("UPDATE characters SET pdjail=1 WHERE charactername='".. mysql:escape_string(prisonerName) .. "'")
 
 			local result = mysql:query( "SELECT * FROM jailed WHERE id=LAST_INSERT_ID()")
-			local row = mysql:fetch_assoc( result )
+			local row = result and mysql:fetch_assoc(result)
+			if result then
+				mysql:free_result(result)
+			else
+				outputDebugString("[prison-system] Jail record inserted but could not be reloaded for actor #" .. tostring(getElementData(client, "dbid")), 1)
+			end
 			if row then
 				table.insert(t, #t+1, { row.id, row.charid, row.charactername, row.jail_time, row.convictionDate, row.updatedBy, row.charges, row.cell, row.fine, row.jail_time_online })
-				exports.logs:dbLog(client, 35, returnWhat(name, online), "Added to jail cell: "..row.cell.." character: "..row.charactername.." JailStamp: "..row.jail_time.." OnlineTime: "..row.jail_time_online.." Charges: "..row.charges.." Fine: "..row.fine)
+				exports.logs:dbLog(client, 35, prisonerName, "Added to jail cell: "..row.cell.." character: "..row.charactername.." JailStamp: "..row.jail_time.." OnlineTime: "..row.jail_time_online.." Charges: "..row.charges.." Fine: "..row.fine)
 				if online then
 					local charid = getElementData(client, "dbid") or 0
 					-- attempt to find mdc account, otherwise use John Fox
@@ -264,21 +271,21 @@ addEventHandler("addPrisoner", resourceRoot,
 					end
 
 					-- automatically submit to MDC
-					local charID = getElementData( name, 'dbid' )
-					triggerEvent( 'mdc-system:add_crime', client, charID, getPlayerName( name ), charges, 'Fine: ' .. fine .. ' & Prison: ' .. ( days + hours ) .. ' hours.', officer )
+					local charID = getElementData(target, 'dbid')
+					triggerEvent('mdc-system:add_crime', client, charID, getPlayerName(target), charges, 'Fine: ' .. fine .. ' & Prison: ' .. (days + hours) .. ' hours.', officer)
 
 					triggerClientEvent(client, "PrisonGUI:Close", client, t) -- close the prison window as it will open MDC window
 					-- END MDC CRAP --
 
-					outputChatBox("You have been placed in jail by "..string.gsub(getPlayerName(client), "_", " ")..".", name, 0, 255, 0)
-					sendPrisonMsg(getPlayerName(client).." added "..getPlayerName(name).." to jail cell: "..row.cell)
+					outputChatBox("You have been placed in jail by "..string.gsub(getPlayerName(client), "_", " ")..".", target, 0, 255, 0)
+					sendPrisonMsg(getPlayerName(client).." added "..getPlayerName(target).." to jail cell: "..row.cell)
 					-- FINE
 					if tonumber(fine)>0 then -- Issue Fine
 						local amount = tonumber(fine) -- Math
-						local bankmoney = getElementData(name, "bankmoney")
+						local bankmoney = getElementData(target, "bankmoney")
 
-						exports.anticheat:changeProtectedElementDataEx(name, "bankmoney", bankmoney-amount) -- Take from player
-						mysql:query_free("UPDATE characters SET bankmoney=bankmoney-" .. mysql:escape_string(amount) .." WHERE charactername='".. mysql:escape_string(returnWhat(name, online)) .. "'")
+						exports.anticheat:changeProtectedElementDataEx(target, "bankmoney", bankmoney-amount) -- Take from player
+						mysql:query_free("UPDATE characters SET bankmoney=bankmoney-" .. mysql:escape_string(amount) .." WHERE charactername='".. mysql:escape_string(prisonerName) .. "'")
 
 						local tax = exports.global:getTaxAmount() -- Split between gov and PD
 						local factionID = exports.factions:getCurrentFactionDuty(client)
@@ -292,60 +299,60 @@ addEventHandler("addPrisoner", resourceRoot,
 					    -- DOC
 						--mysql:query_free("INSERT INTO wiretransfers (`from`, `to`, `amount`, `reason`, `type`) VALUES (" .. mysql:escape_string((charid)) .. ", " .. mysql:escape_string(-getElementData( DOC, "id" ) ) .. ", " .. mysql:escape_string(math.ceil((1-tax)*amount)) .. ", '"..mysql:escape_string("#" .. row.id .. " JAIL FINE").."', 5)" )
 
-						outputChatBox("Fine of $"..amount.." issued.", name, 0, 255, 0)
+						outputChatBox("Fine of $"..amount.." issued.", target, 0, 255, 0)
 					end
 					-- RESTRAINTS/WEAP
-					local restrainedObj = getElementData(name, "restrainedObj") -- Remove restraints
+					local restrainedObj = getElementData(target, "restrainedObj") -- Remove restraints
 					if restrainedObj then
-						toggleControl(name, "sprint", true)
-						toggleControl(name, "jump", true)
-						toggleControl(name, "accelerate", true)
-						toggleControl(name, "brake_reverse", true)
-						exports.anticheat:changeProtectedElementDataEx(name, "restrain", 0, true)
-						exports.anticheat:changeProtectedElementDataEx(name, "restrainedBy", false, true)
-						exports.anticheat:changeProtectedElementDataEx(name, "restrainedObj", false, true)
+						toggleControl(target, "sprint", true)
+						toggleControl(target, "jump", true)
+						toggleControl(target, "accelerate", true)
+						toggleControl(target, "brake_reverse", true)
+						exports.anticheat:changeProtectedElementDataEx(target, "restrain", 0, true)
+						exports.anticheat:changeProtectedElementDataEx(target, "restrainedBy", false, true)
+						exports.anticheat:changeProtectedElementDataEx(target, "restrainedObj", false, true)
 						if restrainedObj == 45 then -- If handcuffs.. take the key
-							local dbid = getElementData(name, "dbid")
+							local dbid = getElementData(target, "dbid")
 							exports['item-system']:deleteAll(47, dbid)
 						end
 						exports.global:giveItem(client, restrainedObj, 1)
-						mysql:query_free("UPDATE characters SET cuffed = 0, restrainedby = 0, restrainedobj = 0 WHERE id = " .. mysql:escape_string(getElementData( name, "dbid" )) )
+						mysql:query_free("UPDATE characters SET cuffed = 0, restrainedby = 0, restrainedobj = 0 WHERE id = " .. mysql:escape_string(getElementData(target, "dbid")))
 					end
-					setPedWeaponSlot(name,0)
+					setPedWeaponSlot(target,0)
 
-					activateJail(row.charid, name)
+					activateJail(row.charid, target)
 				else
 					outputChatBox("[WARNING] No prisoner has been added to the MDC automatically. Please file this manually.", client, 255, 0, 0)
 				end
-				mysql:free_result(result)
 			else
-				outputChatBox("Error, PS#02. Report on Mantis: bugs.owlgaming.net", client, 255, 0, 0)
+				outputChatBox("The jail record was saved but could not be loaded. Please contact an administrator.", client, 255, 0, 0)
 			end
 		else
-			outputChatBox("No character found with that name.", client, 255, 0, 0)
+			outputDebugString("[prison-system] Failed to insert jail record for actor #" .. tostring(getElementData(client, "dbid")), 1)
+			outputChatBox("Failed to add the jail record. Please contact an administrator.", client, 255, 0, 0)
 		end
 	end
 )
 
 addEvent("changePrisoner", true)
 addEventHandler("changePrisoner", resourceRoot,
-	function( name, cell, days, hours, charges, removeid, online )
+	function( _name, cell, days, hours, charges, removeid, _online )
 		local rowIndex = getRow(removeid)
-		if not rowIndex or type(name) ~= "string" or string.lower(string.gsub(name, " ", "_")) ~= string.lower(t[rowIndex][3]) then
+		if not rowIndex or not tonumber(t[rowIndex][1]) or not tonumber(t[rowIndex][2]) then
 			outputChatBox("Invalid prisoner record.", client, 255, 0, 0)
 			return
 		end
-		local target = findOnlinePrisoner(t[rowIndex][3], t[rowIndex][2])
+		local record = t[rowIndex]
+		local target = findOnlinePrisoner(record[3], record[2])
 		if not prisonMutationAllowed(client, target ~= false, "change") then
 			outputChatBox("You are not authorized to update this prisoner.", client, 255, 0, 0)
 			return
 		end
-		online = target ~= false
+		local online = target ~= false
 		if online and not isCloseTo(client, target) then
 			outputChatBox("You must be near this prisoner to update them.", client, 255, 0, 0)
 			return
 		end
-		name = t[rowIndex][3]
 		local validDays, validHours = validatePrisonFields(cell, days, hours, charges, nil, true)
 		if validDays == false then
 			outputChatBox("Invalid cell, sentence, or charges.", client, 255, 0, 0)
@@ -354,6 +361,7 @@ addEventHandler("changePrisoner", resourceRoot,
 		days, hours = validDays, validHours
 		local r = getRealTime()
 		local days = tonumber(days)*24
+		local onlineTime, offlineTime, jailTime
         if cells[cell].type == 1 then
             onlineTime = ( (days + tonumber(hours)) * 60 ) * onlineRatio -- In minutes
             offlineTime = ( (days + tonumber(hours)) * 60 ) * offlineRatio -- In minutes
@@ -362,25 +370,30 @@ addEventHandler("changePrisoner", resourceRoot,
             jailTime = ( r.timestamp + (tonumber(hours) + days) * 60 * 60  )
             onlineTime = 0
         end
-		local query = mysql:query_free("UPDATE jailed SET jail_time=".. mysql:escape_string(jailTime) ..", jail_time_online=".. mysql:escape_string(onlineTime) ..", updatedBy='".. mysql:escape_string(updatedWho(client, online)) .."', charges='" .. mysql:escape_string(charges) .. "', cell='" .. mysql:escape_string(cell) .. "' WHERE charactername='".. mysql:escape_string(returnWhat(name, online)).."'")
+		local jailID = tonumber(record[1])
+		local query = mysql:query_free("UPDATE jailed SET jail_time=".. mysql:escape_string(jailTime) ..", jail_time_online=".. mysql:escape_string(onlineTime) ..", updatedBy='".. mysql:escape_string(updatedWho(client, online)) .."', charges='" .. mysql:escape_string(charges) .. "', cell='" .. mysql:escape_string(cell) .. "' WHERE id=".. mysql:escape_string(jailID))
 		if query then
-			local result = mysql:query( "SELECT * FROM jailed WHERE charactername='"..mysql:escape_string(returnWhat(name, online)).."'")
-			local row = mysql:fetch_assoc( result )
+			local result = mysql:query("SELECT * FROM jailed WHERE id="..mysql:escape_string(jailID).." LIMIT 1")
+			local row = result and mysql:fetch_assoc(result)
+			if result then
+				mysql:free_result(result)
+			else
+				outputDebugString("[prison-system] Updated jail record #" .. tostring(jailID) .. " but failed to reload it for actor #" .. tostring(getElementData(client, "dbid")), 1)
+			end
 			if row then
                 local row1 = getRow(removeid)
 				table.remove(t, row1)
 				table.insert(t, { row.id, row.charid, row.charactername, row.jail_time, row.convictionDate, row.updatedBy, row.charges, row.cell, row.fine, row.jail_time_online })
 				triggerClientEvent(client, "PrisonGUI:Refresh", client, t)
-				exports.logs:dbLog(client, 35, returnWhat(name, online), "Updated prisoner data. New data: "..row.cell.." character: "..row.charactername.." JailStamp: "..row.jail_time.." OnlineTime: ".. row.jail_time_online .." Charges: "..row.charges.." Fine: "..row.fine)
+				exports.logs:dbLog(client, 35, row.charactername, "Updated prisoner data. New data: "..row.cell.." character: "..row.charactername.." JailStamp: "..row.jail_time.." OnlineTime: ".. row.jail_time_online .." Charges: "..row.charges.." Fine: "..row.fine)
 
 				if online then
-					outputChatBox("Your prisoner details has been updated.", name, 0, 255, 0)
-					activateJail(row.charid, name)
+					outputChatBox("Your prisoner details has been updated.", target, 0, 255, 0)
+					activateJail(row.charid, target)
 				end
 			else
 				outputChatBox("Error, PS#02. Report on Mantis: bugs.owlgaming.net", client, 255, 0, 0)
 			end
-			mysql:free_result(result)
 		else
 			outputChatBox("No character found with that name.", client, 255, 0, 0)
 		end
@@ -477,8 +490,8 @@ function duplicateCheck(name)
 		if value[3] == name then
 			return true
 		end
-		return false
 	end
+	return false
 end
 
 function checkForRelease(client, firstLogin)
