@@ -53,6 +53,7 @@ $published = @{
     "LSFD" = @{ Dossier = "docs/resources/LSFD.md"; State = "Full manifest/incident/alarm/faction/admin workflow review; issues #456-#457; Discussion pending" }
     "model-system" = @{ Dossier = "docs/resources/model-system.md"; State = "Full client model-loader/manifest asset review; issue #458; Discussion pending" }
     "OwlGamingLogs" = @{ Dossier = "docs/resources/OwlGamingLogs.md"; State = "Full manifest/client settings/phone transcript caller review; issue #465; Discussion pending" }
+    "parachute" = @{ Dossier = "docs/resources/parachute.md"; State = "Full manifest/script/direct-caller source review; issue #466; Discussion pending" }
     "mods" = @{ Dossier = "docs/resources/mods.md"; State = "Full manifest/two client scripts/server mall script review; issue #459; Discussion pending" }
     "factions" = @{ Number = 101; Dossier = "docs/resources/factions.md"; State = "Full manifest-script source review; individual Discussion published" }
     "item-system" = @{ Number = 102; Dossier = "docs/resources/item-system.md"; State = "Full manifest-script source review; individual Discussion published" }
@@ -64,14 +65,14 @@ $published = @{
     "carradio" = @{ Number = 115; Dossier = "docs/resources/carradio.md"; State = "Full manifest-script source review; individual Discussion published" }
     "carshop-system" = @{ Number = 116; Dossier = "docs/resources/carshop-system.md"; State = "Full manifest-script source review; individual Discussion published" }
     "vehicleplate" = @{ Number = 117; Dossier = "docs/resources/vehicleplate.md"; State = "Full manifest-script source review; individual Discussion published" }
-    "mysql" = @{ Number = 123; Dossier = "docs/resources/mysql.md"; State = "Partial manifest/connection/export/migration/maintenance/query-handle review; issues #460-#463; individual Discussion #123 published" }
+    "mysql" = @{ Number = 123; Dossier = "docs/resources/mysql.md"; State = "Partial manifest/connection/export/migration/maintenance/query-handle review; issues #460-#463; individual Discussion #123 published"; NextAction = "Continue complete exported API and caller/SQL review" }
     "object-browser" = @{ Dossier = "docs/resources/object-browser.md"; State = "Full manifest/client script/object catalog review; issue #464; Discussion pending" }
     "data" = @{ Number = 124; Dossier = "docs/resources/data.md"; State = "Full manifest-script source review; individual Discussion published" }
     "pool" = @{ Number = 125; Dossier = "docs/resources/pool.md"; State = "Full manifest-script source review; individual Discussion published" }
     "integration" = @{ Number = 126; Dossier = "docs/resources/integration.md"; State = "Full manifest-script source review; individual Discussion published" }
     "cache" = @{ Number = 127; Dossier = "docs/resources/cache.md"; State = "Full manifest-script source review; individual Discussion published" }
     "logs" = @{ Number = 128; Dossier = "docs/resources/logs.md"; State = "Full manifest-script source review; individual Discussion published" }
-    "phone" = @{ Number = 135; Dossier = "docs/resources/phone.md"; State = "Full manifest-script source review; individual Discussion published" }
+    "phone" = @{ Number = 135; Dossier = "docs/resources/phone.md"; State = "Full manifest-script source review; phone transcript privacy finding #465; individual Discussion published" }
     "chat-system" = @{ Number = 136; Dossier = "docs/resources/chat-system.md"; State = "Full manifest-script source review; individual Discussion published" }
     "advertisements" = @{ Number = 137; Dossier = "docs/resources/advertisements.md"; State = "Full manifest-script source review; individual Discussion published" }
     "social" = @{ Number = 138; Dossier = "docs/resources/social.md"; State = "Full manifest-script source review; individual Discussion published" }
@@ -173,7 +174,7 @@ $statusRows = foreach ($manifest in ($manifestFiles | Sort-Object FullName)) {
             "Cataloged only"
         }
         RuntimeState = "Unverified"
-        NextAction = if ($isArchivedDuplicate -and -not $record) { "Compare archived copy to active resource and record an identical-source exception or archive-specific dossier and Discussion" } elseif (-not $record) { "Complete dossier and publish Script Resources topic" } elseif (-not $discussionNumber) { "Publish standardized Script Resource Discussion and link implementation tracking" } else { "Complete remaining source review and runtime gate" }
+        NextAction = if ($record -and $record.NextAction) { $record.NextAction } elseif ($isArchivedDuplicate -and -not $record) { "Compare archived copy to active resource and record an identical-source exception or archive-specific dossier and Discussion" } elseif (-not $record) { "Complete dossier and publish Script Resources topic" } elseif (-not $discussionNumber) { "Publish standardized Script Resource Discussion and link implementation tracking" } else { "Complete remaining source review and runtime gate" }
     }
 }
 
