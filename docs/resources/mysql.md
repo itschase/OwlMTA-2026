@@ -1,38 +1,50 @@
 # `mysql`
 
-## Status
+## Status and evidence
 
-- Tree state: active resource tree; marked protected in the tracked server snapshot.
-- Tracked startup snapshot: first of the reviewed foundational resources; live startup is unverified.
-- Evidence state: source-confirmed, full manifest-script review.
-- Runtime state: unverified; no database connection was attempted.
+- Resource path: `mods/deathmatch/resources/mysql`.
+- Source review: manifest, connection bootstrap, exported legacy query helpers, lazy query writer, migration helper, and daily maintenance script reviewed as an initial API/security pass. Complete call-site and SQL/schema audit is still required.
+- Runtime: unverified. No database connection or MTA server was started.
+- Startup snapshot: enabled in `mtaserver.conf.bak`; this is not proof of live configuration.
+- GitHub record: Script Resources Discussion pending; security findings tracked by [Issue #460](https://github.com/itschase/OwlMTA-2026/issues/460) and [Issue #461](https://github.com/itschase/OwlMTA-2026/issues/461).
 
-## What it does
+## Purpose in everyday terms
 
-`mysql` is the central database provider. It opens the native `mta` connection at resource start, opens `core` lazily, exposes modern connection access, retains a legacy `mta_mysql` module connection and query helpers, and runs per-resource migrations recorded in `mta.migrations`.
+`mysql` is the shared server-side database boundary used by gameplay resources. It reads connection settings from the resource configuration, opens MTA and legacy-module database connections, exports query helpers, provides a migration helper, and includes a daily maintenance timer.
 
-## Player and staff use
+This is a critical dependency: failures here affect account, character, economy, inventory, and world persistence. The current resource exposes both a newer MTA `dbConnect` path and a legacy MySQL module API; callers may use either. Do not migrate or remove either path without a repository-wide caller inventory and representative SQL/data review.
 
-Players do not interact with it directly. Nearly every persistent gameplay system depends on it. Staff diagnostic commands include `testdb` and `mysqlleaky`; these should be mapped to an explicit operator/developer capability and must never expose credentials or raw sensitive data.
+## Manifest and exported API
 
-## Operator use
+`meta.xml` loads `mysql.lua`, `lazyquery.lua`, `migrations.lua`, and `mysql_external_module.lua` server-side. It exports `getConn`, `getSmallestID`, `lazyQuery`, connection setting getters, legacy query/result helpers, and generic `select`, `insert`, `update`, and `delete` helpers. The legacy module maintains query/result pools and offers `escape_string`; most consumers build SQL strings directly and call these exports.
 
-The tracked [`settings.xml.bak`](../../mods/deathmatch/settings.xml.bak) contains placeholders for separate `mta` and `core` databases. It is a template, not configured deployment evidence. Some legacy callers also require the platform-specific `mta_mysql` module and matching native MySQL libraries.
+Five getters return database username, password, database name, host, and port directly. Repository search found no in-tree Lua caller for them. Any external server resources must be checked before removal. Issue #460 tracks removing these unnecessary credential exports and replacing any required use with narrow data APIs.
 
-The resource creates and writes `mta.migrations` but does not install the complete schemas. It also writes `maxime.log` through a legacy helper. Native connections request automatic reconnect; the legacy path attempts a ping/reconnect.
+The generic CRUD helpers quote values through `escape_string`, but table and column identifiers are concatenated into SQL. They should only receive code-owned identifiers; user-controlled identifiers would need strict allowlisting. This dossier is not a complete SQL-injection audit of all call sites.
 
-## Technical map
+## Migration and logging behavior
 
-- Manifest: [`mods/deathmatch/resources/mysql/meta.xml`](../../mods/deathmatch/resources/mysql/meta.xml)
-- Native and legacy API: [`mysql.lua`](../../mods/deathmatch/resources/mysql/mysql.lua) and [`mysql_external_module.lua`](../../mods/deathmatch/resources/mysql/mysql_external_module.lua)
-- Migration runner: [`migrations.lua`](../../mods/deathmatch/resources/mysql/migrations.lua)
-- Modern export: `getConn`; legacy exports include raw query/result and simple select/insert/update/delete helpers.
-- No HTTP-callable export was found.
+- `migrations.lua` creates a `migrations` table and applies each resource's ordered migration entry when its index is not present. The helper does not yet provide a documented transaction/rollback or concurrent-run strategy; inspect callers and DB engine/schema before relying on atomicity.
+- `lazyquery.lua` appends free-form messages to `/maxime.log`. This is a single local file rather than structured, categorized logs, and needs retention/size/error policy before production use.
+- The database wrappers log errors and may keep query strings for diagnostics. Before enabling SQL logging, assess whether statements can contain passwords, personal data, tokens, or other secrets.
 
-## Known risks and next work
+## Daily maintenance script: urgent operator boundary
 
-- [Issue #121](https://github.com/itschase/OwlMTA-2026/issues/121) covers configuration preflight, native-module documentation, per-connection readiness, legacy export reconciliation, and verified migration reporting.
-- [Issue #6](https://github.com/itschase/OwlMTA-2026/issues/6) owns schema/table migration, engine/collation work, and transaction boundaries.
-- Several forum-related exports and legacy configuration getters appear incomplete. `s_server_global_maintenance.lua` contains automatic password/shutdown behavior but is not loaded by the manifest.
+`s_server_global_maintenance.lua` starts a one-minute timer. At a fixed local server hour it broadcasts warnings, later kicks every player, and modifies the server password. On resource startup it also clears an existing password. The source contains a committed literal password; it is not repeated in this public dossier. Treat it as exposed. Issue #461 tracks removing the static credential and password mutation, making maintenance explicitly operator-configured, and validating its safe lifecycle.
 
-Disposable verification must cover blank/malformed settings, unavailable server, missing legacy module, both schema connections, reconnect, migration failure/recovery, diagnostics, and secret-safe logs before gameplay resources start.
+The maintenance code is loaded in this database resource, so database startup also changes access control. Separate backup orchestration and server admission policy from the query layer during redesign.
+
+## Discord/API and operator design
+
+Database credentials must remain server-side and must never be returned by an API, Discord bot, client event, or debug log. A future standalone API may request narrow operations using server-derived identity and capability grants, but it should not receive the raw database password or turn this resource into a general SQL proxy. Discord roles can gate named staff actions at the host authorization boundary; local business rules, character ownership, and row-level validation remain in each gameplay resource.
+
+## Follow-up
+
+1. Remove password getters and rotate the committed literal wherever it could have been deployed; resolve #460–#461.
+2. Enumerate every exported function caller and classify the newer `db*` API versus legacy module path.
+3. Review `meta.xml` export HTTP flags and current MTA defaults against the target release; do not infer HTTP exposure from omitted attributes.
+4. Inspect migration callers, migration indices, transactions, table engines, and startup ordering before changing schema behavior.
+5. Review SQL debug/error output for sensitive values and define rotation/retention settings for query logs.
+6. Build an isolated database fixture and run connection-loss, migration replay, query failure, and maintenance timer checks only after safe-start preparation.
+
+No database or runtime behavior is claimed as verified.

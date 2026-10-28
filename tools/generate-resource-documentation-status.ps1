@@ -53,6 +53,7 @@ $published = @{
     "LSFD" = @{ Dossier = "docs/resources/LSFD.md"; State = "Full manifest/incident/alarm/faction/admin workflow review; issues #456-#457; Discussion pending" }
     "model-system" = @{ Dossier = "docs/resources/model-system.md"; State = "Full client model-loader/manifest asset review; issue #458; Discussion pending" }
     "mods" = @{ Dossier = "docs/resources/mods.md"; State = "Full manifest/two client scripts/server mall script review; issue #459; Discussion pending" }
+    "mysql" = @{ Dossier = "docs/resources/mysql.md"; State = "Partial manifest/connection/export/migration/maintenance security review; issues #460-#461; Discussion pending" }
     "factions" = @{ Number = 101; Dossier = "docs/resources/factions.md"; State = "Full manifest-script source review; individual Discussion published" }
     "item-system" = @{ Number = 102; Dossier = "docs/resources/item-system.md"; State = "Full manifest-script source review; individual Discussion published" }
     "vehicle" = @{ Number = 107; Dossier = "docs/resources/vehicle.md" }
