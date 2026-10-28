@@ -27,6 +27,7 @@ These actions must migrate individually to named capabilities. Supporter/donor s
 
 ## Known risks and work
 
+- [#67](https://github.com/itschase/OwlMTA-2026/issues/67): remaining event-boundary work includes generic cargo's client-supplied price. A current source re-review found the scoped monitor, recon, location-manager, NPC 911, and punishment-expiration handlers retain their reviewed actor/permission/source checks; runtime verification is still pending.
 - [#164](https://github.com/itschase/OwlMTA-2026/issues/164): bind remotely triggered privileged mutations to authenticated `client`.
 - [#165](https://github.com/itschase/OwlMTA-2026/issues/165): authorize and make history removal consistent and auditable.
 - [#166](https://github.com/itschase/OwlMTA-2026/issues/166): minimize and capability-scope sensitive administrative data.

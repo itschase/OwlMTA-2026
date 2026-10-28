@@ -1,6 +1,12 @@
 # Next work record
 
-Last updated: 2026-10-27 after publishing the `san` Discussion.
+Last updated: 2026-10-28 after the GameMaster authority correction and account/admin lifecycle re-review.
+
+## Latest continuation — account identity and staff authority
+
+Published commit [`6e17038`](https://github.com/itschase/OwlMTA-2026/commit/6e17038), which changes server `global:getGameMasters()` to require a logged-in player with positive `account:gmlevel`; donor tier alone no longer enters GameMaster lists or report routing. Follow-up documentation commits [`1e82d87`](https://github.com/itschase/OwlMTA-2026/commit/1e82d87) and [`7bd0fd6`](https://github.com/itschase/OwlMTA-2026/commit/7bd0fd6) update the Discord authorization, gamemode, staff guide, and current knowledge notes. Issue [#14](https://github.com/itschase/OwlMTA-2026/issues/14) remains open because no durable account grant, active GM assignment flow, or declared GameMaster export implementations were found. A source-specific login trace was added to [#68](https://github.com/itschase/OwlMTA-2026/issues/68): current login still uses local credentials, attaches legacy ranks, and registration writes Core/MTA schemas separately before calling the absent local activation-mail endpoint. Existing Issues #2, #13, #43, #96, and #158 retain identity, activation, partial provisioning, session revocation, and whitelist-order boundaries.
+
+A bounded admin-system re-review was recorded on [#67](https://github.com/itschase/OwlMTA-2026/issues/67): the sampled monitor, recon, location-manager, NPC 911, and punishment-expiration handlers retain their source-level caller/permission checks; generic cargo still accepts a client-supplied price and lacks an identified server-owned price source. The API review chat is auditing account registration/login/logout/session lifecycle against existing issues; it has not returned yet. No MTA server or tests were run.
 
 ## Latest continuation — attachment, legacy forum, and GUI development tools
 
