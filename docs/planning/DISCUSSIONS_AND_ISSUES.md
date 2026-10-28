@@ -366,6 +366,8 @@ Issues #52 (MDC) and #55 (phone) were updated with the additional read, mutation
 - [Issue #448: Bind attachment and detach events to valid local elements](https://github.com/itschase/OwlMTA-2026/issues/448)
 - [Issue #449: Filter heligrab hangers by helicopter and stored line position](https://github.com/itschase/OwlMTA-2026/issues/449)
 - [Issue #450: Restrict GUI editor remote file reads to generated output files](https://github.com/itschase/OwlMTA-2026/issues/450)
+- [Issue #451: Initialize empty or malformed hardware survey JSON safely](https://github.com/itschase/OwlMTA-2026/issues/451)
+- [Issue #452: Validate and bound remotely submitted hardware survey samples](https://github.com/itschase/OwlMTA-2026/issues/452)
 
 The same-name archived copies have separate source identities. Their archive dossiers and separate `(archived)` Script Resource Discussions are indexed from [`docs/resources/README.md`](../resources/README.md). Archive reviews remain partial comparisons, not evidence of current availability or runtime behavior.
 - [Player Guide Q&A #389: How do I use and recharge a flashlight?](https://github.com/itschase/OwlMTA-2026/discussions/389)

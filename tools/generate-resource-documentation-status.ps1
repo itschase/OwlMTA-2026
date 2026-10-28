@@ -48,6 +48,7 @@ $published = @{
     "heligrab" = @{ Dossier = "docs/resources/heligrab.md"; State = "Full manifest/player interaction/server export/event-flow review; source issue #449; Discussion pending" }
     "forums" = @{ Dossier = "docs/resources/forums.md"; State = "Full manifest/script/caller review; legacy bridge tracked by issue #122; Discussion pending" }
     "guied" = @{ Dossier = "docs/resources/guied.md"; State = "Partial developer-tool manifest, startup, ACL, remote-file, and client workflow review; issue #450; Discussion pending" }
+    "hardwaresurvey" = @{ Dossier = "docs/resources/hardwaresurvey.md"; State = "Full manifest/client/server/JSON persistence and staff-read review; issues #451-#452; Discussion pending" }
     "factions" = @{ Number = 101; Dossier = "docs/resources/factions.md"; State = "Full manifest-script source review; individual Discussion published" }
     "item-system" = @{ Number = 102; Dossier = "docs/resources/item-system.md"; State = "Full manifest-script source review; individual Discussion published" }
     "vehicle" = @{ Number = 107; Dossier = "docs/resources/vehicle.md" }

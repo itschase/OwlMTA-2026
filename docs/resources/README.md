@@ -72,6 +72,7 @@ Every dossier distinguishes source evidence from runtime verification. Presence 
 | Helicopter passenger grabbing and hanging | [`heligrab`](heligrab.md) ([Issue #449](https://github.com/itschase/OwlMTA-2026/issues/449)) | Full manifest/player/export/event-flow review; runtime unverified |
 | Legacy GameMaster School form, retired theft posts, and alcohol overrides | [`forums`](forums.md) ([Issue #122](https://github.com/itschase/OwlMTA-2026/issues/122)) | Full manifest/script/caller review; forum retirement tracked; runtime unverified |
 | In-game GUI design and Lua code generation tool | [`guied`](guied.md) ([Issue #450](https://github.com/itschase/OwlMTA-2026/issues/450)) | Partial developer-tool/ACL/event review; runtime unverified |
+| Aggregate client display-resolution survey | [`hardwaresurvey`](hardwaresurvey.md) ([Issues #451](https://github.com/itschase/OwlMTA-2026/issues/451) and [#452](https://github.com/itschase/OwlMTA-2026/issues/452)) | Full manifest/event/persistence review; runtime unverified |
 
 ## Archived resource variants
 
