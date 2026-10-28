@@ -1,6 +1,6 @@
 # `runcode` resource
 
-**Review state:** Manifest, command/UI path, server remote handlers, export surface, and checked-in ACL references reviewed. Source hardening is present in the working tree; it is not committed or runtime-verified.
+**Review state:** Manifest, command/UI path, server remote handlers, export surface, and checked-in ACL references reviewed. Source hardening is committed in `46b79d7`; runtime behavior remains unverified.
 
 **Discussion:** [Script Resource: runcode #531](https://github.com/itschase/OwlMTA-2026/discussions/531).
 
@@ -12,7 +12,7 @@ This developer utility opens a GUI with `/runcode` for players accepted by `inte
 
 The server command and both remotely triggerable events now derive the actor from MTA's server-side `client` and check the existing Lead Scripter permission at the action boundary. The code-run event ignores its client-selected event `source`, rejects missing/non-player actors, and accepts only non-empty string payloads up to 16 KiB. The client-log event ignores its claimed actor and accepts only a bounded `client`-side report.
 
-Audit output records the actor name, outcome, execution side, and payload byte count. It does not copy submitted Lua into server logs. Unauthorized-attempt logs are rate-limited per player and cleared on quit. The `runString` exports were removed because repository-wide search found no in-tree callers; external resources are not known, so any downstream dependency would need explicit review before restoring a narrower API.
+Audit output records the actor name, outcome, execution side, and payload byte count. It does not copy submitted Lua into server logs. Client-side execution is labeled as a client report, not independently verified execution. Unauthorized-attempt logs are rate-limited per player and cleared on quit. The `runString` exports were removed because repository-wide search found no in-tree callers; external resources are not known, so any downstream dependency would need explicit review before restoring a narrower API.
 
 The executable code remains intentionally powerful for a Lead Scripter. The permission check relies on Owl's current local scripter-level policy; Discord authorization is not implemented here and must not replace independent local action/target checks.
 

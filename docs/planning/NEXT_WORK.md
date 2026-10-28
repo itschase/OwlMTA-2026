@@ -4,7 +4,7 @@ Last updated: 2026-10-28 after adding server-side authentication input bounds an
 
 ## Latest continuation — privileged developer execution boundary
 
-The `[dev]/runcode` server event now authenticates the remote actor with MTA's `client`, rechecks the existing Lead Scripter permission for execution and log events, ignores caller-supplied actor/source values, rejects empty/non-string/over-16-KiB payloads, and records outcome/side/size without logging submitted code. Unauthorized-attempt logs are rate-limited per player. Removed the `runString` client/server exports after repository-wide search found no in-tree callers; external dependencies remain unknown. The resource is not startup-listed. These are source changes only: no MTA server or automated tests were run. Issue #443 remains open for commit and disposable runtime/ACL verification.
+Commit [`46b79d7`](https://github.com/itschase/OwlMTA-2026/commit/46b79d7) hardens `[dev]/runcode`: remote execution/log events authenticate MTA's `client`, recheck existing Lead Scripter permission, ignore caller-supplied actor/source, reject empty/non-string/over-16-KiB payloads, and record outcome/side/size without logging submitted code. Unauthorized-attempt logs are rate-limited per player. Removed the `runString` client/server exports after repository-wide search found no in-tree callers; external dependencies remain unknown. The resource is not startup-listed. No MTA server or automated tests were run. Issue #443 remains open for disposable runtime/ACL verification.
 
 ## Latest continuation — authentication boundary guards
 
