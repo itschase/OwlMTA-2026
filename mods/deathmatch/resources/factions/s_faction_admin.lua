@@ -446,11 +446,18 @@ function getAllowList(factionID)
 	return {}
 end
 
+local function canEditDutyAllow(thePlayer)
+	return isElement(thePlayer) and getElementType(thePlayer) == "player"
+		and (exports.integration:isPlayerLeadAdmin(thePlayer)
+			or exports.integration:isPlayerScripter(thePlayer)
+			or exports.integration:isPlayerFMTLeader(thePlayer))
+end
+
 function adminDuty(thePlayer)
-	if (exports.integration:isPlayerLeadAdmin(thePlayer) or exports.integration:isPlayerScripter(thePlayer) or exports.integration:isPlayerFMTLeader(thePlayer)) then
+	if canEditDutyAllow(thePlayer) then
 		if not getElementData(resourceRoot, "dutyadmin") and type(dutyAllow) == "table" then
 			triggerClientEvent(thePlayer, "adminDutyAllow", resourceRoot, dutyAllow, dutyAllowChanges)
-			setElementData( resourceRoot, "dutyadmin", true )
+			setElementData(resourceRoot, "dutyadmin", thePlayer, false)
 		elseif type(dutyAllow) ~= "table" then
 			outputChatBox("There was a issue with the startup caching of this resource. Contact a Scripter.", thePlayer, 255, 0, 0)
 		else
@@ -476,15 +483,312 @@ function saveChanges()
 end
 addEventHandler("onResourceStop", resourceRoot, saveChanges)
 
+local blockedDutyWeapons = {
+	[-8] = true,
+	[-35] = true,
+	[-36] = true,
+	[-37] = true,
+	[-38] = true,
+	[-39] = true,
+	[-40] = true,
+}
+
+local function getOrderedNumericValues(data)
+	if type(data) ~= "table" then
+		return false
+	end
+
+	local keys = {}
+	for key in pairs(data) do
+		if type(key) ~= "number" or key < 1 or key % 1 ~= 0 then
+			return false
+		end
+		table.insert(keys, key)
+	end
+	table.sort(keys)
+
+	local values = {}
+	for _, key in ipairs(keys) do
+		table.insert(values, data[key])
+	end
+	return values
+end
+
+local function getDutyInteger(value, allowNegative)
+	local number = tonumber(value)
+	if not number or number % 1 ~= 0 or number > 2147483647 then
+		return false
+	end
+	if allowNegative then
+		return number >= -2147483648 and number ~= 0 and number or false
+	end
+	return number > 0 and number or false
+end
+
+local function normalizeDutyItem(itemID, itemValue)
+	itemID = getDutyInteger(itemID, true)
+	if not itemID or (type(itemValue) ~= "string" and type(itemValue) ~= "number") then
+		return false
+	end
+
+	itemValue = tostring(itemValue)
+	if #itemValue > 45 then
+		return false
+	end
+
+	if itemID > 0 then
+		if itemID == 16 or not exports["item-system"]:isItem(itemID) then
+			return false
+		end
+	elseif itemID ~= -100 then
+		if blockedDutyWeapons[itemID] or not getWeaponNameFromID(-itemID) then
+			return false
+		end
+	end
+
+	if itemID < 0 and not tonumber(itemValue) then
+		return false
+	end
+	return itemID, itemValue
+end
+
+local function normalizeDutyAllowPayload(newTable, changesTable)
+	if type(newTable) ~= "table" then
+		return false, false, "allow list is not a table"
+	end
+
+	local normalizedAllow = {}
+	local submittedRows = {}
+	local currentRows = {}
+	for currentFactionID, currentFaction in pairs(dutyAllow) do
+		for _, row in pairs(currentFaction[3] or {}) do
+			local rowID = getDutyInteger(row[1], false)
+			if rowID then
+				currentRows[rowID] = {
+					factionID = tonumber(currentFactionID),
+					itemID = tonumber(row[2]),
+					itemValue = tostring(row[3]),
+				}
+			end
+		end
+	end
+
+	for factionKey, factionData in pairs(newTable) do
+		local factionID = getDutyInteger(factionKey, false)
+		local currentFaction = factionID and dutyAllow[factionID]
+		local factionValues = getOrderedNumericValues(factionData)
+		if not currentFaction or not factionValues or #factionValues ~= 3
+				or tonumber(factionValues[1]) ~= factionID or factionValues[2] ~= currentFaction[2] then
+			return false, false, "invalid faction entry"
+		end
+
+		local itemRows = getOrderedNumericValues(factionValues[3])
+		if not itemRows then
+			return false, false, "invalid faction item list"
+		end
+
+		local normalizedRows = {}
+		for _, row in ipairs(itemRows) do
+			local rowValues = getOrderedNumericValues(row)
+			local rowID = rowValues and getDutyInteger(rowValues[1], false)
+			local itemID, itemValue
+			if rowValues then
+				local currentRow = rowID and currentRows[rowID]
+				if currentRow then
+					itemID = getDutyInteger(rowValues[2], true)
+					itemValue = (type(rowValues[3]) == "string" or type(rowValues[3]) == "number") and tostring(rowValues[3]) or false
+					if currentRow.factionID ~= factionID or currentRow.itemID ~= itemID or currentRow.itemValue ~= itemValue then
+						return false, false, "modified existing duty item row"
+					end
+				else
+					itemID, itemValue = normalizeDutyItem(rowValues[2], rowValues[3])
+				end
+			end
+			if not rowValues or #rowValues ~= 3 or not rowID or not itemID or submittedRows[rowID] then
+				return false, false, "invalid or duplicate duty item row"
+			end
+			submittedRows[rowID] = {
+				factionID = factionID,
+				itemID = itemID,
+				itemValue = itemValue,
+			}
+			table.insert(normalizedRows, { rowID, itemID, itemValue })
+		end
+		normalizedAllow[factionID] = { factionID, currentFaction[2], normalizedRows }
+	end
+
+	for factionID in pairs(dutyAllow) do
+		if not normalizedAllow[factionID] then
+			return false, false, "missing faction entry"
+		end
+	end
+
+	local changeRows = getOrderedNumericValues(changesTable)
+	if not changeRows then
+		return false, false, "change list is not a numeric table"
+	end
+
+	local function normalizeChange(change, validateInsertedItem)
+		local values = getOrderedNumericValues(change)
+		local factionID = values and getDutyInteger(values[1], false)
+		local action = values and tonumber(values[2])
+		local rowID = values and getDutyInteger(values[3], false)
+		if not values or not factionID or not rowID then
+			return false
+		end
+		if action == 0 and #values == 3 then
+			return { factionID, 0, rowID }
+		elseif action == 1 and #values == 5 then
+			local itemID, itemValue
+			if validateInsertedItem then
+				itemID, itemValue = normalizeDutyItem(values[4], values[5])
+			else
+				itemID = getDutyInteger(values[4], true)
+				itemValue = (type(values[5]) == "string" or type(values[5]) == "number") and tostring(values[5]) or false
+			end
+			if not itemID or not itemValue or #itemValue > 45 then
+				return false
+			end
+			return { factionID, 1, rowID, itemID, itemValue }
+		end
+		return false
+	end
+
+	local function changesMatch(left, right)
+		if not left or not right or #left ~= #right then
+			return false
+		end
+		for index = 1, #left do
+			if left[index] ~= right[index] then
+				return false
+			end
+		end
+		return true
+	end
+
+	local currentChangeRows = getOrderedNumericValues(dutyAllowChanges)
+	if not currentChangeRows or #changeRows < #currentChangeRows then
+		return false, false, "missing pending duty changes"
+	end
+
+	local normalizedChanges = {}
+	local reservedRowIDs = {}
+	for index, currentChange in ipairs(currentChangeRows) do
+		local trustedChange = normalizeChange(currentChange, false)
+		local submittedChange = normalizeChange(changeRows[index], false)
+		if not changesMatch(trustedChange, submittedChange) then
+			return false, false, "modified pending duty changes"
+		end
+		reservedRowIDs[trustedChange[3]] = true
+		table.insert(normalizedChanges, trustedChange)
+	end
+
+	local workingRows = {}
+	for rowID, row in pairs(currentRows) do
+		workingRows[rowID] = {
+			factionID = row.factionID,
+			itemID = row.itemID,
+			itemValue = row.itemValue,
+		}
+	end
+
+	local deltaChanges = {}
+	local touchedRows = {}
+	for index = #currentChangeRows + 1, #changeRows do
+		local change = normalizeChange(changeRows[index], true)
+		local factionID = change and change[1]
+		local action = change and change[2]
+		local rowID = change and change[3]
+		if not change or not normalizedAllow[factionID] then
+			return false, false, "invalid new change entry"
+		end
+
+		if action == 0 then
+			local workingRow = workingRows[rowID]
+			local touched = touchedRows[rowID]
+			if not workingRow or workingRow.factionID ~= factionID then
+				return false, false, "delete does not match an active duty item"
+			elseif touched then
+				if touched.action ~= 1 or touched.factionID ~= factionID then
+					return false, false, "duplicate or contradictory duty item change"
+				end
+				deltaChanges[touched.index] = false
+				touchedRows[rowID] = { action = false, factionID = factionID }
+			else
+				table.insert(deltaChanges, change)
+				touchedRows[rowID] = { action = 0, factionID = factionID }
+			end
+			workingRows[rowID] = nil
+		else
+			if workingRows[rowID] or currentRows[rowID] or reservedRowIDs[rowID] or touchedRows[rowID] then
+				return false, false, "insert reuses an existing or changed duty item ID"
+			end
+			table.insert(deltaChanges, change)
+			touchedRows[rowID] = { action = 1, factionID = factionID, index = #deltaChanges }
+			workingRows[rowID] = {
+				factionID = factionID,
+				itemID = change[4],
+				itemValue = change[5],
+			}
+		end
+	end
+
+	for rowID, workingRow in pairs(workingRows) do
+		local submittedRow = submittedRows[rowID]
+		if not submittedRow or submittedRow.factionID ~= workingRow.factionID
+				or submittedRow.itemID ~= workingRow.itemID or submittedRow.itemValue ~= workingRow.itemValue then
+			return false, false, "change list does not produce submitted duty items"
+		end
+	end
+	for rowID in pairs(submittedRows) do
+		if not workingRows[rowID] then
+			return false, false, "submitted duty item has no matching insert"
+		end
+	end
+
+	for _, change in ipairs(deltaChanges) do
+		if change then
+			table.insert(normalizedChanges, change)
+		end
+	end
+
+	return normalizedAllow, normalizedChanges
+end
+
 function updateTable(newTable, changesTable)
-	dutyAllow = newTable
-	dutyAllowChanges = changesTable
+	if not client or getElementData(resourceRoot, "dutyadmin") ~= client then
+		return false
+	end
+	if not canEditDutyAllow(client) then
+		removeElementData(resourceRoot, "dutyadmin")
+		return false
+	end
+
+	local normalizedAllow, normalizedChanges, validationError = normalizeDutyAllowPayload(newTable, changesTable)
+	if not normalizedAllow then
+		removeElementData(resourceRoot, "dutyadmin")
+		outputDebugString("[Factions] Rejected malformed dutyAdmin:Save payload from " .. getPlayerName(client) .. ": " .. validationError .. ".", 2)
+		outputChatBox("Duty permissions were not saved because the submitted data was invalid. Please reopen /dutyadmin.", client, 255, 0, 0)
+		return false
+	end
+
+	dutyAllow = normalizedAllow
+	dutyAllowChanges = normalizedChanges
 	removeElementData(resourceRoot, "dutyadmin")
 	setElementData(resourceRoot, "dutyAllowTable", dutyAllow)
 	exports.logs:dbLog(client, 4, client, "Has saved /dutyadmin")
+	return true
 end
 addEvent("dutyAdmin:Save", true)
 addEventHandler("dutyAdmin:Save", resourceRoot, updateTable)
+
+addEventHandler("onPlayerQuit", root,
+	function()
+		if getElementData(resourceRoot, "dutyadmin") == source then
+			removeElementData(resourceRoot, "dutyadmin")
+		end
+	end
+)
 
 -- Cleanup/convert functions, pretty much a 1 use only as they are now deprecated.
 
