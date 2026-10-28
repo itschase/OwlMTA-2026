@@ -267,14 +267,8 @@ end
 function getPlayerFactionRank(thePlayer, factionID)
 	if (not thePlayer or not isElement(thePlayer) or getElementType(thePlayer) ~= "player") then return false end
 	local faction = getElementData(thePlayer, "faction")
-	for i,v in pairs(faction) do
-		if i == factionID then
-			rankID = tonumber(v.rank)
-			return rankID
-		else
-			return false	
-		end	
-	end	
+	local member = type(faction) == "table" and faction[tonumber(factionID)]
+	return type(member) == "table" and tonumber(member.rank) or false
 end
 
 --------------------

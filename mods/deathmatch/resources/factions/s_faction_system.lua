@@ -55,6 +55,11 @@ local function getFactionMemberCharacterID(playerName, factionID)
 	return #rows > 0 and characterID or false
 end
 
+local function isValidFactionText(value)
+	-- factions.motd/note/fnote are SQL TEXT columns (maximum 65,535 bytes).
+	return type(value) == "string" and #value <= 65535
+end
+
 function loadOneFaction(row)
 	local id = tonumber(row.id)
 	local theTeam = exports.pool:getElement('team', id)
@@ -603,60 +608,63 @@ addEvent("cguiRespawnOneVehicle", true)
 addEventHandler("cguiRespawnOneVehicle", getRootElement(), callbackRespawnOneVehicle)
 
 function callbackUpdateMOTD(motd, factionID)
-	local theTeam = getFactionFromID(factionID)
-	if not hasMemberPermissionTo(client, factionID, "edit_motd") then
+	local allowed, factionID = authorizeFactionAction(client, factionID, "edit_motd", "update faction MOTD")
+	if not allowed or not isValidFactionText(motd) then
 		outputChatBox("Not allowed, sorry.", client)
-		return
+		return false
 	end
+	local theTeam = getFactionFromID(factionID)
 
-	if (factionID ~= -1) then
-		if dbExec(mysql:getConn("mta"), "UPDATE factions SET motd=? WHERE id=?", motd, factionID) then
-			outputChatBox("You changed your faction's MOTD to '" .. motd .. "'", client, 0, 255, 0)
-			exports.anticheat:changeProtectedElementDataEx(theTeam, "motd", motd, false)
-		else
-			outputChatBox("Error 300000 - Report on Forums.", client, 255, 0, 0)
-		end
+	if dbExec(mysql:getConn("mta"), "UPDATE factions SET motd=? WHERE id=?", motd, factionID) then
+		outputChatBox("You changed your faction's MOTD.", client, 0, 255, 0)
+		exports.anticheat:changeProtectedElementDataEx(theTeam, "motd", motd, false)
+		exports.logs:dbLog(client, 35, "fa" .. tostring(factionID), "Updated faction MOTD")
+		return true
 	end
+	outputChatBox("Error 300000 - Report on Forums.", client, 255, 0, 0)
+	return false
 end
 
 addEvent("cguiUpdateMOTD", true)
 addEventHandler("cguiUpdateMOTD", getRootElement(), callbackUpdateMOTD)
 
 function callbackUpdateNote(note, factionID)
-	local theTeam = getFactionFromID(factionID)
-	if not hasMemberPermissionTo(client, factionID, "modify_factionl_note") or not note then
+	local allowed, factionID = authorizeFactionAction(client, factionID, "modify_factionl_note", "update faction leader note")
+	if not allowed or not isValidFactionText(note) then
 		outputChatBox("Not allowed, sorry.", client)
-		return
+		return false
 	end
+	local theTeam = getFactionFromID(factionID)
 
-	if (factionID ~= -1) then
-		if dbExec(mysql:getConn("mta"), "UPDATE factions SET note=? WHERE id=?", note, factionID) then
-			outputChatBox("You successfully changed your faction's leader note.", client, 0, 255, 0)
-			exports.anticheat:changeProtectedElementDataEx(theTeam, "note", note, false)
-		else
-			outputChatBox("Error 30000A - Report on mantis.", client, 255, 0, 0)
-		end
+	if dbExec(mysql:getConn("mta"), "UPDATE factions SET note=? WHERE id=?", note, factionID) then
+		outputChatBox("You successfully changed your faction's leader note.", client, 0, 255, 0)
+		exports.anticheat:changeProtectedElementDataEx(theTeam, "note", note, false)
+		exports.logs:dbLog(client, 35, "fa" .. tostring(factionID), "Updated faction leader note")
+		return true
 	end
+	outputChatBox("Error 30000A - Report on mantis.", client, 255, 0, 0)
+	return false
 end
 
 addEvent("faction:note", true)
 addEventHandler("faction:note", getRootElement(), callbackUpdateNote)
 
 function callbackUpdateFNote(fnote, factionID)
-	local theTeam = getFactionFromID(factionID)
-	if not hasMemberPermissionTo(client, factionID, "modify_faction_note") or not fnote then
+	local allowed, factionID = authorizeFactionAction(client, factionID, "modify_faction_note", "update faction-wide note")
+	if not allowed or not isValidFactionText(fnote) then
 		outputChatBox("Not allowed, sorry.", client)
-		return
+		return false
 	end
+	local theTeam = getFactionFromID(factionID)
 
-	if (factionID ~= -1) then
-		if dbExec(mysql:getConn("mta"), "UPDATE factions SET fnote=? WHERE id=?", fnote, factionID) then
-			outputChatBox("You successfully changed your faction's faction-wide note.", client, 0, 255, 0)
-			exports.anticheat:changeProtectedElementDataEx(theTeam, "fnote", fnote, false)
-		else
-			outputChatBox("Error 30000B - Report on mantis.", client, 255, 0, 0)
-		end
+	if dbExec(mysql:getConn("mta"), "UPDATE factions SET fnote=? WHERE id=?", fnote, factionID) then
+		outputChatBox("You successfully changed your faction's faction-wide note.", client, 0, 255, 0)
+		exports.anticheat:changeProtectedElementDataEx(theTeam, "fnote", fnote, false)
+		exports.logs:dbLog(client, 35, "fa" .. tostring(factionID), "Updated faction-wide note")
+		return true
 	end
+	outputChatBox("Error 30000B - Report on mantis.", client, 255, 0, 0)
+	return false
 end
 
 addEvent("faction:fnote", true)
@@ -885,10 +893,11 @@ end
 addEvent("factionmenu:hide", true)
 addEventHandler("factionmenu:hide", getRootElement(), hideFactionMenu)
 
-function getFactionFinance(factionID)
-	if not factionID then return end
+local factionVehiclePrices = {}
 
-	if hasMemberPermissionTo(client, factionID, "manage_finance") then
+function getFactionFinance(factionID)
+	local allowed, factionID = authorizeFactionAction(client, factionID, "manage_finance", "view faction finances")
+	if allowed then
 		local bankThisWeek = {}
 		local bankPrevWeek = {}
 		local transactions = {}
@@ -904,7 +913,7 @@ function getFactionFinance(factionID)
 		local currentWeek = 0
 		if query then
 			while true do
-				row = mysql:fetch_assoc(query)
+				local row = mysql:fetch_assoc(query)
 				if not row then break end
 
 				local id = tonumber(row["id"])
@@ -924,7 +933,7 @@ function getFactionFinance(factionID)
 				if row["characterfrom"] ~= mysql_null() then
 					from = row["characterfrom"]:gsub("_", " ")
 				elseif tonumber(row["from"]) then
-					num = tonumber(row["from"])
+					local num = tonumber(row["from"])
 					if num < 0 then
 						from = exports.cache:getFactionNameFromId(-num) or "-"
 					elseif num == 0 and (type == 6 or type == 7) then
@@ -973,10 +982,9 @@ function getFactionFinance(factionID)
 			end
 
 			local vehiclesvalue = 0
-			if not vehPrice then vehPrice = {} end
 			for k, v in ipairs(vehicles) do
-				if vehPrice[v] then
-					local price = tonumber(vehPrice[v]) or 0
+				if factionVehiclePrices[v] then
+					local price = tonumber(factionVehiclePrices[v]) or 0
 					vehiclesvalue = vehiclesvalue + price
 				else
 					local result2 = mysql:query("SELECT vehprice FROM vehicles_shop WHERE id='" .. mysql:escape_string(tostring(v)) .. "'")
@@ -985,7 +993,7 @@ function getFactionFinance(factionID)
 							local row = mysql:fetch_assoc(result2)
 							if not row then break end
 							local price = tonumber(row["vehprice"]) or 0
-							vehPrice[v] = price
+							factionVehiclePrices[v] = price
 							vehiclesvalue = vehiclesvalue + price
 						end
 						mysql:free_result(result2)
@@ -993,7 +1001,7 @@ function getFactionFinance(factionID)
 				end
 			end
 
-			propertyValue = 0
+			local propertyValue = 0
 			local result = mysql:query("SELECT cost FROM interiors WHERE faction='" .. mysql:escape_string(tostring(factionID)) .. "' AND owner=-1")
 			if result then
 				while true do
