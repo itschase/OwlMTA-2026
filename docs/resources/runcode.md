@@ -1,23 +1,25 @@
 # `runcode` resource
 
-**Review state:** Manifest, command/UI path, server remotes, exports, and ACL resource identity reviewed. Runtime behavior remains unverified.
+**Review state:** Manifest, command/UI path, server remote handlers, export surface, and checked-in ACL references reviewed. Source hardening is present in the working tree; it is not committed or runtime-verified.
 
 **Discussion:** [Script Resource: runcode #531](https://github.com/itschase/OwlMTA-2026/discussions/531).
 
 ## Purpose and operator workflow
 
-This developer utility opens a GUI with `/runcode` for players recognized by `integration:isPlayerLeadScripter`. The operator can execute Lua on the client or server and view return/error text. Client execution runs locally; server execution sends the code text to the server. Both sides call `loadstring` and `pcall`. The server logs submitted code through debug output and the server log. The resource exports `runString` on both sides for resource callers.
+This developer utility opens a GUI with `/runcode` for players accepted by `integration:isPlayerLeadScripter`. The operator can execute Lua on their own client or request server-side execution and view returned/error text. Client-side execution remains local. Server execution is arbitrary Lua and must be treated as privileged developer tooling, never as a general staff or Discord capability.
 
-## Security boundary
+## Server authorization and logging
 
-The command checks Lead Scripter status only when opening the panel. The server event `GUIRuncode:runServerCode` is remotely triggerable and executes its supplied code without validating `client`, actor identity, or Lead Scripter permission. A client can therefore bypass the GUI and request arbitrary server-side Lua execution. This source-confirmed critical boundary defect is tracked in [Issue #443](https://github.com/itschase/OwlMTA-2026/issues/443). The separate `GUIRuncode:outputLogs` remote accepts caller-supplied player, code, and execution-side fields and writes them to logs without validation, so audit attribution is also forgeable.
+The server command and both remotely triggerable events now derive the actor from MTA's server-side `client` and check the existing Lead Scripter permission at the action boundary. The code-run event ignores its client-selected event `source`, rejects missing/non-player actors, and accepts only non-empty string payloads up to 16 KiB. The client-log event ignores its claimed actor and accepts only a bounded `client`-side report.
 
-The manifest exports `runString` to other resources. These are resource-to-resource code-execution capabilities; review every future caller and MTA ACL grant before enabling. `acl.xml` contains a `resource.runcode` ACL object, but this source review did not establish an effective grant path for the live server configuration.
+Audit output records the actor name, outcome, execution side, and payload byte count. It does not copy submitted Lua into server logs. Unauthorized-attempt logs are rate-limited per player and cleared on quit. The `runString` exports were removed because repository-wide search found no in-tree callers; external resources are not known, so any downstream dependency would need explicit review before restoring a narrower API.
 
-## Dependencies and operations
+The executable code remains intentionally powerful for a Lead Scripter. The permission check relies on Owl's current local scripter-level policy; Discord authorization is not implemented here and must not replace independent local action/target checks.
 
-The only declared scripts are client and server Lua; the server command calls Owl's `integration:isPlayerLeadScripter`. No explicit dependency is declared. The file contains an `ACL = 'Admin'` variable that is unused; it must not be mistaken for an enforced ACL check. Operators should treat the resource as privileged developer tooling, keep it disabled or unavailable to ordinary gameplay identities, and audit any exports or ACL changes before startup.
+## Related configuration and dependencies
 
-## Future direction and verification
+The resource calls `integration:isPlayerLeadScripter` and declares no dependency in its manifest. The old `ACL = 'Admin'` variable was unused and has been removed. `acl.xml` contains a `resource.runcode` object, but this source review does not establish the effective grants of a deployed server configuration. The resource is not listed in the checked-in startup snapshot; keep it disabled outside controlled development until runtime ACL/startup behavior is reviewed.
 
-Do not expose arbitrary Lua execution as a Discord capability or general staff dashboard action. If retained for development, separate server/client execution, bind remote callers with MTA's server-side `client`, recheck the existing Lead Scripter policy at execution, validate and audit attribution, and keep resource export callers explicitly trusted. On a disposable server verify unauthorized direct remote invocation, authorized execution, client/server separation, log attribution, ACL grants, and resource restart behavior. No MTA server or tests were run.
+## Tracking and verification
+
+Issue [#443](https://github.com/itschase/OwlMTA-2026/issues/443) tracks the source hardening and remaining disposable-server work. Verify unauthorized direct event calls, authorized server/client execution, truthful caller attribution, bounded payload behavior, Lead Scripter revocation, and effective ACL/export availability. No MTA server was started and no automated tests were run for this change.

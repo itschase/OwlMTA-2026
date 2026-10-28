@@ -30,7 +30,7 @@ The tracked MTA config starts `mysql`, then shared providers and roughly 136 uni
 5. **Destructive first-start work.** Inactivity scanners and deletion/eviction jobs are enabled in inherited settings. Disable them until backup, data provenance, clock behavior, and synthetic test records are validated.
 6. **No dependency readiness gate.** Provider failure can coexist with consumers starting and later assuming exports or tables exist. A static preflight and provider-ready report must fail closed.
 7. **Native module/library drift.** Module movement and system-library copying have no version/ABI manifest or integrity verification.
-8. **Privileged developer code execution.** The `[dev]/runcode` manifest is not in the tracked startup snapshot, but its server execution event does not enforce the GUI's Lead Scripter check. Keep it disabled and verify its exports/ACL are unavailable before any shared test; fix [Issue #443](https://github.com/itschase/OwlMTA-2026/issues/443) before enabling it.
+8. **Privileged developer code execution.** The `[dev]/runcode` manifest is not in the tracked startup snapshot. The working-tree source now checks the server-side `client` and Lead Scripter permission for execution/log events, bounds payload size, removes unused `runString` exports, and omits submitted code from audit logs. This has not been committed or runtime-verified. Keep the resource disabled and verify the deployed startup/ACL state and the authorization matrix before any shared test; track the remaining work in [Issue #443](https://github.com/itschase/OwlMTA-2026/issues/443).
 
 ## Database bootstrap boundary
 
@@ -61,7 +61,7 @@ Runtime migrations create `mta.migrations` and accept positional migration array
 2. Build sanitized disposable databases; import Core → MTA → data and verify expected schema/charset/table counts.
 3. Inventory and redesign migration ordering/recovery; snapshot before any resource start.
 4. Provision least-privilege identities and secrets; safely render and validate XML with scanners/broadcast/HTTP/integrations off.
-5. Reconcile the startup list against active manifests, duplicates, providers, archives, and optional/development resources; explicitly verify `[dev]/runcode` remains disabled and cannot be invoked through a resource caller or ACL grant.
+5. Reconcile the startup list against active manifests, duplicates, providers, archives, and optional/development resources; explicitly verify `[dev]/runcode` remains disabled and cannot be invoked through a resource caller or ACL grant, then exercise its authorization matrix only in the disposable environment.
 6. Verify native modules, case-sensitive paths, file ownership, and writable locations.
 7. Constrain network/egress and publish only confirmed protocols.
 8. Produce a passing static preflight report with both databases reachable and no placeholders or secrets in output.

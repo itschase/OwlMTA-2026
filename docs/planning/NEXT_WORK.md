@@ -2,6 +2,10 @@
 
 Last updated: 2026-10-28 after adding server-side authentication input bounds and request budgets.
 
+## Latest continuation — privileged developer execution boundary
+
+The `[dev]/runcode` server event now authenticates the remote actor with MTA's `client`, rechecks the existing Lead Scripter permission for execution and log events, ignores caller-supplied actor/source values, rejects empty/non-string/over-16-KiB payloads, and records outcome/side/size without logging submitted code. Unauthorized-attempt logs are rate-limited per player. Removed the `runString` client/server exports after repository-wide search found no in-tree callers; external dependencies remain unknown. The resource is not startup-listed. These are source changes only: no MTA server or automated tests were run. Issue #443 remains open for commit and disposable runtime/ACL verification.
+
 ## Latest continuation — authentication boundary guards
 
 The account login path now rejects non-string/empty/oversized credential fields before querying Core or verifying bcrypt. Registration mirrors the shipped UI's username/password rules and server email validator before hashing or querying. Process-memory budgets are enforced per player and IP: 10 login attempts/player/minute and 40/IP/minute; 3 registration attempts/player/10 minutes and 10/IP/hour. Player buckets are cleared on disconnect, stale buckets are swept, and debug outcomes omit credentials, raw email, and IP. This is source-only; no MTA runtime or tests were run. Issue #529 remains open for enumeration-resistant responses, deeper outcome diagnostics, and disposable-client/load validation; the fixed windows and shared-IP effects also need runtime review.
@@ -21,7 +25,7 @@ Corrected Issues [#527](https://github.com/itschase/OwlMTA-2026/issues/527) and 
 3. **Session authority:** bind session creation, resource-restart behavior, unlink/revocation, and expiry to one account/session contract (#68/#96). Existing restart behavior and disconnect-dependent logout remain source-level gaps, not solved by the device-gate fix.
 4. **Character continuity:** resolve client-shipped account hash material, atomic character creation, staged spawn hydration, and server-derived spawn correction (#201–#204) before broad feature work.
 5. **Staff authority:** reconcile role-to-capability policy and durable GameMaster grants (#3/#14), while preserving local character, faction, duty, ownership, and action checks. Donor tiers remain separate from staff authority.
-6. **Privileged tooling:** resolve [#443](https://github.com/itschase/OwlMTA-2026/issues/443) or explicitly verify `runcode` is disabled and its exports/ACL are not available before any public test server is started.
+6. **Privileged tooling:** keep `runcode` disabled until the source hardening is committed and its direct-event, permission, logging, and effective ACL/startup behavior are verified in the disposable environment ([#443](https://github.com/itschase/OwlMTA-2026/issues/443)).
 7. **Safe-start gate:** complete the static resource/config/schema/dependency review and the disposable boot preflight in [`SAFE_START_PREFLIGHT.md`](SAFE_START_PREFLIGHT.md) before starting MTA.
 
 This ordering puts cross-cutting identity, session, character, and privileged execution guarantees ahead of lower-impact individual resource catalog entries. Issue and resource status remains source-confirmed unless a later disposable runtime record says otherwise.
