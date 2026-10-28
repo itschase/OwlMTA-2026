@@ -8,6 +8,8 @@ Published commit [`6e17038`](https://github.com/itschase/OwlMTA-2026/commit/6e17
 
 A bounded admin-system re-review was recorded on [#67](https://github.com/itschase/OwlMTA-2026/issues/67): the sampled monitor, recon, location-manager, NPC 911, and punishment-expiration handlers retain their source-level caller/permission checks; generic cargo still accepts a client-supplied price and lacks an identified server-owned price source. The API review chat is auditing account registration/login/logout/session lifecycle against existing issues; it has not returned yet. No MTA server or tests were run.
 
+The shared `integration/g_staff.lua` player-type guard was corrected at all 18 occurrences for [Issue #23](https://github.com/itschase/OwlMTA-2026/issues/23). Nil/non-element short-circuiting and explicit player-type rejection are source-visible; the MTA runtime matrix remains for later disposable-environment verification.
+
 ## Latest continuation — attachment, legacy forum, and GUI development tools
 
 Pushed `bfc3b13` with the `heligrab` dossier and Issue #449 for the exported hanger lookup, which ignores its helicopter argument and checks `data.line` instead of stored `data.line_percent`. Pushed `473e7db` with the `forums` dossier and corrected the status ledger's duplicate `heligrab` row. The forum audit separates active alcohol-level staff commands from inert/disabled legacy posting forms and links the existing bridge retirement Issue #122.

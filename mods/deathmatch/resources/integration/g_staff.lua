@@ -13,7 +13,7 @@ local internalAffairs = {
 }
 
 function isPlayerHeadAdmin(player)
-	if not player or not isElement(player) or not getElementType(player) == "player" then
+	if not player or not isElement(player) or getElementType(player) ~= "player" then
 		return false
 	end
 	local adminLevel = getElementData(player, "admin_level") or 0
@@ -21,7 +21,7 @@ function isPlayerHeadAdmin(player)
 end
 
 function isPlayerLeadAdmin(player)
-	if not player or not isElement(player) or not getElementType(player) == "player" then
+	if not player or not isElement(player) or getElementType(player) ~= "player" then
 		return false
 	end
 	local adminLevel = getElementData(player, "admin_level") or 0
@@ -29,7 +29,7 @@ function isPlayerLeadAdmin(player)
 end
 
 function isPlayerSeniorAdmin(player)
-	if not player or not isElement(player) or not getElementType(player) == "player" then
+	if not player or not isElement(player) or getElementType(player) ~= "player" then
 		return false
 	end
 	local adminLevel = getElementData(player, "admin_level") or 0
@@ -37,7 +37,7 @@ function isPlayerSeniorAdmin(player)
 end
 
 function isPlayerAdmin(player)
-	if not player or not isElement(player) or not getElementType(player) == "player" then
+	if not player or not isElement(player) or getElementType(player) ~= "player" then
 		return false
 	end
 	local adminLevel = getElementData(player, "admin_level") or 0
@@ -45,7 +45,7 @@ function isPlayerAdmin(player)
 end
 
 function isPlayerTrialAdmin(player, duty_required)
-	if not player or not isElement(player) or not getElementType(player) == "player" then
+	if not player or not isElement(player) or getElementType(player) ~= "player" then
 		return false
 	end
 	local adminLevel = getElementData(player, "admin_level") or 0
@@ -57,7 +57,7 @@ function isPlayerTrialAdmin(player, duty_required)
 end
 
 function isPlayerSupporter(player)
-	if not player or not isElement(player) or not getElementType(player) == "player" then
+	if not player or not isElement(player) or getElementType(player) ~= "player" then
 		return false
 	end
 	local supporter_level = getElementData(player, "supporter_level") or 0
@@ -65,7 +65,7 @@ function isPlayerSupporter(player)
 end
 
 function isPlayerSupportManager(player)
-	if not player or not isElement(player) or not getElementType(player) == "player" then
+	if not player or not isElement(player) or getElementType(player) ~= "player" then
 		return false
 	end
 	local supporter_level = getElementData(player, "supporter_level") or 0
@@ -73,7 +73,7 @@ function isPlayerSupportManager(player)
 end
 
 function isPlayerTester(player)
-	if not player or not isElement(player) or not getElementType(player) == "player" then
+	if not player or not isElement(player) or getElementType(player) ~= "player" then
 		return false
 	end
 	local scripter_level = getElementData(player, "scripter_level") or 0
@@ -81,7 +81,7 @@ function isPlayerTester(player)
 end
 
 function isPlayerScripter(player)
-	if not player or not isElement(player) or not getElementType(player) == "player" then
+	if not player or not isElement(player) or getElementType(player) ~= "player" then
 		return false
 	end
 	local scripter_level = getElementData(player, "scripter_level") or 0
@@ -89,7 +89,7 @@ function isPlayerScripter(player)
 end
 
 function isPlayerLeadScripter(player)
-	if not player or not isElement(player) or not getElementType(player) == "player" then
+	if not player or not isElement(player) or getElementType(player) ~= "player" then
 		return false
 	end
 	local scripter_level = getElementData(player, "scripter_level") or 0
@@ -98,7 +98,7 @@ end
 
 --LEADER
 function isPlayerVehicleConsultant(player)
-	if not player or not isElement(player) or not getElementType(player) == "player" then
+	if not player or not isElement(player) or getElementType(player) ~= "player" then
 		return false
 	end
 	if getElementData(player, "hasVctAdmin") then
@@ -110,7 +110,7 @@ end
 
 --MEMBERS
 function isPlayerVCTMember(player)
-	if not player or not isElement(player) or not getElementType(player) == "player" then
+	if not player or not isElement(player) or getElementType(player) ~= "player" then
 		return false
 	end
 	local vct_level = getElementData(player, "vct_level") or 0
@@ -119,7 +119,7 @@ end
 
 --LEADER
 function isPlayerMappingTeamLeader(player)
-	if not player or not isElement(player) or not getElementType(player) == "player" then
+	if not player or not isElement(player) or getElementType(player) ~= "player" then
 		return false
 	end
 	local mapper_level = getElementData(player, "mapper_level") or 0
@@ -128,7 +128,7 @@ end
 
 --MEMBERS
 function isPlayerMappingTeamMember(player)
-	if not player or not isElement(player) or not getElementType(player) == "player" then
+	if not player or not isElement(player) or getElementType(player) ~= "player" then
 		return false
 	end
 	local mapper_level = getElementData(player, "mapper_level") or 0
@@ -136,7 +136,7 @@ function isPlayerMappingTeamMember(player)
 end
 
 function isPlayerFMTMember(player)
-	if not player or not isElement(player) or not getElementType(player) == "player" then
+	if not player or not isElement(player) or getElementType(player) ~= "player" then
 		return false
 	end
 	local fmt_level = getElementData(player, "fmt_level") or 0
@@ -144,7 +144,7 @@ function isPlayerFMTMember(player)
 end
 
 function isPlayerFMTLeader(player)
-	if not player or not isElement(player) or not getElementType(player) == "player" then
+	if not player or not isElement(player) or getElementType(player) ~= "player" then
 		return false
 	end
 	local fmt_level = getElementData(player, "fmt_level") or 0
@@ -152,7 +152,7 @@ function isPlayerFMTLeader(player)
 end
 
 function isPlayerStaff(player)
-	if not player or not isElement(player) or not getElementType(player) == "player" then
+	if not player or not isElement(player) or getElementType(player) ~= "player" then
 		return false
 	end
 	return 	isPlayerTrialAdmin(player)
@@ -171,7 +171,7 @@ end
 function isPlayerIA( player )
 	return false
 	--[[
-	if not player or not isElement(player) or not getElementType(player) == "player" then
+	if not player or not isElement(player) or getElementType(player) ~= "player" then
 		return false
 	end
 	return internalAffairs[ tonumber( getElementData( player, "account:id" ) ) ] or false

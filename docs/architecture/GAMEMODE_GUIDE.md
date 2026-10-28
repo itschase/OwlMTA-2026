@@ -111,7 +111,7 @@ Before cutover, enumerate each call site of `isPlayerAdmin`, `isPlayerSupporter`
 Concrete findings in this snapshot:
 
 - Since commit [`6e17038`](https://github.com/itschase/OwlMTA-2026/commit/6e17038), server `getGameMasters()` requires a logged-in player and a positive `account:gmlevel`; donor status alone no longer fills its report/list callers. No durable login-time GM grant source or active GM assignment workflow was found, so the list can be empty until Issue [#14](https://github.com/itschase/OwlMTA-2026/issues/14) is completed. Some report callers still use `duty_supporter` as the separate on-duty flag.
-- `integration/g_staff.lua` repeats `not getElementType(player) == "player"`; Lua precedence makes that check ineffective. Use `getElementType(player) ~= "player"` and validate server-side callers consistently.
+- The malformed player-type guard in `integration/g_staff.lua` was corrected in the current source batch tracked by [Issue #23](https://github.com/itschase/OwlMTA-2026/issues/23): all 18 occurrences now check `isElement` before requiring `getElementType(player) == "player"`. This is source-level only; validate nil, destroyed, non-player, and connected-player inputs in a supported MTA runtime.
 - `global/meta.xml` declares GameMaster exports that were not found in active global Lua definitions, while active callers exist. Verify resource export behavior and repair/remove the mismatch.
 - `account/c_characters.lua` mirrors some rank data client-side for display; this must never decide access.
 - Remote state-changing events need sender validation against MTA's authoritative `client` variable, not a spoofable `source`, plus server-side permission and value checks.
