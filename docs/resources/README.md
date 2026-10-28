@@ -70,6 +70,7 @@ Every dossier distinguishes source evidence from runtime verification. Presence 
 | Animated textures for in-world video players | [`fakevideo`](fakevideo.md) ([Issue #447](https://github.com/itschase/OwlMTA-2026/issues/447)) | Partial streaming/catalog/caller review; runtime unverified |
 | Player and vehicle attachment through `/glue` | [`glue-system`](glue-system.md) ([Issue #448](https://github.com/itschase/OwlMTA-2026/issues/448)) | Full manifest/client/server event-flow review; runtime unverified |
 | Helicopter passenger grabbing and hanging | [`heligrab`](heligrab.md) ([Issue #449](https://github.com/itschase/OwlMTA-2026/issues/449)) | Full manifest/player/export/event-flow review; runtime unverified |
+| Legacy GameMaster School form, retired theft posts, and alcohol overrides | [`forums`](forums.md) ([Issue #122](https://github.com/itschase/OwlMTA-2026/issues/122)) | Full manifest/script/caller review; forum retirement tracked; runtime unverified |
 
 ## Archived resource variants
 
