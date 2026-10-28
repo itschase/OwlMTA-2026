@@ -6,7 +6,7 @@
 - Source review: manifest, connection bootstrap, exported legacy query helpers, lazy query writer, migration helper, and daily maintenance script reviewed as an initial API/security pass. Complete call-site and SQL/schema audit is still required.
 - Runtime: unverified. No database connection or MTA server was started.
 - Startup snapshot: enabled in `mtaserver.conf.bak`; this is not proof of live configuration.
-- GitHub record: Script Resources Discussion pending; security findings tracked by [Issue #460](https://github.com/itschase/OwlMTA-2026/issues/460) and [Issue #461](https://github.com/itschase/OwlMTA-2026/issues/461).
+- GitHub record: [Script Resources Discussion #123](https://github.com/itschase/OwlMTA-2026/discussions/123); security findings tracked by [Issue #460](https://github.com/itschase/OwlMTA-2026/issues/460) and [Issue #461](https://github.com/itschase/OwlMTA-2026/issues/461).
 
 ## Purpose in everyday terms
 
