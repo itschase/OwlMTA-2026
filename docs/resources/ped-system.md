@@ -6,7 +6,7 @@
 - Startup snapshot: enabled in `mods/deathmatch/mtaserver.conf.bak`; snapshot only, not evidence of a live server.
 - Source review: full manifest/script and workflow review; identified four implementation/security issues and one disconnected legacy event path.
 - GitHub tracking: [Issue #469](https://github.com/itschase/OwlMTA-2026/issues/469) (remote staff action authorization), [#470](https://github.com/itschase/OwlMTA-2026/issues/470) (NPC treatment caller/target validation), [#471](https://github.com/itschase/OwlMTA-2026/issues/471) (final treatment kit actor), [#472](https://github.com/itschase/OwlMTA-2026/issues/472) (fake-name gender lookup), [#473](https://github.com/itschase/OwlMTA-2026/issues/473) (unhandled NPC-menu events), and [#474](https://github.com/itschase/OwlMTA-2026/issues/474) (public-transport provider contract). All are assigned to [Milestone #7: Resource Audit and Security Baseline](https://github.com/itschase/OwlMTA-2026/milestone/7).
-- Discussion: pending; publish as `Script Resource: ped-system` in `Script Resources`.
+- Discussion: [Script Resource: ped-system #475](https://github.com/itschase/OwlMTA-2026/discussions/475).
 - Runtime: unverified. No MTA server/client was started.
 
 ## What it does in everyday terms
