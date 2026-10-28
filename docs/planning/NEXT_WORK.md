@@ -1,6 +1,6 @@
 # Next work record
 
-Last updated: 2026-10-27 after the `model-system` audit.
+Last updated: 2026-10-28 after the `object-browser` audit.
 
 ## Latest continuation — attachment, legacy forum, and GUI development tools
 
@@ -22,7 +22,11 @@ The `mods` resource has now been reviewed and documented in `docs/resources/mods
 
 The first `mysql` API/security pass is documented in `docs/resources/mysql.md` and linked to existing Script Resources Discussion #123. Issues #460–#463 track direct export of connection credentials, the daily-maintenance script's committed password/server-password mutation, declared-but-missing forum exports still used by RP news, and shifting numeric query handles; all four are assigned to Milestone #7. Treat the literal as exposed and do not use it. Full query-caller/schema review remains outstanding; runtime and database behavior are unverified.
 
-Next: continue the `mysql` exported API and caller/SQL review before moving into its high-impact dependents. Deeper `guied` event/client audit and the remaining `item-texture` client shader lifecycle review are also queued. Search Issues before adding findings, give every dossier an explicit review state, distinguish runtime-verifiable claims from source facts, and update the index, generator, CSV, and issue tracker together. Keep the MTA server stopped until the static safe-start gates are complete.
+The API/Discord architecture consolidation landed in `25f9407`; it separates standalone service duties from Owl's local provisioning and gameplay policy, assigns existing issues instead of duplicating them, and keeps the `/v1` versus proposed `/api/v1` mismatch explicit. The review remains design evidence, not a deployed integration.
+
+The optional `object-browser` is now documented in `docs/resources/object-browser.md`: a client-only catalog of 7,525 objects across nine groups, manually started and not referenced by other resources. Issue #464 tracks camera/cursor cleanup for resource stop and is assigned to Milestone #7. Runtime remains unverified.
+
+Next active cataloged resource: `OwlGamingLogs`. Then continue the `mysql` exported API and caller/SQL review before moving into its high-impact dependents. Deeper `guied` event/client audit and the remaining `item-texture` client shader lifecycle review are also queued. Search Issues before adding findings, give every dossier an explicit review state, distinguish runtime-verifiable claims from source facts, and update the index, generator, CSV, and issue tracker together. Keep the MTA server stopped until the static safe-start gates are complete.
 
 ## Latest continuation — staff camera, faction TV, and language systems
 

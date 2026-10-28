@@ -64,6 +64,7 @@ $published = @{
     "carshop-system" = @{ Number = 116; Dossier = "docs/resources/carshop-system.md"; State = "Full manifest-script source review; individual Discussion published" }
     "vehicleplate" = @{ Number = 117; Dossier = "docs/resources/vehicleplate.md"; State = "Full manifest-script source review; individual Discussion published" }
     "mysql" = @{ Number = 123; Dossier = "docs/resources/mysql.md"; State = "Partial manifest/connection/export/migration/maintenance/query-handle review; issues #460-#463; individual Discussion #123 published" }
+    "object-browser" = @{ Dossier = "docs/resources/object-browser.md"; State = "Full manifest/client script/object catalog review; issue #464; Discussion pending" }
     "data" = @{ Number = 124; Dossier = "docs/resources/data.md"; State = "Full manifest-script source review; individual Discussion published" }
     "pool" = @{ Number = 125; Dossier = "docs/resources/pool.md"; State = "Full manifest-script source review; individual Discussion published" }
     "integration" = @{ Number = 126; Dossier = "docs/resources/integration.md"; State = "Full manifest-script source review; individual Discussion published" }
