@@ -22,6 +22,14 @@
 - [Issue #68](https://github.com/itschase/OwlMTA-2026/issues/68) now tracks route/schema reconciliation and the missing Owl host adapter, login integration, capability facade, and revocation handler.
 - The separate service's process-local state and unverified MTA adapter runtime are explicit limits. Do not claim end-to-end Discord login or role authorization exists in OwlMTA.
 
+## Current account and character follow-up
+
+- The player-facing account/character overview is [Q&A Discussion #530](https://github.com/itschase/OwlMTA-2026/discussions/530); the detailed technical source remains [`docs/resources/account.md`](../resources/account.md).
+- [Issue #527](https://github.com/itschase/OwlMTA-2026/issues/527) and [#528](https://github.com/itschase/OwlMTA-2026/issues/528) are fixed in source and remain open for disposable-client/runtime verification of authenticated email updates and legacy password-file cleanup.
+- [Issue #529](https://github.com/itschase/OwlMTA-2026/issues/529) tracks remaining legacy login input bounds and abuse throttling. [Issue #158](https://github.com/itschase/OwlMTA-2026/issues/158) now records that the device check runs before session takeover/commit; enrollment, policy, privacy, and runtime work remain.
+- Registration activation/provisioning remains under [#13](https://github.com/itschase/OwlMTA-2026/issues/13) and [#43](https://github.com/itschase/OwlMTA-2026/issues/43). Discord-first identity and host binding remain proposed under [#2](https://github.com/itschase/OwlMTA-2026/issues/2), [#68](https://github.com/itschase/OwlMTA-2026/issues/68), and [#96](https://github.com/itschase/OwlMTA-2026/issues/96); OwlMTA does not yet have integrated Discord login.
+- Character creation, hydration, and spawn correction remain tracked by [#201](https://github.com/itschase/OwlMTA-2026/issues/201)–[#204](https://github.com/itschase/OwlMTA-2026/issues/204). All source fixes and findings remain runtime-unverified unless a tracker explicitly says otherwise.
+
 ## Current resource follow-up — `death`
 
 - Resource guide: [`docs/resources/death.md`](../resources/death.md); standardized [Script Resource: death Discussion #347](https://github.com/itschase/OwlMTA-2026/discussions/347).
@@ -161,6 +169,7 @@ The organized [`docs/`](../README.md) tree is the maintained reference set; the 
 - [Discussion #143: Living roleplay platform](https://github.com/itschase/OwlMTA-2026/discussions/143)
 - [Discussion #144: Documentation and planning program](https://github.com/itschase/OwlMTA-2026/discussions/144)
 - [Player Q&A #145: Can criminal groups use organizations?](https://github.com/itschase/OwlMTA-2026/discussions/145)
+- [Player Q&A #530: How do accounts and characters work?](https://github.com/itschase/OwlMTA-2026/discussions/530)
 - [Discussion #171: Current economy, jobs, payday, and business architecture](https://github.com/itschase/OwlMTA-2026/discussions/171)
 - [Discussion #172: Current criminal, investigation, justice, and corrections architecture](https://github.com/itschase/OwlMTA-2026/discussions/172)
 - [Discussion #173: Administration system architecture, authority, and recovery](https://github.com/itschase/OwlMTA-2026/discussions/173)
@@ -445,5 +454,8 @@ The same-name archived copies have separate source identities. Their archive dos
 - [#338: Bind help command-list refresh requests to the requesting player](https://github.com/itschase/OwlMTA-2026/issues/338)
 - [#340: Separate 911 log access from donor entitlements](https://github.com/itschase/OwlMTA-2026/issues/340)
 - [#341: Authorize prison gate controls on the server](https://github.com/itschase/OwlMTA-2026/issues/341)
+- [#527: Bind account email changes to the authenticated player](https://github.com/itschase/OwlMTA-2026/issues/527) — fixed in source; runtime/DB edge cases remain.
+- [#528: Stop storing reusable passwords in client files](https://github.com/itschase/OwlMTA-2026/issues/528) — fixed in source; disposable-client migration cleanup remains.
+- [#529: Bound and rate-limit legacy account authentication requests](https://github.com/itschase/OwlMTA-2026/issues/529) — open implementation work.
 Milestone [M4 — Organizations & Living Roleplay](https://github.com/itschase/OwlMTA-2026/milestone/6) groups the compatibility-first organization, contextual interaction, criminal opportunity, evidence, and connected-roleplay foundation work. M0/M1 portability and security gates remain prerequisites.
 
