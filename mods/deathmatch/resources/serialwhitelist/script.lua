@@ -1,24 +1,61 @@
 mysql = exports.mysql
 --MAXIME
 
-function check(thePlayer)
-	local userid = getElementData(thePlayer, "account:id")
-	local serialAccepted = false
+local function fetchFirstRow(queryText)
+	local queryHandle = mysql:query(queryText)
+	if queryHandle == false then
+		return false, false
+	end
+	local row = mysql:fetch_assoc(queryHandle)
+	mysql:free_result(queryHandle)
+	return row, true
+end
 
-	local result = mysql:query_fetch_assoc("SELECT `id` FROM `serial_whitelist` WHERE `userid`=".. userid .." AND `serial`='"..getPlayerSerial(thePlayer).."' AND `status`='1' LIMIT 1")
+function check(thePlayer, accountID, requiresWhitelist)
+	if not isElement(thePlayer) or getElementType(thePlayer) ~= "player" then
+		return false
+	end
+
+	local userid = tonumber(accountID)
+	if not userid or userid < 1 or userid ~= math.floor(userid) then
+		outputDebugString("[serialwhitelist] Login check rejected: invalid account identifier.", 2)
+		return false
+	end
+
+	local serial = mysql:escape_string(getPlayerSerial(thePlayer))
+	local ip = mysql:escape_string(getPlayerIP(thePlayer))
+	if not serial or not ip then
+		outputDebugString("[serialwhitelist] Login check failed: could not prepare device identity for account "..userid..".", 1)
+		return false
+	end
+	local result, querySucceeded = fetchFirstRow("SELECT `id` FROM `serial_whitelist` WHERE `userid`=".. userid .." AND `serial`='"..serial.."' AND `status`='1' LIMIT 1")
+	if not querySucceeded then
+		outputDebugString("[serialwhitelist] Login check failed: whitelist lookup error for account "..userid..".", 1)
+		return false
+	end
+
 	if result and result['id'] and tonumber(result['id']) then
-		mysql:query_free("UPDATE `serial_whitelist` SET `serial`='"..getPlayerSerial(thePlayer).."', `last_login_ip`='"..getPlayerIP(thePlayer).."', `last_login_date`=NOW() WHERE `userid`=".. userid .." AND `id`='"..result['id'].."' AND `status`='1' ")
+		mysql:query_free("UPDATE `serial_whitelist` SET `serial`='"..serial.."', `last_login_ip`='"..ip.."', `last_login_date`=NOW() WHERE `userid`=".. userid .." AND `id`='"..tonumber(result['id']).."' AND `status`='1' ")
+		outputDebugString("[serialwhitelist] Login check passed for account "..userid.." (registered device).", 3)
 		return true
 	end
 
-	if exports.integration:isPlayerSupporter(thePlayer) or exports.integration:isPlayerTrialAdmin(thePlayer) or exports.integration:isPlayerScripter(thePlayer) or exports.integration:isPlayerSupporter(thePlayer) or exports.integration:isPlayerFMTMember(thePlayer) then
-		exports.global:sendMessageToAdmins("[SYSTEM] POSSIBLE STAFF ACCOUNT BREACHED! - Someone has illegally tried log into "..exports.global:getPlayerFullIdentity(thePlayer, 2, true).." account from a strange PC. (SERIAL: "..getPlayerSerial(thePlayer).." , IP: "..getPlayerIP(thePlayer)..")")
+	if requiresWhitelist == true then
+		exports.global:sendMessageToAdmins("[SYSTEM] POSSIBLE STAFF ACCOUNT BREACHED! - A login for account #"..userid.." was attempted from an unregistered PC. (SERIAL: "..getPlayerSerial(thePlayer).." , IP: "..getPlayerIP(thePlayer)..")")
+		outputDebugString("[serialwhitelist] Login check denied for restricted account "..userid.." (unregistered device).", 2)
 		return false
 	else
-		local addedSerials = mysql:query_fetch_assoc("SELECT COUNT(*) AS `count` FROM `serial_whitelist` WHERE `userid`=".. userid .." AND `status`='1' ")['count']
+		local countResult, countQuerySucceeded = fetchFirstRow("SELECT COUNT(*) AS `count` FROM `serial_whitelist` WHERE `userid`=".. userid .." AND `status`='1' ")
+		if not countQuerySucceeded or not countResult or not tonumber(countResult['count']) then
+			outputDebugString("[serialwhitelist] Login check failed: device count lookup error for account "..userid..".", 1)
+			return false
+		end
+		local addedSerials = tonumber(countResult['count'])
 		if tonumber(addedSerials) > 0 then
+			outputDebugString("[serialwhitelist] Login check denied for account "..userid.." (a different registered device exists).", 2)
 			return false
 		else 
+			outputDebugString("[serialwhitelist] Login check passed for account "..userid.." (no device registration exists).", 3)
 			return true
 		end
 	end
