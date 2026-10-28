@@ -56,6 +56,7 @@ $published = @{
     "parachute" = @{ Number = 468; Dossier = "docs/resources/parachute.md"; State = "Full manifest/script/direct-caller source review; issue #466; individual Discussion published" }
     "ped-system" = @{ Number = 475; Dossier = "docs/resources/ped-system.md"; State = "Full manifest/schema/event/caller review; issues #469-#474; individual Discussion published" }
     "ramp-system" = @{ Number = 479; Dossier = "docs/resources/ramp-system.md"; State = "Full manifest/schema/client/server/caller review; issues #476-#478; individual Discussion published" }
+    "realtime-system" = @{ Number = 483; Dossier = "docs/resources/realtime-system.md"; State = "Full manifest/configuration/interior caller review; issues #480-#482; individual Discussion published" }
     "mods" = @{ Dossier = "docs/resources/mods.md"; State = "Full manifest/two client scripts/server mall script review; issue #459; Discussion pending" }
     "factions" = @{ Number = 101; Dossier = "docs/resources/factions.md"; State = "Full manifest-script source review; individual Discussion published" }
     "item-system" = @{ Number = 102; Dossier = "docs/resources/item-system.md"; State = "Full manifest-script source review; individual Discussion published" }

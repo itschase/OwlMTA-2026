@@ -1,6 +1,6 @@
 # Next work record
 
-Last updated: 2026-10-28 after publishing the `ramp-system` Discussion.
+Last updated: 2026-10-27 after publishing the `realtime-system` Discussion.
 
 ## Latest continuation — attachment, legacy forum, and GUI development tools
 
@@ -33,6 +33,8 @@ The optional `object-browser` is now documented in `docs/resources/object-browse
 `ped-system` is documented as the persistent NPC registry and the router for service/mission right-click actions and published as [Script Resource Discussion #475](https://github.com/itschase/OwlMTA-2026/discussions/475). Issues #469–#474 are assigned to Milestone #7 and cover remote staff authorization, medic caller/target validation, final-kit consumption, fake-name gender lookup, disconnected legacy events, and the missing public-transport provider contract. Runtime and external provider behavior remain unverified.
 
 `ramp-system` is documented as the persistent garage-lift resource, distinct from the separate item-117 DFT-30 deployment ramp. Issues #476–#478 are assigned to Milestone #7 for remote lift movement authorization/bounds, raw ramp command SQL inputs, and interior-aware nearby lookup. The resource Discussion is [published as #479](https://github.com/itschase/OwlMTA-2026/discussions/479). Runtime movement, model replacement, and DB behavior remain unverified.
+
+`realtime-system` now has a full manifest/configuration/interior-caller dossier and [Script Resource Discussion #483](https://github.com/itschase/OwlMTA-2026/discussions/483). Issues [#480](https://github.com/itschase/OwlMTA-2026/issues/480)–[#482](https://github.com/itschase/OwlMTA-2026/issues/482) track remote refresh recipient binding (client visual effect only per source), invalid `/setgametime` minute validation, and offset normalization/timezone policy. All three are assigned under Milestone #7. MTA runtime behavior remains unverified.
 
 ## Latest continuation — staff camera, faction TV, and language systems
 
@@ -239,3 +241,9 @@ The first static plan is now maintained in [Static Safe-Start Preflight](SAFE_ST
 ## Latest continuation — ramp-system documentation publication
 
 Published and verified [Script Resource: ramp-system #479](https://github.com/itschase/OwlMTA-2026/discussions/479). The dossier, resource index, and generated status ledger now point to the thread. Issues [#476](https://github.com/itschase/OwlMTA-2026/issues/476)–[#478](https://github.com/itschase/OwlMTA-2026/issues/478) are assigned to itschase, linked to the dossier and discussion, and associated with Milestone #7. Static source review only; runtime remains unverified. Continue the active manifest census with the next cataloged-only resource, tracing loaded scripts, callers, persistence, player/staff/operator workflows, and duplicate issue coverage before publishing.
+
+## Latest continuation — realtime-system audit
+
+Completed the active `realtime-system` resource review. Its dossier describes the GTA/server clock sync, resource offset, minute alignment, per-player interior updates, `interior_system` settings, player and staff commands, the disabled `c_clock.lua`, and boundaries for future dashboard/Discord work. Published [Script Resource: realtime-system #483](https://github.com/itschase/OwlMTA-2026/discussions/483). Issues [#480](https://github.com/itschase/OwlMTA-2026/issues/480)–[#482](https://github.com/itschase/OwlMTA-2026/issues/482) are assigned to `itschase`, linked to the dossier and discussion, and filed under Milestone #7. MTA docs confirm `setTime` accepts hours 0–23 and minutes 0–59, and that server-side `getRealTime` follows the server's local timezone by default. This remains static review only; no runtime checks were performed.
+
+Next cataloged-only active resource in the ledger: `release-notes`. Audit its manifest-loaded code, where release notes originate, player display flow, operator editing/publishing path, file or database persistence, startup dependencies, and duplicate tracker coverage. Then publish the one-to-one `Script Resource: release-notes` thread and update the dossier, index, generator, CSV, and issue tracker together.
