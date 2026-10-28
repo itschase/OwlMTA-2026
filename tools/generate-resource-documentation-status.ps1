@@ -58,6 +58,7 @@ $published = @{
     "ramp-system" = @{ Number = 479; Dossier = "docs/resources/ramp-system.md"; State = "Full manifest/schema/client/server/caller review; issues #476-#478; individual Discussion published" }
     "realtime-system" = @{ Number = 483; Dossier = "docs/resources/realtime-system.md"; State = "Full manifest/configuration/interior caller review; issues #480-#482; individual Discussion published" }
     "release-notes" = @{ Number = 486; Dossier = "docs/resources/release-notes.md"; State = "Full manifest/player/server/SQL snapshot/caller review; issues #484-#485; individual Discussion published" }
+    "roadblock-system" = @{ Number = 490; Dossier = "docs/resources/roadblock-system.md"; State = "Full manifest/player/staff/dependency and direct spike-consumer review; issues #487-#489; individual Discussion published" }
     "mods" = @{ Dossier = "docs/resources/mods.md"; State = "Full manifest/two client scripts/server mall script review; issue #459; Discussion pending" }
     "factions" = @{ Number = 101; Dossier = "docs/resources/factions.md"; State = "Full manifest-script source review; individual Discussion published" }
     "item-system" = @{ Number = 102; Dossier = "docs/resources/item-system.md"; State = "Full manifest-script source review; individual Discussion published" }

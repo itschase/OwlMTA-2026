@@ -1,6 +1,6 @@
 # Next work record
 
-Last updated: 2026-10-27 after publishing the `release-notes` Discussion.
+Last updated: 2026-10-27 after publishing the `roadblock-system` Discussion.
 
 ## Latest continuation — attachment, legacy forum, and GUI development tools
 
@@ -252,4 +252,10 @@ Next cataloged-only active resource in the ledger: `release-notes`. Audit its ma
 
 Completed the `release-notes` audit and published [Script Resource: release-notes #486](https://github.com/itschase/OwlMTA-2026/discussions/486). The dossier documents player display, staff/operator gaps, SQL and cache behavior, startup dependencies, the legacy bug-site text, and its missing active opener. Issues [#484](https://github.com/itschase/OwlMTA-2026/issues/484) and [#485](https://github.com/itschase/OwlMTA-2026/issues/485) are assigned to `itschase`, linked to the dossier/discussion, and tracked in Milestone #7. The SQL table is not declared in checked-in schema snapshots; deployed DB presence remains unknown.
 
-Next cataloged-only active resource: `roadblock-system`. Inspect the manifest-loaded player deployment flow, inventory/item checks, persistence and cleanup, staff/operator controls, direct callers, and existing tracker overlap. Continue distinguishing source findings from runtime effects; do not start MTA until the safe-start gates are satisfied.
+Next cataloged-only active resource: `san`. Inspect its manifest-loaded player/admin/operator workflows, state and persistence, direct callers, dependencies, and duplicate tracker coverage. Continue distinguishing source findings from runtime effects; do not start MTA until the safe-start gates are satisfied.
+
+## Latest continuation — roadblock-system audit
+
+Completed the `roadblock-system` dossier and published [Script Resource: roadblock-system #490](https://github.com/itschase/OwlMTA-2026/discussions/490). The source review follows the `/rbs` placement flow, configured faction model sets, temporary in-memory object tracking, staff listing/removal/global cleanup commands, and the spikestrip handoff to `spike-system`. Existing Issue [#88](https://github.com/itschase/OwlMTA-2026/issues/88) already tracks placement request authorization. Added Issues [#487](https://github.com/itschase/OwlMTA-2026/issues/487)–[#489](https://github.com/itschase/OwlMTA-2026/issues/489) for world/proximity/removal scoping, collision-shape world context, and nil faction membership handling. The new issues are assigned and in Milestone #7; their source finding and runtime verification boundaries are recorded in the dossier. No MTA runtime was started.
+
+Next active cataloged-only resource: `san`. Trace its manifest, client/server/admin usage, dependencies, persistence, and callers; search the existing tracker before filing new implementation work.
