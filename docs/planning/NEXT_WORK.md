@@ -1,6 +1,16 @@
 # Next work record
 
-Last updated: 2026-10-27 after documenting and publishing the freecam, freecam-TV, and language-system batch.
+Last updated: 2026-10-27 after the `heligrab`, `forums`, and partial `guied` audits.
+
+## Latest continuation — attachment, legacy forum, and GUI development tools
+
+Pushed `bfc3b13` with the `heligrab` dossier and Issue #449 for the exported hanger lookup, which ignores its helicopter argument and checks `data.line` instead of stored `data.line_percent`. Pushed `473e7db` with the `forums` dossier and corrected the status ledger's duplicate `heligrab` row. The forum audit separates active alcohol-level staff commands from inert/disabled legacy posting forms and links the existing bridge retirement Issue #122.
+
+The current unpushed batch documents the developer-only `guied` resource as a partial technical review. Its server accepts a client-provided output-file path and returns file contents without checking the saved-output allowlist; MTA documents cross-resource file paths and ACL requirements. Issue #450 records the source finding with its ACL/configuration-dependent impact and requests a constrained generated-output allowlist. The tool's declared `general.ModifyOtherObjects` right needs operator scrutiny; runtime access has not been tested. Finish review updates, then commit and push this batch.
+
+The resource Discussion approvals for `id-system`, `realism`, and `hud` remain outstanding for publication. The GitHub connector exposes no Discussion-creation action, and no Brave window was available in the active desktop session during the last check. Do not record these topics as published until their GitHub URLs and contents are verified. Continue authoring/publishing other repo artifacts through available channels.
+
+Next active cataloged-only resource after this batch: `hardwaresurvey`. Continue in manifest/caller order, with deeper `guied` event and client code audit queued because this first pass did not inspect every GUI/code-generation module. Search Issues before adding findings, give every dossier an explicit review state, distinguish runtime-verifiable claims from source facts, and update the index, generator, CSV, and issue tracker together. Keep the MTA server stopped until the static safe-start gates are complete.
 
 ## Latest continuation — staff camera, faction TV, and language systems
 
