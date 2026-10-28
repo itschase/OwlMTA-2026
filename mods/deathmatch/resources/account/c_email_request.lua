@@ -34,10 +34,9 @@ function requestEmail(id)
 		if source == bOK then
 			if guiGetText(eEmail1) == guiGetText(eEmail2) then
 				if (guiGetText(eEmail1):match("[A-Za-z0-9%.%%%+%-]+@[A-Za-z0-9%.%%%+%-]+%.%w%w%w?%w?")) then
-					triggerServerEvent("requestEmail:saveEmail", getLocalPlayer(), id, guiGetText(eEmail1))
-					guiSetText(lMsg, "Saved successfully!")
-					guiLabelSetColor(lMsg,0,255,0)
-					setTimer(function () closeEmailRequest() end, 1000, 1)
+					guiSetText(lMsg, "Saving...")
+					guiSetEnabled(bOK, false)
+					triggerServerEvent("requestEmail:saveEmail", localPlayer, guiGetText(eEmail1))
 				else
 					guiSetText(lMsg, "Invalid email address!")
 					guiLabelSetColor(lMsg,255,255,0)
@@ -62,6 +61,28 @@ function requestEmail(id)
 end
 addEvent("requestEmail:onPlayerLogin", true)
 addEventHandler("requestEmail:onPlayerLogin", getRootElement(), requestEmail)
+
+addEvent("requestEmail:saveEmailResult", true)
+addEventHandler("requestEmail:saveEmailResult", getRootElement(), function(success, message)
+	if not isElement(wEmail) then
+		return
+	end
+
+	guiSetText(lMsg, tostring(message or "Unable to save email."))
+	if success == true then
+		guiLabelSetColor(lMsg, 0, 255, 0)
+		setTimer(function()
+			if isElement(wEmail) then
+				closeEmailRequest()
+			end
+		end, 1000, 1)
+	else
+		guiLabelSetColor(lMsg, 255, 255, 0)
+		if isElement(bOK) then
+			guiSetEnabled(bOK, true)
+		end
+	end
+end)
 
 function closeEmailRequest()
 	if wEmail then
