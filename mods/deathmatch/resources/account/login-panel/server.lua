@@ -40,7 +40,7 @@ function validateCredentials(username,password,checksave)
 	if not (username == "") then
 		if not (password == "") then
 			if checksave == true then
-				triggerClientEvent(client,"saveLoginToXML",client,username,password)
+				triggerClientEvent(client,"saveLoginToXML",client,username)
 			else
 				triggerClientEvent(client,"resetSaveXML",client)
 			end

@@ -87,7 +87,7 @@ function open_log_reg_pannel()
 		guiLabelSetVerticalAlign(lbl_about_legth,"center")
 		guiLabelSetHorizontalAlign(lbl_about_legth,"center",false)
 		]]
-		panel.login.remember = guiCreateCheckBox(X + 230,Y + 275-120,100,20,"(Remember me!)",false,false)
+		panel.login.remember = guiCreateCheckBox(X + 230,Y + 275-120,120,20,"(Remember username)",false,false)
 		guiSetFont(panel.login.remember,"default-small")
 
 		panel.login.error = guiCreateLabel(X,Y + 325-120,364,31,"Error_login_tab",false)
@@ -287,32 +287,44 @@ function loadLoginFromXML()
     if not xml_save_log_File then
         xml_save_log_File = xmlCreateFile("@rememberme.xml", "login")
     end
+	if not xml_save_log_File then
+		return "", ""
+	end
     local usernameNode = xmlFindChild (xml_save_log_File, "username", 0)
     local passwordNode = xmlFindChild (xml_save_log_File, "password", 0)
-    local username, password = usernameNode and exports.global:decryptString(xmlNodeGetValue(usernameNode), localPlayer) or "", passwordNode and exports.global:decryptString(xmlNodeGetValue(passwordNode), localPlayer) or ""
+	local username = usernameNode and exports.global:decryptString(xmlNodeGetValue(usernameNode), localPlayer) or ""
+	-- Remove reversible legacy password data from existing client files.
+	if passwordNode then
+		xmlDestroyNode(passwordNode)
+		xmlSaveFile(xml_save_log_File)
+	end
     xmlUnloadFile ( xml_save_log_File )
-    return username, password
+    return username, ""
 end
 
-function saveLoginToXML(username, password)
+function saveLoginToXML(username)
+	if type(username) ~= "string" or username == "" then return false end
     local xml_save_log_File = xmlLoadFile ("@rememberme.xml")
     if not xml_save_log_File then
         xml_save_log_File = xmlCreateFile("@rememberme.xml", "login")
     end
-	if (username ~= "") then
-		local usernameNode = xmlFindChild (xml_save_log_File, "username", 0)
-		local passwordNode = xmlFindChild (xml_save_log_File, "password", 0)
-		if not usernameNode then
-			usernameNode = xmlCreateChild(xml_save_log_File, "username")
-		end
-		if not passwordNode then
-			passwordNode = xmlCreateChild(xml_save_log_File, "password")
-		end
-		xmlNodeSetValue (usernameNode, exports.global:encryptString(username, localPlayer))
-		xmlNodeSetValue (passwordNode, exports.global:encryptString(password, localPlayer))
+	if not xml_save_log_File then return false end
+	local usernameNode = xmlFindChild (xml_save_log_File, "username", 0)
+	local passwordNode = xmlFindChild (xml_save_log_File, "password", 0)
+	if not usernameNode then
+		usernameNode = xmlCreateChild(xml_save_log_File, "username")
 	end
-    xmlSaveFile(xml_save_log_File)
-    xmlUnloadFile (xml_save_log_File)
+	if passwordNode then
+		xmlDestroyNode(passwordNode)
+	end
+	if not usernameNode then
+		xmlUnloadFile(xml_save_log_File)
+		return false
+	end
+	xmlNodeSetValue (usernameNode, exports.global:encryptString(username, localPlayer))
+	local saved = xmlSaveFile(xml_save_log_File)
+	xmlUnloadFile (xml_save_log_File)
+	return saved
 end
 addEvent("saveLoginToXML", true)
 addEventHandler("saveLoginToXML", getRootElement(), saveLoginToXML)
@@ -351,13 +363,14 @@ end
 function resetSaveXML()
 	local xml_save_log_File = xmlLoadFile ("@rememberme.xml")
     if xml_save_log_File then
-		local username, password = xmlFindChild(xml_save_log_File, "username", 0), xmlFindChild (xml_save_log_File, "password", 0)
-		if username and password then 
-			xmlDestroyNode(username)
-			xmlDestroyNode(password)
+		local username = xmlFindChild(xml_save_log_File, "username", 0)
+		local password = xmlFindChild (xml_save_log_File, "password", 0)
+		if username or password then
+			if username then xmlDestroyNode(username) end
+			if password then xmlDestroyNode(password) end
 			xmlSaveFile(xml_save_log_File)
-			xmlUnloadFile(xml_save_log_File)
 		end
+		xmlUnloadFile(xml_save_log_File)
 	end
 end
 addEvent("resetSaveXML", true)

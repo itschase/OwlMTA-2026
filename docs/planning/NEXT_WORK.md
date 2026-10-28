@@ -12,7 +12,7 @@ The shared `integration/g_staff.lua` player-type guard was corrected at all 18 o
 
 Created [Issue #527](https://github.com/itschase/OwlMTA-2026/issues/527) and pushed [`cd24c18`](https://github.com/itschase/OwlMTA-2026/commit/cd24c18) to bind email changes to the authenticated account, parameterize the update, validate server-side, add non-PII outcome logs, and report the DB result to the UI. Runtime and duplicate-address behavior remain unverified. A source review also confirmed resource-restart seamless login trusts retained `loggedin` state plus an `account_details` row; record this under existing identity/session contracts #68/#96 rather than duplicate them.
 
-Created [#528](https://github.com/itschase/OwlMTA-2026/issues/528) for the reversible client-side remember-password store and [#529](https://github.com/itschase/OwlMTA-2026/issues/529) for unbounded legacy credential events and missing account-level rate/input limits. These issues distinguish current legacy risks from the proposed Discord service controls in #2/#68.
+Created [#528](https://github.com/itschase/OwlMTA-2026/issues/528) for the reversible client-side remember-password store and [#529](https://github.com/itschase/OwlMTA-2026/issues/529) for unbounded legacy credential events and missing account-level rate/input limits. The login panel now saves only the username and removes saved password nodes on load; #528 remains open for disposable-client verification of file migration and cleanup. These issues distinguish current legacy risks from the proposed Discord service controls in #2/#68.
 
 ## Latest continuation — attachment, legacy forum, and GUI development tools
 
