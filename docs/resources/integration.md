@@ -33,7 +33,7 @@ No key value belongs in source, documentation, logs, or client state. Any retain
 
 - [Issue #122](https://github.com/itschase/OwlMTA-2026/issues/122) covers retiring or isolating the forum bridge, secret transport, optional configuration, bounded delivery, and migration to the self-hosted API where warranted.
 - [Issue #3](https://github.com/itschase/OwlMTA-2026/issues/3) owns capability mapping and supporter/staff separation.
-- The malformed player-type checks in `g_staff.lua` were corrected in the current source batch. [Issue #23](https://github.com/itschase/OwlMTA-2026/issues/23) remains open for runtime validation of invalid, destroyed, non-player, and live player inputs.
+- The malformed player-type checks in `g_staff.lua` were corrected in the current source batch, as was the same guard in the high-fan-in `global:getPlayerFullIdentity` helper. [Issue #23](https://github.com/itschase/OwlMTA-2026/issues/23) tracks this guard family and remains open for runtime validation of invalid, destroyed, non-player, and live player inputs.
 - [Issue #68](https://github.com/itschase/OwlMTA-2026/issues/68) owns the self-hosted Discord identity/capability API.
 
 Runtime verification must cover every retained predicate, disconnected/non-player values, disabled/missing forum configuration, safe provider failure, role refresh, capability migration, and absence of secrets in logs/URLs.

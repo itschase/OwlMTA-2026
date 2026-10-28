@@ -36,7 +36,7 @@ Its blast radius is exceptional: roughly 370 Lua files call `global`. Frequently
 - The server `getGameMasters()` helper previously returned every supporter; it now requires a logged-in player with an explicit positive `account:gmlevel`. Donor status alone no longer places a player in server-side GameMaster lists/report routing. The durable grant/assignment path and several manifest-declared GameMaster exports remain unresolved under Issues #3, #14, #23, and #68.
 - Export realm, input/output/error contracts, restart behavior, and compatibility are undocumented across hundreds of callers. [Issue #208](https://github.com/itschase/OwlMTA-2026/issues/208).
 - The legacy ban facade is inactive/broken and should defer to `bans`, not become parallel authority.
-- Account-result cleanup, smallest-ID allocation, element guards, item-space slot selection, sound-volume application, country parsing, and century leap-year handling contain source-confirmed correctness risks.
+- `getPlayerFullIdentity` and the `integration` staff predicates previously used a malformed Lua element-type guard. The source checks are corrected; nil, destroyed, non-player, and live-player behavior still needs runtime verification under [Issue #23](https://github.com/itschase/OwlMTA-2026/issues/23). Other utility risks include account-result cleanup, smallest-ID allocation, item-space slot selection, sound-volume application, country parsing, and century leap-year handling.
 - Weapon serial and string “encryption” helpers are reversible/custom and must not protect identity tickets, Discord sessions, passwords, or secrets.
 
 ## Target direction

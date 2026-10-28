@@ -85,7 +85,7 @@ function sendWrnToStaffOnDuty(msg, prefix1, r1, g1, b1)
 end
 
 function getPlayerFullIdentity(thePlayer, type, doNotUseFakeName)
-	if not thePlayer or not isElement(thePlayer) or not getElementType(thePlayer) == "player" then
+	if not thePlayer or not isElement(thePlayer) or getElementType(thePlayer) ~= "player" then
 		return "Unknown person"
 	end
 	if not type then --For common chat channels | (id) Rank Username Characrtername
