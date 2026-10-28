@@ -1,6 +1,6 @@
 # Next work record
 
-Last updated: 2026-10-28 after the `ped-system` audit.
+Last updated: 2026-10-28 after the `ramp-system` audit.
 
 ## Latest continuation — attachment, legacy forum, and GUI development tools
 
@@ -31,6 +31,8 @@ The optional `object-browser` is now documented in `docs/resources/object-browse
 `parachute` now has a full manifest/script/direct-caller dossier and [Script Resource Discussion #468](https://github.com/itschase/OwlMTA-2026/discussions/468). Source-confirmed Issue #466 tracks the opening-animation render loop returning before it can advance other active props. Its purchase/inventory flow and all client physics remain runtime-unverified. Next continue the `mysql` exported API and caller/SQL review before moving into its high-impact dependents. Deeper `guied` event/client audit and the remaining `item-texture` client shader lifecycle review are also queued. Search Issues before adding findings, give every dossier an explicit review state, distinguish runtime-verifiable claims from source facts, and update the index, generator, CSV, and issue tracker together. Keep the MTA server stopped until the static safe-start gates are complete.
 
 `ped-system` is documented as the persistent NPC registry and the router for service/mission right-click actions and published as [Script Resource Discussion #475](https://github.com/itschase/OwlMTA-2026/discussions/475). Issues #469–#474 are assigned to Milestone #7 and cover remote staff authorization, medic caller/target validation, final-kit consumption, fake-name gender lookup, disconnected legacy events, and the missing public-transport provider contract. Runtime and external provider behavior remain unverified.
+
+`ramp-system` is documented as the persistent garage-lift resource, distinct from the separate item-117 DFT-30 deployment ramp. Issues #476–#478 are assigned to Milestone #7 for remote lift movement authorization/bounds, raw ramp command SQL inputs, and interior-aware nearby lookup. The resource Discussion is pending. Runtime movement, model replacement, and DB behavior remain unverified.
 
 ## Latest continuation — staff camera, faction TV, and language systems
 
