@@ -6,7 +6,7 @@
 - Source review: manifest and client logger reviewed with F10 account settings and phone log producer/consumer callers.
 - Runtime: unverified. MTA was not started; actual local file creation, persistence, and log rotation are unverified.
 - Startup snapshot: enabled in `mtaserver.conf.bak`; this is not proof of live configuration.
-- GitHub record: individual Script Resource Discussion pending; phone-content privacy work tracked by [Issue #465](https://github.com/itschase/OwlMTA-2026/issues/465), assigned to [Milestone #7](https://github.com/itschase/OwlMTA-2026/milestone/7). The separate 911 history access policy is tracked by [Issue #340](https://github.com/itschase/OwlMTA-2026/issues/340).
+- GitHub record: [Script Resource: OwlGamingLogs Discussion #467](https://github.com/itschase/OwlMTA-2026/discussions/467); phone-content privacy work tracked by [Issue #465](https://github.com/itschase/OwlMTA-2026/issues/465), assigned to [Milestone #7](https://github.com/itschase/OwlMTA-2026/milestone/7). The separate 911 history access policy is tracked by [Issue #340](https://github.com/itschase/OwlMTA-2026/issues/340).
 
 ## Purpose in everyday terms
 

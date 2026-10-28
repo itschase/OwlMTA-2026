@@ -52,8 +52,8 @@ $published = @{
     "item-texture" = @{ Dossier = "docs/resources/item-texture.md"; State = "Partial manifest/caller/persistence/remote-stream and vehicle-mutation review; issues #453-#455; Discussion pending" }
     "LSFD" = @{ Dossier = "docs/resources/LSFD.md"; State = "Full manifest/incident/alarm/faction/admin workflow review; issues #456-#457; Discussion pending" }
     "model-system" = @{ Dossier = "docs/resources/model-system.md"; State = "Full client model-loader/manifest asset review; issue #458; Discussion pending" }
-    "OwlGamingLogs" = @{ Dossier = "docs/resources/OwlGamingLogs.md"; State = "Full manifest/client settings/phone transcript caller review; issue #465; Discussion pending" }
-    "parachute" = @{ Dossier = "docs/resources/parachute.md"; State = "Full manifest/script/direct-caller source review; issue #466; Discussion pending" }
+    "OwlGamingLogs" = @{ Number = 467; Dossier = "docs/resources/OwlGamingLogs.md"; State = "Full manifest/client settings/phone transcript caller review; issue #465; individual Discussion published" }
+    "parachute" = @{ Number = 468; Dossier = "docs/resources/parachute.md"; State = "Full manifest/script/direct-caller source review; issue #466; individual Discussion published" }
     "mods" = @{ Dossier = "docs/resources/mods.md"; State = "Full manifest/two client scripts/server mall script review; issue #459; Discussion pending" }
     "factions" = @{ Number = 101; Dossier = "docs/resources/factions.md"; State = "Full manifest-script source review; individual Discussion published" }
     "item-system" = @{ Number = 102; Dossier = "docs/resources/item-system.md"; State = "Full manifest-script source review; individual Discussion published" }

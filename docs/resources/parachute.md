@@ -6,7 +6,7 @@
 - Startup snapshot: enabled in `mods/deathmatch/mtaserver.conf.bak`; this is not proof of live configuration.
 - Source state: full manifest/script and direct-caller source review. The concurrent opening-animation finding is tracked by [Issue #466](https://github.com/itschase/OwlMTA-2026/issues/466), assigned to [Milestone #7: Resource Audit and Security Baseline](https://github.com/itschase/OwlMTA-2026/milestone/7).
 - Runtime state: unverified. The MTA server/client were not started.
-- Discussion: [Script Resource: parachute](DISCUSSION_URL_PENDING).
+- Discussion: [Script Resource: parachute #468](https://github.com/itschase/OwlMTA-2026/discussions/468).
 
 ## What it does
 
