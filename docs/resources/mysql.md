@@ -6,7 +6,7 @@
 - Source review: manifest, connection bootstrap, exported legacy query helpers, lazy query writer, migration helper, and daily maintenance script reviewed as an initial API/security pass. Complete call-site and SQL/schema audit is still required.
 - Runtime: unverified. No database connection or MTA server was started.
 - Startup snapshot: enabled in `mtaserver.conf.bak`; this is not proof of live configuration.
-- GitHub record: [Script Resources Discussion #123](https://github.com/itschase/OwlMTA-2026/discussions/123); findings tracked by [Issues #460](https://github.com/itschase/OwlMTA-2026/issues/460)–[#462](https://github.com/itschase/OwlMTA-2026/issues/462).
+- GitHub record: [Script Resources Discussion #123](https://github.com/itschase/OwlMTA-2026/discussions/123); findings tracked by [Issues #460](https://github.com/itschase/OwlMTA-2026/issues/460)–[#463](https://github.com/itschase/OwlMTA-2026/issues/463).
 
 ## Purpose in everyday terms
 
@@ -23,6 +23,8 @@ Five getters return database username, password, database name, host, and port d
 The manifest also declares four forum query exports that have no matching function definitions or forum connection setup in the current resource. The RP help/news path still calls `forum_query_fetch_assoc`. Three other legacy getters return `db`, `host`, and `externalprefix`, while the current connection bootstrap populates `database`, `hostname`, and other differently named settings. Issue #462 tracks deciding whether to restore this legacy integration or retire it with every caller handled.
 
 The generic CRUD helpers quote values through `escape_string`, but table and column identifiers are concatenated into SQL. They should only receive code-owned identifiers; user-controlled identifiers would need strict allowlisting. This dossier is not a complete SQL-injection audit of all call sites.
+
+Legacy query results are exposed as numeric indices into `resultPool` and paired `queryPool`. `free_result` currently removes entries with `table.remove`, which shifts later slots even when a caller still holds the old result ID. Interleaved result lifetimes can therefore address the wrong slot; Issue #463 tracks stable, non-shifting handle storage and a focused reproduction.
 
 ## Migration and logging behavior
 
@@ -44,7 +46,7 @@ Database credentials must remain server-side and must never be returned by an AP
 
 1. Remove password getters and rotate the committed literal wherever it could have been deployed; resolve #460–#461.
 2. Restore or retire the declared forum exports and their remaining callers; resolve #462.
-3. Enumerate every exported function caller and classify the newer `db*` API versus legacy module path.
+3. Enumerate every exported function caller and classify the newer `db*` API versus legacy module path; resolve result-handle stability in #463.
 4. Review `meta.xml` export HTTP flags and current MTA defaults against the target release; do not infer HTTP exposure from omitted attributes.
 5. Inspect migration callers, migration indices, transactions, table engines, and startup ordering before changing schema behavior.
 6. Review SQL debug/error output for sensitive values and define rotation/retention settings for query logs.
