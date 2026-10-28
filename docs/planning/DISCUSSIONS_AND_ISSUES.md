@@ -20,6 +20,7 @@
 
 - Owl's [`API_CONTRACT.md`](../architecture/API_CONTRACT.md) is a target proposal; its `/api/v1` routes do not match the standalone identity service's implemented `/v1` routes.
 - [Issue #68](https://github.com/itschase/OwlMTA-2026/issues/68) now tracks route/schema reconciliation and the missing Owl host adapter, login integration, capability facade, and revocation handler.
+- Current adapter linking requires an already authenticated account, so it cannot provide pre-auth Discord login. New [Issue #551](https://github.com/itschase/OwlMTA-2026/issues/551) scopes a separate connection-bound challenge/ticket operation without duplicating the overall login policy in #2.
 - The separate service's process-local state and unverified MTA adapter runtime are explicit limits. Do not claim end-to-end Discord login or role authorization exists in OwlMTA.
 
 ## Current account and character follow-up
@@ -27,7 +28,7 @@
 - The player-facing account/character overview is [Q&A Discussion #530](https://github.com/itschase/OwlMTA-2026/discussions/530); the detailed technical source remains [`docs/resources/account.md`](../resources/account.md).
 - [Issue #527](https://github.com/itschase/OwlMTA-2026/issues/527) and [#528](https://github.com/itschase/OwlMTA-2026/issues/528) are fixed in source and remain open for disposable-client/runtime verification of authenticated email updates and legacy password-file cleanup.
 - [Issue #529](https://github.com/itschase/OwlMTA-2026/issues/529) tracks remaining legacy login input bounds and abuse throttling. [Issue #158](https://github.com/itschase/OwlMTA-2026/issues/158) now records that the device check runs before session takeover/commit; enrollment, policy, privacy, and runtime work remain.
-- Registration activation/provisioning remains under [#13](https://github.com/itschase/OwlMTA-2026/issues/13) and [#43](https://github.com/itschase/OwlMTA-2026/issues/43). Discord-first identity and host binding remain proposed under [#2](https://github.com/itschase/OwlMTA-2026/issues/2), [#68](https://github.com/itschase/OwlMTA-2026/issues/68), and [#96](https://github.com/itschase/OwlMTA-2026/issues/96); OwlMTA does not yet have integrated Discord login.
+- Registration activation/provisioning remains under [#13](https://github.com/itschase/OwlMTA-2026/issues/13) and [#43](https://github.com/itschase/OwlMTA-2026/issues/43). Discord-first identity and host binding remain proposed under [#2](https://github.com/itschase/OwlMTA-2026/issues/2), [#68](https://github.com/itschase/OwlMTA-2026/issues/68), [#96](https://github.com/itschase/OwlMTA-2026/issues/96), and pre-auth challenge [#551](https://github.com/itschase/OwlMTA-2026/issues/551); OwlMTA does not yet have integrated Discord login.
 - Character creation, hydration, and spawn correction remain tracked by [#201](https://github.com/itschase/OwlMTA-2026/issues/201)–[#204](https://github.com/itschase/OwlMTA-2026/issues/204). All source fixes and findings remain runtime-unverified unless a tracker explicitly says otherwise.
 
 ## Current resource follow-up — `death`
@@ -436,6 +437,7 @@ The same-name archived copies have separate source identities. Their archive dos
 
 ### Recent Issues
 
+- [#551: Add pre-auth connection-bound Discord login challenges](https://github.com/itschase/OwlMTA-2026/issues/551)
 - [#540: Remove the embedded ICWeb credential fallback from item-texture](https://github.com/itschase/OwlMTA-2026/issues/540)
 - [#541: GameMaster School form submits to a server handler with no active persistence](https://github.com/itschase/OwlMTA-2026/issues/541)
 

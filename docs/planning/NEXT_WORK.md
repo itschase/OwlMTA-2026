@@ -1,6 +1,10 @@
 # Next work record
 
-Last updated: 2026-10-28 after retiring the unreferenced password-changing maintenance script.
+Last updated: 2026-10-28 after reconciling the Discord login contract and tracking the pre-authentication gap.
+
+## Latest continuation — Discord pre-authentication contract gap
+
+Rechecked the separate [`mta-discord-identity`](https://github.com/itschase/mta-discord-identity) checkout at `87bc03f`. Its adapter's `beginLink` and `exchangeTicket` both resolve an already authenticated local account; they cannot support Discord login before Owl authentication. The Owl target documentation previously described a future login challenge without making this mismatch explicit. Updated `DISCORD_AUTH_DESIGN.md`, `API_CONTRACT.md`, and `DISCORD_INTEGRATION_PLAN.md` to distinguish existing-account linking from the missing pre-auth login operation. Created [Issue #551](https://github.com/itschase/OwlMTA-2026/issues/551) under Milestone #3 for a connection-bound challenge and one-use ticket, separate from new-account provisioning and the broader #2/#68/#96 contracts. Updated [Script Resource Discussion #531](https://github.com/itschase/OwlMTA-2026/discussions/531) and [#123](https://github.com/itschase/OwlMTA-2026/discussions/123) to match committed `runcode` and MySQL source changes. No MTA, Discord app, or live service was run.
 
 ## Latest continuation — privileged developer execution boundary
 
@@ -24,7 +28,7 @@ Corrected Issues [#527](https://github.com/itschase/OwlMTA-2026/issues/527) and 
 
 ## Immediate priority order — core identity and playability
 
-1. **Login safety:** finish residual enumeration, diagnostics, and runtime work in #529, then reconcile the exact identity-service contract before any Discord login cutover (#2/#68). No automatic password fallback after a Discord authorization failure.
+1. **Login safety:** finish residual legacy enumeration/diagnostics work in #529 and define the separate pre-auth challenge needed by [#551](https://github.com/itschase/OwlMTA-2026/issues/551), then reconcile the exact identity-service contract before any Discord login cutover (#2/#68). No automatic password fallback after a Discord authorization failure.
 2. **Account lifecycle:** make cross-schema registration recoverable and remove the missing local activation-service dependency (#43/#13); preserve the now-pre-session device gate while completing its operator workflow (#158).
 3. **Session authority:** bind session creation, resource-restart behavior, unlink/revocation, and expiry to one account/session contract (#68/#96). Existing restart behavior and disconnect-dependent logout remain source-level gaps, not solved by the device-gate fix.
 4. **Character continuity:** resolve client-shipped account hash material, atomic character creation, staged spawn hydration, and server-derived spawn correction (#201–#204) before broad feature work.
