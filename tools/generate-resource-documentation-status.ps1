@@ -63,6 +63,7 @@ $published = @{
     "sapt-system" = @{ Number = 512; Dossier = "docs/resources/sapt-system.md"; State = "Full manifest/player/staff/operator/database source review; issues #496-#500; individual Discussion published" }
     "sfia" = @{ Number = 513; Dossier = "docs/resources/sfia.md"; State = "Full manifest and major client/server workflow review; issues #501-#508; individual Discussion published" }
     "shader_car_paint" = @{ Number = 511; Dossier = "docs/resources/shader_car_paint.md"; State = "Full manifest/client/effect/direct-caller source review; issues #509-#510; individual Discussion published" }
+    "shader_radar" = @{ Number = 517; Dossier = "docs/resources/shader_radar.md"; State = "Full manifest/client/effect/settings/caller source review; issues #514-#516; individual Discussion published" }
     "mods" = @{ Dossier = "docs/resources/mods.md"; State = "Full manifest/two client scripts/server mall script review; issue #459; Discussion pending" }
     "factions" = @{ Number = 101; Dossier = "docs/resources/factions.md"; State = "Full manifest-script source review; individual Discussion published" }
     "item-system" = @{ Number = 102; Dossier = "docs/resources/item-system.md"; State = "Full manifest-script source review; individual Discussion published" }
