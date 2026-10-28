@@ -77,7 +77,7 @@ function RemovingSpikes(sourcePlayer, command, ID)
 				if (getDistanceBetweenPoints3D(x1, y1, z1, x2, y2, z2) <= 10) then
 					triggerEvent("sendAme", sourcePlayer, "reaches into the road retrieving the spike strip.")
 					outputChatBox("Removed spikes with ID:" .. message, sourcePlayer, 0, 194, 0)
-					exports.logs:dbLog(sourcePlayer, 28, sourcePlayer, "Spawned spike ID "..tostring(message))
+					exports.logs:dbLog(sourcePlayer, 28, sourcePlayer, "Removed spike ID "..tostring(message))
 					TotalSpikes = TotalSpikes -1
 					destroyElement(Spike[message])
 					Spike[message] = nil
