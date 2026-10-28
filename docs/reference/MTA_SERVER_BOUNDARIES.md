@@ -1,6 +1,6 @@
 # MTA server event and outbound request notes
 
-Last reviewed against the official Multi Theft Auto wiki: 2026-10-26. This is a practical project reference, not a substitute for the current API page or a runtime compatibility check against the selected server build.
+Last reviewed against the official Multi Theft Auto wiki: 2026-10-28. This is a practical project reference, not a substitute for the current API page or a runtime compatibility check against the selected server build.
 
 ## Remote client events
 
@@ -14,6 +14,7 @@ Official references:
 - [triggerServerEvent](https://wiki.multitheftauto.com/wiki/TriggerServerEvent) — event source is a client argument; use server-side `client` for remote requester identity.
 - [Event](https://wiki.multitheftauto.com/wiki/Event) — event variables, including `client`, `source`, `this`, and event propagation.
 - [addEvent](https://wiki.multitheftauto.com/wiki/AddEvent) — whether an event can be triggered remotely.
+- [isElement](https://wiki.multitheftauto.com/wiki/IsElement) and [getElementType](https://wiki.multitheftauto.com/wiki/GetElementType) — validate that a value is still an element before querying whether it is a player; `getElementType` returns `false` for invalid arguments.
 
 ## Element data and client state
 
