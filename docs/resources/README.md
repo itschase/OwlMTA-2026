@@ -73,6 +73,7 @@ Every dossier distinguishes source evidence from runtime verification. Presence 
 | Legacy GameMaster School form, retired theft posts, and alcohol overrides | [`forums`](forums.md) ([Issue #122](https://github.com/itschase/OwlMTA-2026/issues/122)) | Full manifest/script/caller review; forum retirement tracked; runtime unverified |
 | In-game GUI design and Lua code generation tool | [`guied`](guied.md) ([Issue #450](https://github.com/itschase/OwlMTA-2026/issues/450)) | Partial developer-tool/ACL/event review; runtime unverified |
 | Aggregate client display-resolution survey | [`hardwaresurvey`](hardwaresurvey.md) ([Issues #451](https://github.com/itschase/OwlMTA-2026/issues/451) and [#452](https://github.com/itschase/OwlMTA-2026/issues/452)) | Full manifest/event/persistence review; runtime unverified |
+| Item, artifact, and vehicle texture replacement and streaming | [`item-texture`](item-texture.md) ([Issues #453](https://github.com/itschase/OwlMTA-2026/issues/453)–[#455](https://github.com/itschase/OwlMTA-2026/issues/455)) | Partial caller/persistence/remote-event review; runtime unverified |
 
 ## Archived resource variants
 

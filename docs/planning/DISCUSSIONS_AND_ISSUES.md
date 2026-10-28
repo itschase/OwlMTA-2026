@@ -368,6 +368,9 @@ Issues #52 (MDC) and #55 (phone) were updated with the additional read, mutation
 - [Issue #450: Restrict GUI editor remote file reads to generated output files](https://github.com/itschase/OwlMTA-2026/issues/450)
 - [Issue #451: Initialize empty or malformed hardware survey JSON safely](https://github.com/itschase/OwlMTA-2026/issues/451)
 - [Issue #452: Validate and bound remotely submitted hardware survey samples](https://github.com/itschase/OwlMTA-2026/issues/452)
+- [Issue #453: Bind vehicle texture mutations to the authenticated caller](https://github.com/itschase/OwlMTA-2026/issues/453)
+- [Issue #454: Enforce image host and validation policy on the server](https://github.com/itschase/OwlMTA-2026/issues/454)
+- [Issue #455: Authorize and constrain client-requested texture streams](https://github.com/itschase/OwlMTA-2026/issues/455)
 
 The same-name archived copies have separate source identities. Their archive dossiers and separate `(archived)` Script Resource Discussions are indexed from [`docs/resources/README.md`](../resources/README.md). Archive reviews remain partial comparisons, not evidence of current availability or runtime behavior.
 - [Player Guide Q&A #389: How do I use and recharge a flashlight?](https://github.com/itschase/OwlMTA-2026/discussions/389)
