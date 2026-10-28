@@ -156,6 +156,28 @@ function remoteOrderSupplies(thePlayer, supplies, money, isAdmin, stockOnly)
 	local payer = payerOrReason
 	if payer == nil then payer = true end -- true means the player wallet
 	if payer ~= true and payer ~= false and not isElement(payer) then return false, "Invalid business payer." end
+	local function recordBankPayment(reason, details)
+		if payer == true or payer == false then return true end -- Wallet/admin orders are not bank transfers.
+		if not isElement(payer) then return true end -- Wallet/admin orders are not bank transfers.
+		local accountID
+		if getElementType(payer) == "team" then
+			local factionID = tonumber(getElementData(payer, "id"))
+			accountID = factionID and -factionID
+		elseif getElementType(payer) == "player" then
+			accountID = tonumber(getElementData(payer, "dbid"))
+		else
+			return false
+		end
+		if not accountID then
+			outputDebugString("[trucker] Could not resolve the account for a completed supply payment.", 1)
+			return false
+		end
+		if not exports.bank:addBankTransactionLog(accountID, 0, amount, 15, reason, details) then
+			outputDebugString("[trucker] Failed to record a completed supply payment for account " .. tostring(accountID), 1)
+			return false
+		end
+		return true
+	end
 
 	local x, y, z, name
 	if not stockOnly then
@@ -187,6 +209,7 @@ function remoteOrderSupplies(thePlayer, supplies, money, isAdmin, stockOnly)
 	end
 	if not charged then return false, "The selected payer no longer has enough money." end
 	if stockOnly then
+		recordBankPayment("Business stock restock", "Stock-only restock for interior #" .. tostring(getElementDimension(thePlayer)))
 		return true, "Shop stock payment completed."
 	end
 	local done, why = addOrder(getElementDimension(thePlayer), supplies, x, y, z, name)
@@ -197,9 +220,7 @@ function remoteOrderSupplies(thePlayer, supplies, money, isAdmin, stockOnly)
 			local gender = getElementData(thePlayer, 'gender')
 			local customerName = exports.global:getPlayerName(thePlayer)
 			notifyTruckers("RS Haul Operator: "..(gender == 0 and "Mr. " or "Mrs. ")..customerName.." ordered supplies to "..name..". Deliver them as soon as you can please.", true)
-			if isElement(payer) and getElementType(payer) == "team" then
-				exports.bank:addBankTransactionLog(-getElementData(payer, 'id'), 0, amount, 15, "RS Haul order for "..name.." ("..customerName..")", "RS Haul")
-			end
+			recordBankPayment("RS Haul order for "..name.." ("..customerName..")", "RS Haul")
 			exports["interior-manager"]:addInteriorLogs(getElementDimension(thePlayer), "ordersupplies ~ $"..amount, thePlayer)
 		end
 		return true, "Half of your order has been sent to the RS Haul delivery drivers."

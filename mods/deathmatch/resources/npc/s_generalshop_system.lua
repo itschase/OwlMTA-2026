@@ -833,8 +833,15 @@ function solvePendingWage(payer, ped, solver)
 		or (interiorID and (exports.global:hasItem(player, 4, interiorID) or exports.global:hasItem(player, 5, interiorID)))
 	local factionID = status and tonumber(status.faction)
 	local hasFactionAccess = factionID and factionID > 0 and exports.factions:hasMemberPermissionTo(player, factionID, "manage_finance")
-	if not hasAccess and not hasFactionAccess then
+	if factionID and factionID > 0 then
+		if not hasFactionAccess then return 0 end
+	elseif not hasAccess then
 		return 0
+	end
+	local wagePayer = player
+	if factionID and factionID > 0 then
+		wagePayer = exports.pool:getElement("team", factionID)
+		if not wagePayer or not isElement(wagePayer) then return 0 end
 	end
 
 	-- if wage is not positive, assuming everything is done
@@ -844,13 +851,19 @@ function solvePendingWage(payer, ped, solver)
 	end
 
 	-- preparing some info
-	local pedName = getPedName(ped)
 	local took_money = false
+	local paymentAvailable = false
 
-	-- Only the actual event caller can pay; never accept a client-selected team
-	-- or another player's element as the payer.
-	if exports.global:hasMoney(player, wage) then
+	-- Derive the payer from the business: the authenticated caller pays for a
+	-- player-owned business, while an authorized faction uses its bank account.
+	if wagePayer == player and exports.global:hasMoney(player, wage) then
+		paymentAvailable = true
 		if exports.global:takeMoney(player, wage) then
+			took_money = true
+		end
+	elseif wagePayer ~= player and exports.bank:hasBankMoney(wagePayer, wage) then
+		paymentAvailable = true
+		if exports.bank:takeBankMoney(wagePayer, wage) then
 			took_money = true
 		end
 	end
@@ -858,8 +871,23 @@ function solvePendingWage(payer, ped, solver)
 	-- now finally we can clear the wage on npc
 	if took_money then
 		if not setShopStats(ped, 'sPendingWage', 0) then
-			exports.global:giveMoney(player, wage)
+			local refunded
+			if wagePayer == player then
+				refunded = exports.global:giveMoney(player, wage)
+			else
+				refunded = exports.bank:giveBankMoney(wagePayer, wage)
+			end
+			if not refunded then
+				outputDebugString("[NPC] Failed to refund NPC wage after shop record update failure; shop #" .. tostring(getElementData(ped, "dbid")) .. ", actor #" .. tostring(getElementData(player, "dbid")), 1)
+				outputChatBox("The wage payment could not be reconciled. Please contact an administrator.", player, 255, 0, 0)
+			else
+				outputDebugString("[NPC] Refunded NPC wage after shop record update failure; shop #" .. tostring(getElementData(ped, "dbid")) .. ", actor #" .. tostring(getElementData(player, "dbid")), 2)
+			end
 			return 0
+		end
+		exports.anticheat:setEld(ped, "sPendingWage", 0, 'all')
+		if wagePayer ~= player then
+			exports.bank:addBankTransactionLog(-getElementData(wagePayer, 'id'), 0, wage, 3, 'NPC wage', getPedName(ped))
 		end
 		playPayWageSound(ped)
 		local id = getElementData(ped, 'dbid')
@@ -867,6 +895,9 @@ function solvePendingWage(payer, ped, solver)
 			loadOneShop(id)
 		end
 		return wage
+	end
+	if paymentAvailable then
+		outputDebugString("[NPC] Pending wage payment failed after a sufficient-balance check; shop #" .. tostring(getElementData(ped, "dbid")) .. ", actor #" .. tostring(getElementData(player, "dbid")), 1)
 	end
 
 	-- just in case
@@ -955,14 +986,19 @@ function updateShopSupplies(interiorID, supplies, thePlayer, cost, pedName)
 	if not player or not isElement(player) or getElementType(player) ~= "player" then return false end
 	if not isElement(source) or getElementType(source) ~= "interior" then return false end
 	local serverInteriorID = tonumber(getElementData(source, "dbid"))
-	if not serverInteriorID or getElementDimension(player) ~= serverInteriorID then return false end
+	if not serverInteriorID or getElementDimension(player) ~= serverInteriorID or exports.pool:getElement("interior", serverInteriorID) ~= source then return false end
 	local status = getElementData(source, "status")
 	if not status or tonumber(status.type) ~= 1 or type(supplies) ~= "table" then return false end
-	local shopPed
+	local shopPed, shopDistance
+	local px, py, pz = getElementPosition(player)
 	for _, ped in ipairs(getElementsByType("ped", resourceRoot)) do
-		if getElementData(ped, "shopkeeper") and getElementDimension(ped) == serverInteriorID then
-			shopPed = ped
-			break
+		if getElementData(ped, "shopkeeper") and getElementDimension(ped) == serverInteriorID and getElementInterior(ped) == getElementInterior(player) then
+			local sx, sy, sz = getElementPosition(ped)
+			local distance = getDistanceBetweenPoints3D(px, py, pz, sx, sy, sz)
+			if distance <= 5 and (not shopDistance or distance < shopDistance) then
+				shopPed = ped
+				shopDistance = distance
+			end
 		end
 	end
 	if not shopPed then return false end
@@ -1005,7 +1041,6 @@ function updateShopSupplies(interiorID, supplies, thePlayer, cost, pedName)
 	if success then
 		status.supplies = updatedSupplies
 		setElementData(source, "status", status)
-		exports.bank:addBankTransactionLog(getElementData(player, "dbid"), nil, serverCost, 0, "SHOP RESTOCK", "Purchased "..tostring(serverCost).."$ worth of supplies for business ID"..tostring(serverInteriorID), nil, nil)
 		storeKeeperSay(player, "We have stocked your business with half of your order. The other half has been sent to RS Haul delivery drivers.", getPedName(shopPed))
 	else
 		local rollback = mysql:query_free("UPDATE interiors SET supplies='" .. mysql:escape_string(previousSupplies or "{}") .. "' WHERE id='" .. serverInteriorID .. "'")
