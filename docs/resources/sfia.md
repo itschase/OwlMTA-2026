@@ -3,7 +3,7 @@
 **Resource:** `sfia`
 
 **Review state:** Manifest, server workflows, major client flows, database references, and in-repository callers reviewed statically. Runtime behavior is unverified.
-**Tracking:** Issues [#501](https://github.com/itschase/OwlMTA-2026/issues/501)–[#508](https://github.com/itschase/OwlMTA-2026/issues/508), assigned to `itschase` in [Milestone #7](https://github.com/itschase/OwlMTA-2026/milestone/7). The standardized `Script Resource: sfia` Discussion is pending publication.
+**Tracking:** Issues [#501](https://github.com/itschase/OwlMTA-2026/issues/501)–[#508](https://github.com/itschase/OwlMTA-2026/issues/508), assigned to `itschase` in [Milestone #7](https://github.com/itschase/OwlMTA-2026/milestone/7). Standardized resource Discussion: [#513](https://github.com/itschase/OwlMTA-2026/discussions/513).
 
 ## What the resource provides
 

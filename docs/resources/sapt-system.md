@@ -3,7 +3,7 @@
 **Resource:** `sapt-system`
 
 **Review state:** Full manifest, player workflow, server event, persistence, and direct-caller source review. Static evidence only; runtime behavior is unverified.
-**Tracking:** Issues [#496](https://github.com/itschase/OwlMTA-2026/issues/496)–[#500](https://github.com/itschase/OwlMTA-2026/issues/500), all assigned to `itschase` in [Milestone #7](https://github.com/itschase/OwlMTA-2026/milestone/7). The standardized `Script Resource: sapt-system` Discussion is not yet published.
+**Tracking:** Issues [#496](https://github.com/itschase/OwlMTA-2026/issues/496)–[#500](https://github.com/itschase/OwlMTA-2026/issues/500), all assigned to `itschase` in [Milestone #7](https://github.com/itschase/OwlMTA-2026/milestone/7). Standardized resource Discussion: [#512](https://github.com/itschase/OwlMTA-2026/discussions/512).
 
 ## What it does
 
