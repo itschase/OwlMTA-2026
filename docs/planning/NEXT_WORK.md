@@ -1,12 +1,14 @@
 # Next work record
 
-Last updated: 2026-10-28 after adding server-side authentication input bounds and request budgets.
+Last updated: 2026-10-28 after retiring the unreferenced password-changing maintenance script.
 
 ## Latest continuation — privileged developer execution boundary
 
 Commit [`46b79d7`](https://github.com/itschase/OwlMTA-2026/commit/46b79d7) hardens `[dev]/runcode`: remote execution/log events authenticate MTA's `client`, recheck existing Lead Scripter permission, ignore caller-supplied actor/source, reject empty/non-string/over-16-KiB payloads, and record outcome/side/size without logging submitted code. Unauthorized-attempt logs are rate-limited per player. Removed the `runString` client/server exports after repository-wide search found no in-tree callers; external dependencies remain unknown. The resource is not startup-listed. No MTA server or automated tests were run. Issue #443 remains open for disposable runtime/ACL verification.
 
-The MySQL resource's five credential getters were removed from `mysql_external_module.lua` and its manifest after repository-wide search found no in-tree caller. This prevents dependent resources from reading connection username/password/endpoint values through those legacy exports. External resource compatibility and runtime behavior remain unverified under Issue #460; do not assume deployments have no out-of-repository caller.
+The MySQL resource's five credential getters were removed from `mysql_external_module.lua` and its manifest after repository-wide search found no in-tree caller. This prevents dependent resources from reading connection username/password/endpoint values through those legacy exports. External resource compatibility and runtime behavior remain unverified under Issue #460; do not assume deployments have no out-of-repository caller. Commit `533851a` contains the source change.
+
+The file `mysql/s_server_global_maintenance.lua` contained a historical literal server password and password mutations, but the current `mysql/meta.xml` did not load it and no source callers were found. The unreferenced file was removed rather than activated. The historical literal remains in Git history, so rotate it if it was ever deployed. No backup/kick automation is provided by the active resource; any replacement must be operator-configured and tied to a real backup workflow. Issue #461 remains open for exposure review and replacement planning. Static source review only; no server was run.
 
 ## Latest continuation — authentication boundary guards
 
@@ -27,7 +29,7 @@ Corrected Issues [#527](https://github.com/itschase/OwlMTA-2026/issues/527) and 
 3. **Session authority:** bind session creation, resource-restart behavior, unlink/revocation, and expiry to one account/session contract (#68/#96). Existing restart behavior and disconnect-dependent logout remain source-level gaps, not solved by the device-gate fix.
 4. **Character continuity:** resolve client-shipped account hash material, atomic character creation, staged spawn hydration, and server-derived spawn correction (#201–#204) before broad feature work.
 5. **Staff authority:** reconcile role-to-capability policy and durable GameMaster grants (#3/#14), while preserving local character, faction, duty, ownership, and action checks. Donor tiers remain separate from staff authority.
-6. **Privileged tooling:** keep `runcode` disabled until the source hardening is committed and its direct-event, permission, logging, and effective ACL/startup behavior are verified in the disposable environment ([#443](https://github.com/itschase/OwlMTA-2026/issues/443)).
+6. **Privileged tooling:** keep `runcode` disabled until its committed source hardening and direct-event, permission, logging, and effective ACL/startup behavior are verified in the disposable environment ([#443](https://github.com/itschase/OwlMTA-2026/issues/443)).
 7. **Safe-start gate:** complete the static resource/config/schema/dependency review and the disposable boot preflight in [`SAFE_START_PREFLIGHT.md`](SAFE_START_PREFLIGHT.md) before starting MTA.
 
 This ordering puts cross-cutting identity, session, character, and privileged execution guarantees ahead of lower-impact individual resource catalog entries. Issue and resource status remains source-confirmed unless a later disposable runtime record says otherwise.

@@ -1,7 +1,6 @@
 <meta>
         <info author="OwlGaming MTA Server Development Team" type="script" description=""/>
 		<oop>true</oop>
-
         <script src="mysql.lua" type="server"/>
 		<export function="getConn" type="server" http="false" />
 		<export function="getSmallestID" type="server" http="false" />

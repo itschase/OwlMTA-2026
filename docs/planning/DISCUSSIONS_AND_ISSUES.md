@@ -367,7 +367,7 @@ Issues #52 (MDC) and #55 (phone) were updated with the additional read, mutation
 - [Issue #437: Bind language preference events to their authenticated owner](https://github.com/itschase/OwlMTA-2026/issues/437)
 - [Issue #438: Select an occupied language slot after unlearning](https://github.com/itschase/OwlMTA-2026/issues/438)
 - [Issue #442: Align performance-browser command and telemetry access policy](https://github.com/itschase/OwlMTA-2026/issues/442)
-- [Issue #443: Restrict remote server-side Lua execution to Lead Scripters](https://github.com/itschase/OwlMTA-2026/issues/443)
+- [Issue #443: Enforce and verify server-side execution authorization](https://github.com/itschase/OwlMTA-2026/issues/443)
 - [Issue #444: Bind diagnosis approval and character data to authenticated players](https://github.com/itschase/OwlMTA-2026/issues/444)
 - [Issue #445: Derive treatment target, price, and payment server-side](https://github.com/itschase/OwlMTA-2026/issues/445)
 - [Issue #446: Restrict ped diagnosis lookup to the caller's active character](https://github.com/itschase/OwlMTA-2026/issues/446)

@@ -3,7 +3,7 @@
 ## Status and evidence
 
 - Resource path: `mods/deathmatch/resources/mysql`.
-- Source review: manifest, connection bootstrap, exported legacy query helpers, lazy query writer, migration helper, and daily maintenance script reviewed as an initial API/security pass. Complete call-site and SQL/schema audit is still required.
+- Source review: manifest, connection bootstrap, exported legacy query helpers, lazy query writer, migration helper, and the retired unreferenced maintenance script reviewed as an initial API/security pass. Complete call-site and SQL/schema audit is still required.
 - Runtime: unverified. No database connection or MTA server was started.
 - Startup snapshot: enabled in `mtaserver.conf.bak`; this is not proof of live configuration.
 - GitHub record: [Script Resources Discussion #123](https://github.com/itschase/OwlMTA-2026/discussions/123); findings tracked by [Issues #460](https://github.com/itschase/OwlMTA-2026/issues/460)–[#463](https://github.com/itschase/OwlMTA-2026/issues/463), all assigned to [Milestone #7: Resource Audit and Security Baseline](https://github.com/itschase/OwlMTA-2026/milestone/7).
@@ -32,11 +32,11 @@ Legacy query results are exposed as numeric indices into `resultPool` and paired
 - `lazyquery.lua` appends free-form messages to `/maxime.log`. This is a single local file rather than structured, categorized logs, and needs retention/size/error policy before production use.
 - The database wrappers log errors and may keep query strings for diagnostics. Before enabling SQL logging, assess whether statements can contain passwords, personal data, tokens, or other secrets.
 
-## Daily maintenance script: urgent operator boundary
+## Retired daily maintenance script
 
-`s_server_global_maintenance.lua` starts a one-minute timer. At a fixed local server hour it broadcasts warnings, later kicks every player, and modifies the server password. On resource startup it also clears an existing password. The source contains a committed literal password; it is not repeated in this public dossier. Treat it as exposed. Issue #461 tracks removing the static credential and password mutation, making maintenance explicitly operator-configured, and validating its safe lifecycle.
+The removed `s_server_global_maintenance.lua` file was present in the resource folder but was not declared by `mysql/meta.xml`, and repository search found no caller for its functions. Its source nevertheless contained a committed server password, cleared the configured password on startup, and described a warning/kick schedule without implementing backups or restart. Because the file was not loaded by the checked-in manifest, its runtime effect is not established; do not claim those password changes were active. The obsolete file was removed in commit `TODO` rather than enabling an unsafe, unconfigured scheduler.
 
-The maintenance code is loaded in this database resource, so database startup also changes access control. Separate backup orchestration and server admission policy from the query layer during redesign.
+The literal remains in Git history and must be treated as exposed. Rotate it anywhere it may have been deployed. If server maintenance automation is needed later, build it as an explicit operator feature tied to a real backup/restart workflow, with safe defaults and no password mutation. Issue #461 tracks exposure/compatibility checks and the replacement design.
 
 ## Discord/API and operator design
 
@@ -44,7 +44,7 @@ Database credentials must remain server-side and must never be returned by an AP
 
 ## Follow-up
 
-1. Remove password getters and rotate the committed literal wherever it could have been deployed; resolve #460–#461.
+1. Verify external compatibility for the removed credential getters and rotate the historical maintenance password wherever it could have been deployed; define any future backup/maintenance scheduler as a separate operator workflow under #460–#461.
 2. Restore or retire the declared forum exports and their remaining callers; resolve #462.
 3. Enumerate every exported function caller and classify the newer `db*` API versus legacy module path; resolve result-handle stability in #463.
 4. Review `meta.xml` export HTTP flags and current MTA defaults against the target release; do not infer HTTP exposure from omitted attributes.
