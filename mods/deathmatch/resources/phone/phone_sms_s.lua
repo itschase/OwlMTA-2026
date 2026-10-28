@@ -87,7 +87,7 @@ local function sendSMSForPlayer(player, from, to, content, showChatNotification)
         local ringtone
         powerOn, ringtone, isSecret = getPhoneSettings(from, true)
     end
-    private = tonumber(isSecret) == 1 and 1 or 0
+    local private = tonumber(isSecret) == 1 and 1 or 0
     if not from or not to or not content or type(content) ~= "string" or string.len(content) < 1 or string.len(content) > 120 then
         return false
     end

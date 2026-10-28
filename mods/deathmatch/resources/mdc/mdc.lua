@@ -175,8 +175,8 @@ function login( charid, silent )
 		end
 	else
 		dbFree( accountQuery )
+		exports.anticheat:setEld( requester, "mdc_account", false, 'one' )
 		if not silent then
-			exports.anticheat:setEld( requester, "mdc_account", false, 'one' )
 			outputChatBox( "You do not have an account with sufficient access to use the MDC.", requester, 255, 155, 155 )
 		end
 	end
