@@ -1,6 +1,6 @@
 # Next work record
 
-Last updated: 2026-10-27 after publishing the `realtime-system` Discussion.
+Last updated: 2026-10-27 after publishing the `release-notes` Discussion.
 
 ## Latest continuation — attachment, legacy forum, and GUI development tools
 
@@ -247,3 +247,9 @@ Published and verified [Script Resource: ramp-system #479](https://github.com/it
 Completed the active `realtime-system` resource review. Its dossier describes the GTA/server clock sync, resource offset, minute alignment, per-player interior updates, `interior_system` settings, player and staff commands, the disabled `c_clock.lua`, and boundaries for future dashboard/Discord work. Published [Script Resource: realtime-system #483](https://github.com/itschase/OwlMTA-2026/discussions/483). Issues [#480](https://github.com/itschase/OwlMTA-2026/issues/480)–[#482](https://github.com/itschase/OwlMTA-2026/issues/482) are assigned to `itschase`, linked to the dossier and discussion, and filed under Milestone #7. MTA docs confirm `setTime` accepts hours 0–23 and minutes 0–59, and that server-side `getRealTime` follows the server's local timezone by default. This remains static review only; no runtime checks were performed.
 
 Next cataloged-only active resource in the ledger: `release-notes`. Audit its manifest-loaded code, where release notes originate, player display flow, operator editing/publishing path, file or database persistence, startup dependencies, and duplicate tracker coverage. Then publish the one-to-one `Script Resource: release-notes` thread and update the dossier, index, generator, CSV, and issue tracker together.
+
+## Latest continuation — release-notes resource audit
+
+Completed the `release-notes` audit and published [Script Resource: release-notes #486](https://github.com/itschase/OwlMTA-2026/discussions/486). The dossier documents player display, staff/operator gaps, SQL and cache behavior, startup dependencies, the legacy bug-site text, and its missing active opener. Issues [#484](https://github.com/itschase/OwlMTA-2026/issues/484) and [#485](https://github.com/itschase/OwlMTA-2026/issues/485) are assigned to `itschase`, linked to the dossier/discussion, and tracked in Milestone #7. The SQL table is not declared in checked-in schema snapshots; deployed DB presence remains unknown.
+
+Next cataloged-only active resource: `roadblock-system`. Inspect the manifest-loaded player deployment flow, inventory/item checks, persistence and cleanup, staff/operator controls, direct callers, and existing tracker overlap. Continue distinguishing source findings from runtime effects; do not start MTA until the safe-start gates are satisfied.
