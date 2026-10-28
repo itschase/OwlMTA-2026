@@ -142,7 +142,7 @@ The durability, shared-assets, entitlement, duty, public-safety, and property ba
 | core | `rightclick` | Active tree | 0 | 1 | Rightclick menu system | `mods/deathmatch/resources/rightclick/meta.xml` |
 | core | `roadblock-system` | Active tree | 2 | 2 | Roadblock System | `mods/deathmatch/resources/roadblock-system/meta.xml` |
 | core | `san` | Active tree | 1 | 1 | SAN System | `mods/deathmatch/resources/san/meta.xml` |
-| core | `sapt-system` | Active tree | 2 | 2 | No description declared in meta.xml; source-level purpose review pending. | `mods/deathmatch/resources/sapt-system/meta.xml` |
+| core | `sapt-system` | Active tree | 2 | 2 | San Andreas Public Transport bus routes and IBIS. | `mods/deathmatch/resources/sapt-system/meta.xml` |
 | core | `saveplayer-system` | Active tree | 1 | 0 | Save Player System | `mods/deathmatch/resources/saveplayer-system/meta.xml` |
 | core | `scoreboard` | Active tree | 1 | 1 | No description declared in meta.xml; source-level purpose review pending. | `mods/deathmatch/resources/scoreboard/meta.xml` |
 | core | `selfck-system` | Active tree | 1 | 1 | Self-CK System | `mods/deathmatch/resources/selfck-system/meta.xml` |

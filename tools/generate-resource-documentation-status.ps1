@@ -60,6 +60,7 @@ $published = @{
     "release-notes" = @{ Number = 486; Dossier = "docs/resources/release-notes.md"; State = "Full manifest/player/server/SQL snapshot/caller review; issues #484-#485; individual Discussion published" }
     "roadblock-system" = @{ Number = 490; Dossier = "docs/resources/roadblock-system.md"; State = "Full manifest/player/staff/dependency and direct spike-consumer review; issues #487-#489; individual Discussion published" }
     "san" = @{ Number = 494; Dossier = "docs/resources/san.md"; State = "Full manifest/player/staff/direct-caller review; issues #491-#493; individual Discussion published" }
+    "sapt-system" = @{ Dossier = "docs/resources/sapt-system.md"; State = "Full manifest/player/staff/operator/database source review; issues #496-#500; individual Discussion publication pending" }
     "mods" = @{ Dossier = "docs/resources/mods.md"; State = "Full manifest/two client scripts/server mall script review; issue #459; Discussion pending" }
     "factions" = @{ Number = 101; Dossier = "docs/resources/factions.md"; State = "Full manifest-script source review; individual Discussion published" }
     "item-system" = @{ Number = 102; Dossier = "docs/resources/item-system.md"; State = "Full manifest-script source review; individual Discussion published" }
