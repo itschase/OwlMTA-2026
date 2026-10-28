@@ -211,10 +211,19 @@ function setbikeimpound(player, matchingDimension)
 end
 addCommandHandler("impoundbike", setbikeimpound)
 
+local function refundReleaseCharge(player, vehicleID, reason)
+	if exports.global:giveMoney(player, 1000) then
+		return true
+	end
+	outputDebugString("[TOW] Failed to refund vehicle release payment for vehicle #" .. tostring(vehicleID)
+		.. " player #" .. tostring(getElementData(player, "dbid")) .. " (" .. reason .. ")", 1)
+	return false
+end
+
 function payRelease(vehid)
 	local player = client
 	local vehicleID = tonumber(vehid)
-	if not player or not isElement(player) or getElementType(player) ~= "player" or not vehicleID then
+	if not player or not isElement(player) or getElementType(player) ~= "player" or not vehicleID or vehicleID <= 0 or vehicleID % 1 ~= 0 then
 		return false
 	end
 	if not isElementWithinColShape(player, towImpoundSphere) then
@@ -229,8 +238,9 @@ function payRelease(vehid)
 	local owner = tonumber(getElementData(vehID, "owner"))
 	local characterID = tonumber(getElementData(player, "dbid"))
 	local factionID = tonumber(getElementData(vehID, "faction"))
-	local impounder = tonumber(getElementData(vehID, "impounder")) or towingFactionID
+	local impounder = tonumber(getElementData(vehID, "impounder"))
 	local impounded = tonumber(getElementData(vehID, "Impounded")) or 0
+	if getElementData(player, "loggedin") ~= 1 or not characterID or characterID <= 0 then return false end
 	local ownsVehicle = owner and owner > 0 and owner == characterID
 	local factionMember = factionID and factionID > 0 and exports.factions:isPlayerInFaction(player, factionID)
 	if impounded == 0 or impounder ~= towingFactionID or not (ownsVehicle or factionMember) then
@@ -244,16 +254,34 @@ function payRelease(vehid)
 	if exports.global:takeMoney(player, 1000) then
         local towingFactionTeam = exports.factions:getFactionFromID(towingFactionID)
 		if not towingFactionTeam or not isElement(towingFactionTeam) then
-			exports.global:giveMoney(player, 1000)
-			outputChatBox("The towing faction is unavailable; no money was charged.", player, 255, 0, 0)
+			if refundReleaseCharge(player, vehicleID, "towing faction unavailable") then
+				outputChatBox("The towing faction is unavailable; your payment was refunded.", player, 255, 0, 0)
+			else
+				outputChatBox("The release payment could not be reconciled. Please contact an administrator.", player, 255, 0, 0)
+			end
 			return false
 		end
-        exports.global:giveMoney(towingFactionTeam, 1000) --give money to towing faction
+		if not exports.global:giveMoney(towingFactionTeam, 1000) then
+			if refundReleaseCharge(player, vehicleID, "towing faction credit failed") then
+				outputChatBox("The towing faction could not be credited; your payment was refunded.", player, 255, 0, 0)
+			else
+				outputChatBox("The release payment could not be reconciled. Please contact an administrator.", player, 255, 0, 0)
+			end
+			return false
+		end
 		local logged = exports.mysql:query_free( "INSERT INTO wiretransfers (`from`, `to`, `amount`, `reason`, `type`) VALUES (" .. exports.mysql:escape_string(characterID) .. ", " .. -towingFactionID .. ", " .. 1000 .. ", 'Vehicle Release', 16)" )
 		if not logged then
-			exports.global:takeMoney(towingFactionTeam, 1000)
-			exports.global:giveMoney(player, 1000)
-			outputChatBox("The release could not be recorded; no money was charged.", player, 255, 0, 0)
+			local reversed = exports.global:takeMoney(towingFactionTeam, 1000)
+			if reversed then
+				if refundReleaseCharge(player, vehicleID, "release journal insert failed") then
+					outputChatBox("The release could not be recorded; your payment was refunded.", player, 255, 0, 0)
+				else
+					outputChatBox("The release payment could not be reconciled. Please contact an administrator.", player, 255, 0, 0)
+				end
+			else
+				outputDebugString("[TOW] Failed to reverse faction credit after release journal failure for vehicle #"..vehicleID, 1)
+				outputChatBox("The release payment could not be reconciled. Please contact an administrator.", player, 255, 0, 0)
+			end
 			return false
 		end
         setElementFrozen(vehID, false)
@@ -271,7 +299,9 @@ function payRelease(vehid)
 
 		outputChatBox("Your vehicle has been released, it's out front. (( Please remember to /park your vehicle so it does not respawn back here. ))", player, 255, 194, 14)
     else
-		outputChatBox("Insufficient funds.", player, 255, 0, 0)
+		outputDebugString("[TOW] Release debit failed after balance check for vehicle #" .. tostring(vehicleID)
+			.. " player #" .. tostring(characterID), 1)
+		outputChatBox("The release payment could not be processed. Please try again or contact an administrator.", player, 255, 0, 0)
     end
 end
 addEvent("releaseCar", true)
