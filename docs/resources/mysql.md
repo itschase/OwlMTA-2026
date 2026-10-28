@@ -16,9 +16,9 @@ This is a critical dependency: failures here affect account, character, economy,
 
 ## Manifest and exported API
 
-`meta.xml` loads `mysql.lua`, `lazyquery.lua`, `migrations.lua`, and `mysql_external_module.lua` server-side. It exports `getConn`, `getSmallestID`, `lazyQuery`, connection setting getters, legacy query/result helpers, and generic `select`, `insert`, `update`, and `delete` helpers. The legacy module maintains query/result pools and offers `escape_string`; most consumers build SQL strings directly and call these exports.
+`meta.xml` loads `mysql.lua`, `lazyquery.lua`, `migrations.lua`, and `mysql_external_module.lua` server-side. It exports `getConn`, `getSmallestID`, `lazyQuery`, legacy query/result helpers, and generic `select`, `insert`, `update`, and `delete` helpers. The legacy module maintains query/result pools and offers `escape_string`; most consumers build SQL strings directly and call these exports.
 
-Five getters return database username, password, database name, host, and port directly. Repository search found no in-tree Lua caller for them. Any external server resources must be checked before removal. Issue #460 tracks removing these unnecessary credential exports and replacing any required use with narrow data APIs.
+Five legacy getters exposed the configured database username, password, database name, host, and port. A full repository source search found no caller, so their definitions and exports were removed in commit `TODO`. Any external server resources must be checked for compatibility before deployment. Runtime behavior remains unverified; Issue #460 tracks that compatibility check and confirmation that secret values are no longer exported.
 
 The manifest also declares four forum query exports that have no matching function definitions or forum connection setup in the current resource. The RP help/news path still calls `forum_query_fetch_assoc`. Three other legacy getters return `db`, `host`, and `externalprefix`, while the current connection bootstrap populates `database`, `hostname`, and other differently named settings. Issue #462 tracks deciding whether to restore this legacy integration or retire it with every caller handled.
 

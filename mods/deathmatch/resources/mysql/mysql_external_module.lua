@@ -15,27 +15,6 @@ local queryPool = { }
 local sqllog = false
 local countqueries = 0
 
-
-function getMySQLUsername()
-	return username
-end
-
-function getMySQLPassword()
-	return password
-end
-
-function getMySQLDBName()
-	return db
-end
-
-function getMySQLHost()
-	return host
-end
-
-function getMySQLPort()
-	return port
-end
-
 function getForumsPrefix()
 	return externalprefix
 end
