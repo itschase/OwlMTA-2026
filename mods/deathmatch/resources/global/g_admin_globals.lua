@@ -58,7 +58,8 @@ function getGameMasters()
 	local players = exports.pool:getPoolElementsByType("player")
 	local gameMasters = { }
 	for key, value in ipairs(players) do
-		if exports.integration:isPlayerSupporter(value) then
+		local gameMasterLevel = tonumber(getElementData(value, "account:gmlevel")) or 0
+		if getElementData(value, "loggedin") == 1 and gameMasterLevel > 0 then
 			table.insert(gameMasters, value)
 		end
 	end

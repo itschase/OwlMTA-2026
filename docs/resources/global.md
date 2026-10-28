@@ -33,7 +33,7 @@ Its blast radius is exceptional: roughly 370 Lua files call `global`. Frequently
 - Money exports perform SQL, cash-item rebuild, protected element data, and effects separately, ignore some outcomes, and require no actor/reason/correlation/idempotency. [Issue #209](https://github.com/itschase/OwlMTA-2026/issues/209).
 - Inventory wrappers are untyped passthrough calls with no dependency readiness or normalized failure contract.
 - Local text, me/do action, and 3D-sound remote events trust caller-selected actor/source, range/audience, message/media, and volume. [Issue #210](https://github.com/itschase/OwlMTA-2026/issues/210).
-- The manifest declares several GameMaster exports with no active definitions; current helpers also mix supporter/donor and staff semantics. Issues #3, #14, #23, and #68 own capability separation.
+- The server `getGameMasters()` helper previously returned every supporter; it now requires a logged-in player with an explicit positive `account:gmlevel`. Donor status alone no longer places a player in server-side GameMaster lists/report routing. The durable grant/assignment path and several manifest-declared GameMaster exports remain unresolved under Issues #3, #14, #23, and #68.
 - Export realm, input/output/error contracts, restart behavior, and compatibility are undocumented across hundreds of callers. [Issue #208](https://github.com/itschase/OwlMTA-2026/issues/208).
 - The legacy ban facade is inactive/broken and should defer to `bans`, not become parallel authority.
 - Account-result cleanup, smallest-ID allocation, element guards, item-space slot selection, sound-volume application, country parsing, and century leap-year handling contain source-confirmed correctness risks.
