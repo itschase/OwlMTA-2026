@@ -8,10 +8,14 @@ local helpMessageTime = 4000
 local helpMessageY = 0.2]]
 
 local bEffectEnabled
-local noiseTexture
 local snowShader
 local treeShader
 local naughtyTreeShader
+local sNoiseTexture
+local vehTimer
+local doneVehTexRemove = {}
+local lastveh, lastid
+local checkCurrentVehicle, removeVehTexturesSoon, removeVehTextures
 
 ----------------------------------------------------------------
 ----------------------------------------------------------------
@@ -156,27 +160,78 @@ function enableGoundSnow()
 		return
 	end
 
-	snowShader = dxCreateShader ( "snow_ground.fx", 0, maxEffectDistance )
-	treeShader = dxCreateShader( "snow_trees.fx" )
-	naughtyTreeShader = dxCreateShader( "snow_naughty_trees.fx" )
-	sNoiseTexture = dxCreateTexture( "smallnoise3d.dds" )
-
-	if not snowShader or not treeShader or not naughtyTreeShader or not sNoiseTexture then
-		--outputChatBox( "Could not create shader. Please use debugscript 3" )
-		return nil
+	-- Keep allocations local until the full shader set is ready. A failed DX
+	-- allocation or uniform update must not strand earlier elements.
+	local created = {}
+	local function createShader(path, priority, distance)
+		local shader = dxCreateShader(path, priority, distance)
+		if shader then
+			table.insert(created, shader)
+		else
+			outputDebugString("[shader_snow_ground] Failed to create shader: " .. path, 2)
+		end
+		return shader
+	end
+	local function createTexture(path)
+		local texture = dxCreateTexture(path)
+		if texture then
+			table.insert(created, texture)
+		else
+			outputDebugString("[shader_snow_ground] Failed to create texture: " .. path, 2)
+		end
+		return texture
+	end
+	local function releaseCreated()
+		for _, element in ipairs(created) do
+			if isElement(element) then
+				destroyElement(element)
+			end
+		end
 	end
 
-	-- Setup shaders
-	dxSetShaderValue( treeShader, "sNoiseTexture", sNoiseTexture )
-	dxSetShaderValue( naughtyTreeShader, "sNoiseTexture", sNoiseTexture )
-	dxSetShaderValue( snowShader, "sNoiseTexture", sNoiseTexture )
-	dxSetShaderValue( snowShader, "sFadeEnd", maxEffectDistance )
-	dxSetShaderValue( snowShader, "sFadeStart", maxEffectDistance/2 )
+	local newSnowShader = createShader("snow_ground.fx", 0, maxEffectDistance)
+	local newTreeShader = createShader("snow_trees.fx")
+	local newNaughtyTreeShader = createShader("snow_naughty_trees.fx")
+	local newNoiseTexture = createTexture("smallnoise3d.dds")
+	if not newSnowShader or not newTreeShader or not newNaughtyTreeShader or not newNoiseTexture then
+		releaseCreated()
+		return false
+	end
+
+	local uniforms = {
+		{ newTreeShader, "sNoiseTexture", newNoiseTexture },
+		{ newNaughtyTreeShader, "sNoiseTexture", newNoiseTexture },
+		{ newSnowShader, "sNoiseTexture", newNoiseTexture },
+		{ newSnowShader, "sFadeEnd", maxEffectDistance },
+		{ newSnowShader, "sFadeStart", maxEffectDistance / 2 },
+	}
+	for _, uniform in ipairs(uniforms) do
+		if not dxSetShaderValue(uniform[1], uniform[2], uniform[3]) then
+			outputDebugString("[shader_snow_ground] Failed to set shader value: " .. uniform[2], 2)
+			releaseCreated()
+			return false
+		end
+	end
+
+	snowShader = newSnowShader
+	treeShader = newTreeShader
+	naughtyTreeShader = newNaughtyTreeShader
+	sNoiseTexture = newNoiseTexture
+
+	local function applyPatterns(shader, patterns, label)
+		local failedPatterns = {}
+		for _, pattern in ipairs(patterns) do
+			if not engineApplyShaderToWorldTexture(shader, pattern) then
+				table.insert(failedPatterns, pattern)
+			end
+		end
+		if #failedPatterns > 0 then
+			outputDebugString("[shader_snow_ground] Failed to apply " .. label .. " to texture pattern(s): " .. table.concat(failedPatterns, ", "), 2)
+		end
+	end
 
 	-- Process snow apply list
-	for _,applyMatch in ipairs(snowApplyList) do
-		engineApplyShaderToWorldTexture ( snowShader, applyMatch )
-	end
+	applyPatterns(snowShader, snowApplyList, "ground shader")
 
 	-- Process snow remove list
 	for _,removeMatch in ipairs(snowRemoveList) do
@@ -184,18 +239,19 @@ function enableGoundSnow()
 	end
 
 	-- Process tree apply list
-	for _,applyMatch in ipairs(treeApplyList) do
-		engineApplyShaderToWorldTexture ( treeShader, applyMatch )
-	end
+	applyPatterns(treeShader, treeApplyList, "tree shader")
 
 	-- Process naughty tree apply list
-	for _,applyMatch in ipairs(naughtyTreeApplyList) do
-		engineApplyShaderToWorldTexture ( naughtyTreeShader, applyMatch )
-	end
+	applyPatterns(naughtyTreeShader, naughtyTreeApplyList, "alternate tree shader")
 
 	-- Init vehicle checker
 	doneVehTexRemove = {}
 	vehTimer = setTimer( checkCurrentVehicle, 100, 0 )
+	if not vehTimer then
+		outputDebugString("[shader_snow_ground] Failed to start vehicle texture cleanup timer", 2)
+		disableGoundSnow()
+		return false
+	end
 	removeVehTextures()
 
 	-- Flag effect as running
@@ -208,15 +264,38 @@ end
 -- Switch effect off
 --------------------------------
 function disableGoundSnow()
-	if not bEffectEnabled then return end
+	if not bEffectEnabled and not snowShader and not treeShader and not naughtyTreeShader and not sNoiseTexture then return end
+
+	-- Remove world associations before destroying the DX elements. This also
+	-- makes cleanup safe if initialization was interrupted after allocation.
+	if snowShader then
+		for _, match in ipairs(snowApplyList) do
+			engineRemoveShaderFromWorldTexture(snowShader, match)
+		end
+	end
+	if treeShader then
+		for _, match in ipairs(treeApplyList) do
+			engineRemoveShaderFromWorldTexture(treeShader, match)
+		end
+	end
+	if naughtyTreeShader then
+		for _, match in ipairs(naughtyTreeApplyList) do
+			engineRemoveShaderFromWorldTexture(naughtyTreeShader, match)
+		end
+	end
 
 	-- Destroy all elements
-	destroyElement( sNoiseTexture  )
-	destroyElement( treeShader )
-	destroyElement( naughtyTreeShader )
-	destroyElement( snowShader )
-
-	killTimer( vehTimer )
+	if sNoiseTexture and isElement(sNoiseTexture) then destroyElement(sNoiseTexture) end
+	if treeShader and isElement(treeShader) then destroyElement(treeShader) end
+	if naughtyTreeShader and isElement(naughtyTreeShader) then destroyElement(naughtyTreeShader) end
+	if snowShader and isElement(snowShader) then destroyElement(snowShader) end
+	if isTimer(vehTimer) then
+		killTimer(vehTimer)
+	end
+	sNoiseTexture, treeShader, naughtyTreeShader, snowShader = nil, nil, nil, nil
+	vehTimer = nil
+	doneVehTexRemove = {}
+	lastveh, lastid = nil, nil
 
 	-- Flag effect as stopped
 	bEffectEnabled = false
@@ -237,7 +316,7 @@ addEventHandler( "onClientPlayerVehicleEnter", root,
 )
 
 -- Called every 100ms
-function checkCurrentVehicle ()
+checkCurrentVehicle = function ()
 	local veh = getPedOccupiedVehicle(localPlayer)
 	local id = veh and getElementModel(veh)
 	if lastveh ~= veh or lastid ~= id then
@@ -252,13 +331,14 @@ function checkCurrentVehicle ()
 end
 
 -- Called the players current vehicle need processing
-function removeVehTexturesSoon ()
+removeVehTexturesSoon = function ()
 	nextCheckTime = getTickCount() + 200
 end
 
 -- Remove textures from players vehicle from effect
-function removeVehTextures ()
+removeVehTextures = function ()
 	if not bHasFastRemove then return end
+	if not snowShader then return end
 
 	local veh = getPedOccupiedVehicle(localPlayer)
 	if veh then
@@ -357,7 +437,7 @@ end
 addEvent("shader_snow_ground:applySlippery", true)
 addEventHandler("shader_snow_ground:applySlippery", root, applySlippery)
 
-addEventHandler("OnClientVehicleExit", getRootElement(),
+addEventHandler("onClientVehicleExit", root,
 	function(thePlayer, seat)
 		if thePlayer == getLocalPlayer() then
 			setGravity ( 0.008 )
