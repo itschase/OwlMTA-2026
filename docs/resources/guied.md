@@ -2,6 +2,8 @@
 
 **Review state:** Active manifest, documented player/developer workflows, startup inventory, remote server-event surface, and declared ACL requests reviewed. The editor contains many client modules; individual GUI creation, code-generation, and parser paths still need a deeper function-level audit. No MTA runtime test was run.
 
+**GitHub record:** [Script Resource Discussion #543](https://github.com/itschase/OwlMTA-2026/discussions/543); [Issue #450](https://github.com/itschase/OwlMTA-2026/issues/450) tracks the remote output-file allowlist.
+
 ## Purpose and use
 
 `guied` is a developer tool for assembling and adjusting MTA GUI elements in-game, then generating Lua code to copy into a resource or save under the editor's output directory. The in-game help documents `/guied` and Shift+G for toggling it. The editor supports menus, property editing, move/resize, snapping, undo/redo, tutorials, image/font selection, code loading/output, local generated-file browsing, and consent-based sharing with another connected player. It is not a player-facing roleplay interface framework and does not provide a general server management dashboard.

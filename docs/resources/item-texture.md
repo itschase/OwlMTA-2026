@@ -2,6 +2,8 @@
 
 **Review state:** Partial active manifest, item/artifact/world-item/vehicle persistence and caller review, plus remote stream and vehicle mutation boundary review. The client shader lifecycle and every model/texture lookup path still need a complete file-by-file pass; runtime remains unverified.
 
+**GitHub record:** [Script Resource Discussion #538](https://github.com/itschase/OwlMTA-2026/discussions/538); Issues [#453](https://github.com/itschase/OwlMTA-2026/issues/453)–[#455](https://github.com/itschase/OwlMTA-2026/issues/455) track mutation and outbound-fetch boundaries, and [#540](https://github.com/itschase/OwlMTA-2026/issues/540) tracks removal of the embedded ICWeb credential fallback.
+
 ## What it does
 
 `item-texture` applies downloaded image textures to item-world objects, artifact elements, and vehicles. The client creates shaders and replaces a named GTA texture on a target element. For cache misses, the server downloads and caches the image and streams bytes to requesting clients. The resource also provides vehicle texture management UI and server exports `addTexture`, `removeTexture`, and `validateFileFromURL` for integration with other resources.

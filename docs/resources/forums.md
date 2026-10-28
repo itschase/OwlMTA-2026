@@ -2,6 +2,8 @@
 
 **Review state:** Active manifest and all listed scripts reviewed statically, with neighboring staff and gameplay callers checked. The GameMaster School screen remains available, but its submit handler is empty in active code; theft and interior-post workflows are disabled or inert. No live forum connection was exercised.
 
+**GitHub record:** [Script Resource Discussion #539](https://github.com/itschase/OwlMTA-2026/discussions/539); [Issue #122](https://github.com/itschase/OwlMTA-2026/issues/122) tracks the legacy bridge, and [Issue #541](https://github.com/itschase/OwlMTA-2026/issues/541) tracks the non-persistent GameMaster School submission.
+
 ## What operators and staff encounter
 
 The resource loads three clusters of functionality:

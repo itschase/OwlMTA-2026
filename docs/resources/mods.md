@@ -6,7 +6,7 @@
 - Source review: both client scripts, manifest, and Verona Mall server script reviewed; model callers, collision/visual behavior, and runtime are not verified.
 - Runtime: unverified. The MTA server has not been started for this review.
 - Startup snapshot: enabled in `mtaserver.conf.bak`; snapshot only.
-- GitHub record: Script Resources Discussion pending; FPS state defect tracked by [Issue #459](https://github.com/itschase/OwlMTA-2026/issues/459), assigned to [Milestone #7: Resource Audit and Security Baseline](https://github.com/itschase/OwlMTA-2026/milestone/7).
+- GitHub record: [Script Resources Discussion #536](https://github.com/itschase/OwlMTA-2026/discussions/536); FPS state defect tracked by [Issue #459](https://github.com/itschase/OwlMTA-2026/issues/459), assigned to [Milestone #7: Resource Audit and Security Baseline](https://github.com/itschase/OwlMTA-2026/milestone/7).
 
 ## Purpose in everyday terms
 

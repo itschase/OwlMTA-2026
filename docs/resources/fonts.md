@@ -2,6 +2,8 @@
 
 **Review state:** Manifest, bundled asset, and direct client-call references reviewed. Client cache/download behavior remains runtime-unverified.
 
+**GitHub record:** [Script Resource Discussion #548](https://github.com/itschase/OwlMTA-2026/discussions/548).
+
 ## Purpose and use
 
 `fonts` is a shared client asset resource. Its manifest registers `helveticastrong.ttf` as a downloadable file so other resources can use MTA's cross-resource file path (for example, `guiCreateFont(":fonts/helveticastrong.ttf", size)`) instead of bundling another copy. The manifest contains no Lua scripts, commands, events, exports, database access, or player controls.

@@ -6,7 +6,7 @@
 - Source review: complete for the one client script and manifest assets; external model-ID callers and visual behavior still need runtime verification.
 - Runtime: unverified. The MTA server has not been started for this review.
 - Startup snapshot: enabled in the tracked `mtaserver.conf.bak`; this is not proof of live configuration.
-- GitHub record: Script Resources Discussion pending; loader diagnostics tracked by [Issue #458](https://github.com/itschase/OwlMTA-2026/issues/458), assigned to [Milestone #7: Resource Audit and Security Baseline](https://github.com/itschase/OwlMTA-2026/milestone/7).
+- GitHub record: [Script Resources Discussion #535](https://github.com/itschase/OwlMTA-2026/discussions/535); loader diagnostics tracked by [Issue #458](https://github.com/itschase/OwlMTA-2026/issues/458), assigned to [Milestone #7: Resource Audit and Security Baseline](https://github.com/itschase/OwlMTA-2026/milestone/7).
 
 ## Purpose in everyday terms
 

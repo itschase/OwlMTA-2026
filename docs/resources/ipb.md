@@ -2,6 +2,8 @@
 
 **Review state:** Manifest, player access flow, remote settings/stat events, CPU sampler, and client GUI callers reviewed. Data exposure and performance behavior remain runtime-unverified.
 
+**Discussion:** [Script Resource: ipb #534](https://github.com/itschase/OwlMTA-2026/discussions/534).
+
 ## Purpose and user workflow
 
 IPB is an in-game performance browser for server resources. A Scripter can open it with `/ipb` or `/perfbrowse`; the client GUI requests server statistics, chooses categories/options/filters, and refreshes the selected view every two seconds. Operators may enable a five-second sampler that retains up to 999 high-usage Lua timing rows in memory and warns active IPB listeners above a configurable threshold. The sampler is process-local: it is not a durable incident log and its history is lost on resource/server restart.

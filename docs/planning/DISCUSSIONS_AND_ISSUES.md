@@ -419,9 +419,25 @@ The same-name archived copies have separate source identities. Their archive dos
 - [Script Resource #531: runcode](https://github.com/itschase/OwlMTA-2026/discussions/531)
 - [Script Resource #532: health-addon](https://github.com/itschase/OwlMTA-2026/discussions/532)
 - [Script Resource #533: LSFD](https://github.com/itschase/OwlMTA-2026/discussions/533)
+- [Script Resource #534: ipb](https://github.com/itschase/OwlMTA-2026/discussions/534)
+- [Script Resource #535: model-system](https://github.com/itschase/OwlMTA-2026/discussions/535)
+- [Script Resource #536: mods](https://github.com/itschase/OwlMTA-2026/discussions/536)
+- [Script Resource #537: glue-system](https://github.com/itschase/OwlMTA-2026/discussions/537)
+- [Script Resource #538: item-texture](https://github.com/itschase/OwlMTA-2026/discussions/538)
+- [Script Resource #539: forums](https://github.com/itschase/OwlMTA-2026/discussions/539)
+- [Script Resource #542: heligrab](https://github.com/itschase/OwlMTA-2026/discussions/542)
+- [Script Resource #543: guied](https://github.com/itschase/OwlMTA-2026/discussions/543)
+- [Script Resource #544: hardwaresurvey](https://github.com/itschase/OwlMTA-2026/discussions/544)
+- [Script Resource #545: fakevideo](https://github.com/itschase/OwlMTA-2026/discussions/545)
+- [Script Resource #546: object-browser](https://github.com/itschase/OwlMTA-2026/discussions/546)
+- [Script Resource #547: sfxbrowser](https://github.com/itschase/OwlMTA-2026/discussions/547)
+- [Script Resource #548: fonts](https://github.com/itschase/OwlMTA-2026/discussions/548)
 - [Discord identity Discussion #239: per-resource capability review](https://github.com/itschase/OwlMTA-2026/discussions/239)
 
 ### Recent Issues
+
+- [#540: Remove the embedded ICWeb credential fallback from item-texture](https://github.com/itschase/OwlMTA-2026/issues/540)
+- [#541: GameMaster School form submits to a server handler with no active persistence](https://github.com/itschase/OwlMTA-2026/issues/541)
 
 - [#41: Bind MDC access to the caller and authorize search/mutation events](https://github.com/itschase/OwlMTA-2026/issues/41)
 - [#52: Bind MDC login to the caller's authenticated character](https://github.com/itschase/OwlMTA-2026/issues/52)

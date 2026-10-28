@@ -2,6 +2,8 @@
 
 **Review state:** Full active manifest, client/server event, JSON persistence, and staff-read path reviewed statically. Runtime behavior and the actual handling of empty files by the installed MTA build remain unverified.
 
+**GitHub record:** [Script Resource Discussion #544](https://github.com/itschase/OwlMTA-2026/discussions/544); [Issues #451](https://github.com/itschase/OwlMTA-2026/issues/451) and [#452](https://github.com/itschase/OwlMTA-2026/issues/452) track JSON initialization and remote sample bounds.
+
 ## What it measures
 
 Despite its name, the shipped client reports only the player's screen resolution when this resource starts. It hashes the `resolution//<width>x<height>` pair and creates a private client-side marker file so the same client does not resubmit that exact value on later starts. The server aggregates counts by resolution in `hws.json`; this source does not attach an account, character, serial, IP, or player name to each count. `/hws resolution` lets an administrator view the aggregate table through `integration:isPlayerAdmin`.

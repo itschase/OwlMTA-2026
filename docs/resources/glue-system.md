@@ -2,6 +2,8 @@
 
 **Review state:** Full client command and server attachment-event review. Attachment policy, cleanup behavior, and live vehicle interactions remain runtime-unverified.
 
+**GitHub record:** [Script Resource Discussion #537](https://github.com/itschase/OwlMTA-2026/discussions/537); [Issue #448](https://github.com/itschase/OwlMTA-2026/issues/448) tracks server-side event validation.
+
 ## Player use
 
 The client `/glue` command attaches a player to the contacted vehicle, or attaches the player's occupied vehicle to a nearby vehicle. A second invocation detaches the current attachment. Client code computes relative position and rotation and sends these values to server events. The active manifest loads one client and one server script; no database, staff command, Discord role, or explicit export is declared.

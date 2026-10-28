@@ -4,6 +4,7 @@
 
 - Resource path: `mods/deathmatch/resources/object-browser`.
 - Source review: active manifest, `ob.lua`, `obj.xml`, and in-tree references reviewed; the object list was parsed from source for its entry/group counts.
+- GitHub record: [Script Resource Discussion #546](https://github.com/itschase/OwlMTA-2026/discussions/546); [Issue #464](https://github.com/itschase/OwlMTA-2026/issues/464) tracks camera/cursor cleanup.
 - Runtime: unverified. The MTA server/client was not started.
 - Startup snapshot: not enabled in `mtaserver.conf.bak`; this does not rule out manual operator use.
 - Callers: no in-tree resource caller or integration was found; commands are registered inside this resource.

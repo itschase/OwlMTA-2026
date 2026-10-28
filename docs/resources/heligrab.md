@@ -2,6 +2,8 @@
 
 **Review state:** Active manifest, player interaction, server exports, and event flow reviewed statically. Several API and trust-boundary concerns are recorded below; live helicopter behavior and multiplayer cleanup remain runtime-unverified.
 
+**GitHub record:** [Script Resource Discussion #542](https://github.com/itschase/OwlMTA-2026/discussions/542); [Issue #449](https://github.com/itschase/OwlMTA-2026/issues/449) tracks the exported hanger lookup filter.
+
 ## What it does
 
 `heligrab` lets a player catch and hang from configured helicopter models. The client tracks streamed helicopters, computes a nearest hand-to-side point, checks the drop point against the ground, and allows grab by `/grab` or the configured jump control. `/drop` or backspace releases the player. The client updates attachment position, animation, rotation, leg pose, and drop behavior as the helicopter moves. The operator can configure allowed bind/command names and whether client-side passenger count limits are enabled.

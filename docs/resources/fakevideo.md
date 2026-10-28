@@ -2,6 +2,8 @@
 
 **Review state:** Partial manifest, client/server streaming, persisted texture catalog, and ClubTec/item-system caller review. Creation/deletion workflows and all texture lifecycle/runtime behavior need further review.
 
+**GitHub record:** [Script Resource Discussion #545](https://github.com/itschase/OwlMTA-2026/discussions/545); [Issue #447](https://github.com/itschase/OwlMTA-2026/issues/447) tracks stalled pending batches after failed frame fetches.
+
 ## Purpose and use
 
 `fakevideo` provides animated world textures for the video-player objects managed by `clubtec`. The server loads `textures_animated` rows into an in-memory catalog; client render code requests frame data, applies shaders to objects, and updates textures as players change dimension/interior. Frames are fetched from the URLs stored in the database and cached in the resource's `cache/` directory. Client/server exports expose `getFakevideoData`; `clubtec` uses that catalog to resolve video-disc data. Item movement and world-object flows also trigger dimension reloads through `item-system`.

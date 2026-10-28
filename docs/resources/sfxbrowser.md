@@ -2,6 +2,8 @@
 
 **Review state:** Full manifest, GUI workflow, data catalog, and playback lifecycle reviewed. Audio availability and client performance remain runtime-unverified.
 
+**GitHub record:** [Script Resource Discussion #547](https://github.com/itschase/OwlMTA-2026/discussions/547).
+
 ## Purpose and player/staff use
 
 `sfxbrowser` is a client-only developer utility for browsing and previewing the GTA:SA sound-effect banks with `playSFX`. The `/sfxbrowser` command opens or closes a local GUI containing container, bank, and sound lists, a loop option, playback/progress controls, and a generated Lua snippet showing the selected `playSFX` call. The bundled data file is a catalog of sound indexes and descriptive labels; it does not play sounds automatically or change server state.
