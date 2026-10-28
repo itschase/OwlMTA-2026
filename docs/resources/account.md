@@ -34,7 +34,8 @@ This is not yet Discord authentication. Discord-first identity, role-to-capabili
 
 ## Credential, privacy, and lifecycle findings
 
-- New registration uses bcrypt-sha256; accepted legacy salted double-MD5 credentials are upgraded in place. The client remember-me feature stores the reusable plaintext password in reversibly encrypted XML.
+- New registration uses bcrypt-sha256; accepted legacy salted double-MD5 credentials are upgraded in place. The client remember-me feature stores a reusable password in reversible serial-derived XML obfuscation; [Issue #528](https://github.com/itschase/OwlMTA-2026/issues/528) tracks removal and cleanup of existing client files.
+- Login and registration events are remotely callable. The UI enforces some format/length rules, but equivalent comprehensive server validation and account-specific bcrypt/login throttling were not found; [Issue #529](https://github.com/itschase/OwlMTA-2026/issues/529) tracks this current legacy path.
 - Registration writes `core.accounts` and MTA `account_details` separately and calls an absent localhost activation-mail service. Issue #43 owns partial cross-schema provisioning; Issues #12/#13 own forum and activation dependencies.
 - The email-change event previously trusted a client-supplied account ID and had no authenticated-session boundary. The source now derives the account from the logged-in server session, validates and parameterizes the update, synchronizes the email only after DB success, and returns the actual result. [Issue #527](https://github.com/itschase/OwlMTA-2026/issues/527) remains open for runtime, duplicate-address, and DB-failure validation. No active password-recovery consumer was found, so takeover impact is not established.
 - Login commits identity, email, ranks, and session state before serial-whitelist denial. Issue #158 owns moving device policy before session commit and complete rollback.
