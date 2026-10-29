@@ -3,7 +3,9 @@ addEvent("accounts:login:request", true)
 addEvent("accounts:login:attempt", true)
 addEvent("accounts:characters:list", true)
 addEvent("accounts:characters:spawn", true)
-addEvent("accounts:characters:change", true)
+-- Server-only lifecycle event. Clients request a change through the bound
+-- accounts:characters:change:request wrapper in s_characters.lua.
+addEvent("accounts:characters:change", false)
 addEvent("accounts:characters:logout", true)
 addEvent("accounts:options", true)
 addEvent("accounts:options:settings", true)	-- 

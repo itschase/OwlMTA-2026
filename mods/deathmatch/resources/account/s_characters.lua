@@ -65,20 +65,38 @@ end
 addEvent("forum:remove", true)
 addEventHandler("forum:remove", resourceRoot, removeForum)
 
+local characterRefreshRequests = setmetatable({}, { __mode = "k" })
+
 function reloadCharacters(fromButton)
-    local chars = characterList(source)
-    --setElementData(source, "account:characters", chars, true)
-    exports.anticheat:changeProtectedElementDataEx(source, "account:characters", chars)
-    if fromButton then
-        triggerClientEvent(client, "refreshCharacters", resourceRoot)
+    local player = client
+    if not player or source ~= resourceRoot or not isElement(player) or getElementType(player) ~= "player"
+        or getElementData(player, "account:loggedin") ~= true then
+        return false
     end
+    local now = getTickCount()
+    if characterRefreshRequests[player] and now - characterRefreshRequests[player] < 3000 then
+        outputDebugString("[ACCOUNT][CHARACTER_LIST] outcome=rejected reason=rate_limited", 2)
+        return false
+    end
+    characterRefreshRequests[player] = now
+
+    local chars = characterList(player)
+    --setElementData(source, "account:characters", chars, true)
+    exports.anticheat:changeProtectedElementDataEx(player, "account:characters", chars)
+    if fromButton then
+        triggerClientEvent(player, "refreshCharacters", resourceRoot)
+    end
+    outputDebugString("[ACCOUNT][CHARACTER_LIST] outcome=refreshed", 3)
+    return true
 end
 addEvent("updateCharacters", true)
-addEventHandler("updateCharacters", getRootElement(), reloadCharacters)
+addEventHandler("updateCharacters", resourceRoot, reloadCharacters)
 
 
 function reconnectMe()
-    redirectPlayer(client, "", 0 )
+    if client and source == client then
+        redirectPlayer(client, "", 0)
+    end
 end
 addEvent("accounts:reconnectMe", true)
 addEventHandler("accounts:reconnectMe", getRootElement(), reconnectMe)
@@ -523,19 +541,22 @@ end
 addEventHandler("accounts:characters:spawn", getRootElement(), spawnCharacter)
 
 function Characters_onCharacterChange()
-    triggerClientEvent(client, "items:inventory:hideinv", client)
-    --triggerEvent("updateCharacters", client) -- Refresh the character selection screen, perhaps? / No it's too late to update shit here
-    triggerEvent("savePlayer", client, "Change Character")
-    triggerEvent('setDrunkness', client, 0)
-    setElementDataEx(client, "alcohollevel", 0, true)
-    setElementDataEx(client, "clothing:id", nil, true)
-    removeMasksAndBadges(client)
+    local player = source
+    if not isElement(player) or getElementType(player) ~= "player" then return false end
 
-    setElementDataEx(client, "loggedin", 0, true)
-    setElementDataEx(client, "dbid", 0, true)
-    setElementDataEx(client, "bankmoney", 0)
-    setElementDataEx(client, "account:character:id", false)
-    setElementAlpha(client, 0)
+    triggerClientEvent(player, "items:inventory:hideinv", player)
+    --triggerEvent("updateCharacters", client) -- Refresh the character selection screen, perhaps? / No it's too late to update shit here
+    triggerEvent("savePlayer", player, "Change Character")
+    triggerEvent('setDrunkness', player, 0)
+    setElementDataEx(player, "alcohollevel", 0, true)
+    setElementDataEx(player, "clothing:id", nil, true)
+    removeMasksAndBadges(player)
+
+    setElementDataEx(player, "loggedin", 0, true)
+    setElementDataEx(player, "dbid", 0, true)
+    setElementDataEx(player, "bankmoney", 0)
+    setElementDataEx(player, "account:character:id", false)
+    setElementAlpha(player, 0)
 
     --[[removeElementData(client, "jailed")
     removeElementData(client, "jail_time")
@@ -543,42 +564,42 @@ function Characters_onCharacterChange()
     removeElementData(client, "jail:cell")
     removeElementData(client, "jail_time_online")
     removeElementData(client, "jail:timer")]]
-    setElementData(client, "dispatch:onDuty", false)
-    triggerClientEvent("dispatch:onDutyChange", root, false, client)
-    removeElementData(client, "enableGunAttach")
-    triggerEvent("destroyWepObjects", client)
-    triggerEvent("cards:leave_session", client)
-    triggerEvent("endViewPropertyInterior", client, client, true)
+    setElementData(player, "dispatch:onDuty", false)
+    triggerClientEvent("dispatch:onDutyChange", root, false, player)
+    removeElementData(player, "enableGunAttach")
+    triggerEvent("destroyWepObjects", player)
+    triggerEvent("cards:leave_session", player)
+    triggerEvent("endViewPropertyInterior", player, player, true)
 
-    if (getPedOccupiedVehicle(client)) then
-        removePedFromVehicle(client)
+    if (getPedOccupiedVehicle(player)) then
+        removePedFromVehicle(player)
     end
-    exports.global:updateNametagColor(client)
-    local clientAccountID = getElementDataEx(client, "account:id") or -1
+    exports.global:updateNametagColor(player)
+    local clientAccountID = getElementDataEx(player, "account:id") or -1
 
-    setElementInterior(client, 0)
-    setElementDimension(client, 1)
-    setElementPosition(client, -26.8828125, 2320.951171875, 24.303373336792)
+    setElementInterior(player, 0)
+    setElementDimension(player, 1)
+    setElementPosition(player, -26.8828125, 2320.951171875, 24.303373336792)
 
-    setElementDataEx(client, "legitnamechange", 1)
-    makeOwlName(client)
-    setElementDataEx(client, "legitnamechange", 0)
+    setElementDataEx(player, "legitnamechange", 1)
+    makeOwlName(player)
+    setElementDataEx(player, "legitnamechange", 0)
 
-    exports.logs:dbLog("ac"..tostring(clientAccountID), 27, { "ac"..tostring(clientAccountID), client } , "Went to character selection" )
-    triggerEvent("shop:removeMeFromCurrentShopUser",client, client)
-    triggerClientEvent(client, "hideGeneralshopUI", client)
-    triggerEvent("artifacts:removeAllOnPlayer",client, client)
+    exports.logs:dbLog("ac"..tostring(clientAccountID), 27, { "ac"..tostring(clientAccountID), player } , "Went to character selection" )
+    triggerEvent("shop:removeMeFromCurrentShopUser", player, player)
+    triggerClientEvent(player, "hideGeneralshopUI", player)
+    triggerEvent("artifacts:removeAllOnPlayer", player, player)
 
-    removeElementData(client, "chat:status")
+    removeElementData(player, "chat:status")
 
     --outputDebugString('account:character:select')
-    triggerEvent( "account:character:select", client ) -- have an event that we can call when player comes to character selectio screen.
-    triggerClientEvent( client, "account:character:select", client ) -- have an event that we can call when player comes to character selectio screen.
+    triggerEvent("account:character:select", player) -- have an event that we can call when player comes to character selectio screen.
+    triggerClientEvent(player, "account:character:select", player) -- have an event that we can call when player comes to character selectio screen.
 
     --keypad door lock
-    local padId = getElementData(client, "padUsing")
+    local padId = getElementData(player, "padUsing")
     if padId then
-        removeElementData(client, "padUsing")
+        removeElementData(player, "padUsing")
         for key, thePad in pairs(getElementsByType("object", getResourceRootElement(getResourceFromName("item-world")))) do
             if getElementData(thePad, "id") == padId then
                 removeElementData(thePad, "playerUsing")
@@ -586,8 +607,45 @@ function Characters_onCharacterChange()
             end
         end
     end
+    return true
 end
 addEventHandler("accounts:characters:change", getRootElement(), Characters_onCharacterChange)
+
+local characterChangeRequests = setmetatable({}, { __mode = "k" })
+
+local function requestCharacterChange()
+    local player = client
+    if not player or source ~= resourceRoot or not isElement(player) or getElementType(player) ~= "player" then
+        return
+    end
+
+    local now = getTickCount()
+    if characterChangeRequests[player] and now - characterChangeRequests[player] < 3000 then
+        triggerClientEvent(player, "accounts:characters:change:result", resourceRoot, false,
+            "Please wait before changing characters again.")
+        outputDebugString("[ACCOUNT][CHARACTER_CHANGE] outcome=rejected reason=rate_limited", 2)
+        return
+    end
+    characterChangeRequests[player] = now
+
+    local accountID = tonumber(getElementData(player, "account:id"))
+    local characterID = tonumber(getElementData(player, "dbid"))
+    if getElementData(player, "account:loggedin") ~= true or getElementData(player, "loggedin") ~= 1
+        or not accountID or accountID < 1 or not characterID or characterID < 1 then
+        triggerClientEvent(player, "accounts:characters:change:result", resourceRoot, false,
+            "Your current character session could not be changed safely.")
+        outputDebugString("[ACCOUNT][CHARACTER_CHANGE] outcome=rejected reason=invalid_session", 2)
+        return
+    end
+
+    triggerEvent("accounts:characters:change", player, "Change Character")
+    local chars = characterList(player)
+    exports.anticheat:changeProtectedElementDataEx(player, "account:characters", chars)
+    triggerClientEvent(player, "accounts:characters:change:result", resourceRoot, true)
+    outputDebugString("[ACCOUNT][CHARACTER_CHANGE] outcome=completed", 3)
+end
+addEvent("accounts:characters:change:request", true)
+addEventHandler("accounts:characters:change:request", resourceRoot, requestCharacterChange)
 
 -- sometimes your character position is not properly set, and your position is retained from the char selection (somewhere near angel pine) albeit it shouldn't be.
 function fixCharacterSpawnPosition(expectedLocation)

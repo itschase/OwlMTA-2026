@@ -282,7 +282,7 @@ addEvent("accounts:settings:loadAccountSettings", false)
 addEvent("accounts:settings:loadCharacterSettings", false)
 
 function reconnectPlayer()
-	if client and isPlayerElement(client) then
+    if client and source == client and isPlayerElement(client) then
 		redirectPlayer(client, "", 0)
 	end
 end

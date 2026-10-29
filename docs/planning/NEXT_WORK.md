@@ -1,6 +1,12 @@
 # Next work record
 
-Last updated: 2026-10-29 after binding identity cleanup to Owl account lifecycle boundaries.
+Last updated: 2026-10-29 after restricting character-change and reconnect lifecycles to server-validated boundaries.
+
+## Latest continuation — character change and reconnect lifecycle boundary
+
+The `accounts:characters:change` event is now server-only (`addEvent("accounts:characters:change", false)`). Client-side character changes are routed through a new `accounts:characters:change:request` remote event that debounces calls to once per 3 seconds per player, verifies that the requesting `client` has active account and character session element data (`account:loggedin == true`, `loggedin == 1`, positive `account:id` and `dbid`), executes the local character-change save/cleanup, refreshes `account:characters`, and returns an explicit result to the client.
+
+`Characters_onCharacterChange` now derives the player element from `source` instead of trusting `client`, eliminating remote-event spoofing and ensuring consistency when invoked from server-side character selection or administrative flows. `item-system`'s character-change listener is updated to use `source` for player bottle tracking. Additionally, character list refresh (`updateCharacters`) is bound to `resourceRoot`, rate-limited to 3 seconds, and requires an active login; reconnect events (`accounts:reconnectMe` and `accounts:settings:reconnectPlayer`) now enforce `client and source == client`. Static source inspection only; runtime behavior, GUI transitions, and rate-limit feel remain runtime-unverified under Issues #1 and #203.
 
 ## Latest continuation — synchronous identity-session cleanup
 

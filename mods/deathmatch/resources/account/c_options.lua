@@ -741,18 +741,39 @@ function options_closegraphicsmenu()
 	end
 end
 
-function options_logOut( message )
-	triggerServerEvent("updateCharacters", localPlayer)
-	triggerServerEvent("accounts:characters:change", localPlayer, "Change Character")
+local characterChangePending = false
+local characterChangeMessage = nil
+
+function options_logOut(message)
+	if characterChangePending then return end
+	characterChangePending = true
+	characterChangeMessage = message
+	triggerServerEvent("accounts:characters:change:request", resourceRoot)
+end
+addEventHandler("accounts:logout", getRootElement(), options_logOut)
+
+local function finishCharacterChange(accepted, rejectionMessage)
+	if not characterChangePending then return end
+	characterChangePending = false
+	if accepted ~= true then
+		characterChangeMessage = nil
+		if rejectionMessage then
+			LoginScreen_showWarningMessage(rejectionMessage)
+		end
+		return
+	end
+
 	triggerEvent("onClientChangeChar", getRootElement())
 	options_disable()
 	Characters_showSelection()
 	clearChat()
-	if message then
-		LoginScreen_showWarningMessage( message )
+	if characterChangeMessage then
+		LoginScreen_showWarningMessage(characterChangeMessage)
 	end
+	characterChangeMessage = nil
 end
-addEventHandler("accounts:logout", getRootElement(), options_logOut)
+addEvent("accounts:characters:change:result", true)
+addEventHandler("accounts:characters:change:result", resourceRoot, finishCharacterChange)
 
 function options_logOutToLoginPanel( message )
 	triggerServerEvent("accounts:characters:logout", localPlayer, "Change Character")

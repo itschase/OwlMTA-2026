@@ -1294,8 +1294,8 @@ end)
 
 addEventHandler("accounts:characters:change", getRootElement(),
 function()
-	if cokeBottles[client] then
-		destroyElement(cokeBottles[client])
-		cokeBottles[client] = nil
+	if cokeBottles[source] then
+		destroyElement(cokeBottles[source])
+		cokeBottles[source] = nil
 	end
 end)
