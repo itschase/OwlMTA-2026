@@ -33,6 +33,22 @@ This file is a high-level, human- and AI-agent readable guide and chronological 
 
 ## 2. Activity Read Log
 
+### [2026-10-29] — Codex / ChatGPT (Canonical Full-Account Logout)
+* **Goal**: Complete the first bounded Issue #96 account-session termination slice without conflating full logout with ordinary character change.
+* **Work Completed**:
+  1. Replaced the incomplete client logout helper with caller-bound, rate-limited `accounts:session:logout:request`. The server validates the authenticated account, invokes and verifies the existing character save/clear lifecycle when needed, and keeps `accounts:characters:logout` as a server-only terminal cleanup notification.
+  2. Clears Discord adapter state, synchronized account identity/profile/credit data, legacy staff/GameMaster/supporter/specialist ranks, duty flags, and donor perk state. Critical authority claims are read back before reconnect; authority-clear or redirect failure disconnects fail closed. Only `account:id` remains until disconnect for existing settings/cache/audit consumers.
+  3. Added bounded `[ACCOUNT][SESSION_LOGOUT]` outcomes for rejection, failed authority clearing, unavailable durable audit, redirect request, and redirect failure. Logger outage cannot strand an already de-authorized session.
+  4. Updated the account dossier, migration map, work queue, and tracker index. Published the checkpoint to [Issue #96](https://github.com/itschase/OwlMTA-2026/issues/96#issuecomment-6508953413), [Script Resource Discussion #99](https://github.com/itschase/OwlMTA-2026/discussions/99#discussioncomment-19279065), and [Agent Operations Discussion #568](https://github.com/itschase/OwlMTA-2026/discussions/568#discussioncomment-19279067).
+* **Commit**:
+  - [`2fbbcb8`](https://github.com/itschase/OwlMTA-2026/commit/2fbbcb8) — `fix(account): add canonical full-session logout`
+* **Validation**: `git diff --check` and staged checks passed; `account/meta.xml` parsed as XML; focused searches reconciled every logout/change definition and consumer plus account authority writers; official MTA `triggerEvent` and `redirectPlayer` return contracts were checked. A separate read-only Antigravity review found no source-level commit blocker and made no repository or GitHub change. No MTA server, client, adapter/service, database, Discord application, or gameplay test was run.
+* **Current Status**: Fixed in source and published; runtime unverified. Issue #96 remains open for save/listener ordering, pending callbacks/timers, adapter outage, duplicate requests, redirect/reconnect, bounded leases/heartbeat, and operator recovery/revocation.
+* **Recommended Next Work**:
+  1. Build the Issue #3/#14 action-to-capability shadow matrix and select one high-risk staff/GameMaster consumer; supporter/donor entitlement must remain separate.
+  2. Continue Issue #96 with server-generated session generation/lease semantics and stale-callback invalidation before password retirement.
+  3. Validate this logout matrix only after `SAFE_START_PREFLIGHT.md` permits a disposable MTA environment.
+
 ### [2026-10-29] — Codex / ChatGPT (Autonomous Operations and Identity Migration)
 * **Goal**: Replace low-evidence autonomous work with a durable contributor program, reconcile weak trackers/Milestones, and make the legacy-login-to-Discord-session path explicit.
 * **Work Completed**:

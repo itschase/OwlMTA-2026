@@ -6,6 +6,7 @@
 - Evidence: full review of every manifest-loaded shared, server, client, login, character, tutorial, settings, news, and rules script plus schema and representative integrations.
 - Runtime: unverified. The server has not been started.
 - Discussion: [Script Resource: account](https://github.com/itschase/OwlMTA-2026/discussions/99).
+- Latest fixed-in-source checkpoint: [`2fbbcb8`](https://github.com/itschase/OwlMTA-2026/commit/2fbbcb8), [Issue #96 update](https://github.com/itschase/OwlMTA-2026/issues/96#issuecomment-6508953413), and [Discussion #99 update](https://github.com/itschase/OwlMTA-2026/discussions/99#discussioncomment-19279065).
 
 ## What it does
 
