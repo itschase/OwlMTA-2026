@@ -28,6 +28,24 @@ This file is a high-level, human- and AI-agent readable guide and chronological 
 
 ## 2. Activity Read Log
 
+### [2026-10-29] — Codex / ChatGPT (Shared-Agent Reconciliation)
+* **Goal**: Reclaim the shared checkout safely, correct unverified project records, establish durable agent pickup instructions, and review the pushed character spawn-correction security change.
+* **Work Completed**:
+  1. Stopped Antigravity's active work and terminated its remaining browser subagent. Verified that its attempted category/Discussion API calls did not execute. A PAT pasted into its conversation and placed in failed process arguments is treated as compromised; it was not reused or copied into the repository and still requires manual owner revocation.
+  2. Replaced the unpushed agent-guidelines draft's nonexistent AI category, Project board, automation, Milestone, label, and Discussion claims with a model-neutral operating guide. Added shared-checkout, evidence, credential, publication, and handoff requirements to this file.
+  3. Strengthened the server-held character spawn-correction context with local-account binding, finite and integer destination validation, elapsed-time rollover rejection, `/loginto` compatibility, and checked MTA world/position/rotation/camera results.
+  4. Reframed [Issue #555](https://github.com/itschase/OwlMTA-2026/issues/555) as evidence-backed marker triage. Published the source follow-up to [Issue #204](https://github.com/itschase/OwlMTA-2026/issues/204#issuecomment-6508435884) and [Script Resource Discussion #99](https://github.com/itschase/OwlMTA-2026/discussions/99#discussioncomment-19278656).
+* **Commits**:
+  - [`5e7abd5`](https://github.com/itschase/OwlMTA-2026/commit/5e7abd5) — `docs(agents): add shared project operating guide`
+  - [`1761f17`](https://github.com/itschase/OwlMTA-2026/commit/1761f17) — `security(account): bind spawn correction to local session`
+  - [`d8aec7a`](https://github.com/itschase/OwlMTA-2026/commit/d8aec7a) — `docs(project): record agent reconciliation publication`
+* **Validation**: `git diff --check` passed; `account/meta.xml` parsed as XML; focused source-invariant checks passed; changed-document relative links resolved; the repository contained no known PAT prefix marker; official MTA Wiki return contracts were checked for the five spawn-correction application APIs. No MTA server, client, database, or automated gameplay test was run.
+* **Current Status**: Agent guide is corrected and spawn correction is fixed in source; all runtime behavior remains unverified. Final branch/remote cleanliness is checked after committing this handoff.
+* **Recommended Next Work**:
+  1. The repository owner must manually revoke the exposed PAT before treating the credential incident as closed.
+  2. Continue core character integrity with Issue #203 (staged spawn hydration/recovery) or Issue #202 (atomic quota and name allocation), preserving the new context/session boundary.
+  3. Build Issue #555's evidence inventory only as bounded active-resource reviews occur; do not bulk-open markers as defects.
+
 ### [2026-10-29] — Antigravity (Continued Development)
 * **Goal**: Attempt broad code-base hygiene and agent guidance.
 * **Verified Result**:
