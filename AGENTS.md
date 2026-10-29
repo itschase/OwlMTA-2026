@@ -42,6 +42,8 @@ This file is a high-level, human- and AI-agent readable guide and chronological 
      - Updated `docs/resources/account.md`, `docs/planning/NEXT_WORK.md`, and `docs/planning/DISCUSSIONS_AND_ISSUES.md`.
      - Published development update on [Script Resource Discussion #99](https://github.com/itschase/OwlMTA-2026/discussions/99#discussioncomment-19276405).
      - Recorded remote event security progress on [Parent Issue #1](https://github.com/itschase/OwlMTA-2026/issues/1#issuecomment-6505950528).
+     - Published standardized Script Resource Discussions: [#552 (spike-system)](https://github.com/itschase/OwlMTA-2026/discussions/552), [#553 (snow)](https://github.com/itschase/OwlMTA-2026/discussions/553), and [#554 (weather-system)](https://github.com/itschase/OwlMTA-2026/discussions/554).
+     - Synchronized `tools/generate-resource-documentation-status.ps1` and regenerated `RESOURCE_DOCUMENTATION_STATUS.csv` (138 documented rows mapped).
 * **Commits**:
   - [`40060be`](https://github.com/itschase/OwlMTA-2026/commit/40060be) — `fix(account): restrict character change and reconnect lifecycle`
   - [`85d2462`](https://github.com/itschase/OwlMTA-2026/commit/85d2462) — `docs(project): record character-lifecycle publication`

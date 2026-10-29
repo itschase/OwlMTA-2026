@@ -38,20 +38,22 @@ $published = @{
     "freecam" = @{ Number = 439; Dossier = "docs/resources/freecam.md"; State = "Full manifest/player/server-event/export/direct-caller review; individual Discussion published" }
     "freecam-tv" = @{ Number = 440; Dossier = "docs/resources/freecam-tv.md"; State = "Full manifest/player/item-caller/faction-payout review; individual Discussion published" }
     "language-system" = @{ Number = 441; Dossier = "docs/resources/language-system.md"; State = "Full manifest/player/UI/persistence/direct-caller review; individual Discussion published" }
-    "ipb" = @{ Dossier = "docs/resources/ipb.md"; State = "Full manifest/access/settings/sampling/player-event source review; Discussion pending" }
-    "runcode" = @{ Dossier = "docs/resources/runcode.md"; State = "Full manifest/command/UI/remote/export/ACL source review; Discussion pending" }
-    "sfxbrowser" = @{ Dossier = "docs/resources/sfxbrowser.md"; State = "Full client-only manifest/GUI/catalog/playback source review; Discussion pending" }
-    "fonts" = @{ Dossier = "docs/resources/fonts.md"; State = "Full asset manifest/direct client consumer review; Discussion pending" }
-    "health-addon" = @{ Dossier = "docs/resources/health-addon.md"; State = "Partial manifest/injury/diagnosis flow and treatment event inventory; source review continuing; Discussion pending" }
-    "fakevideo" = @{ Dossier = "docs/resources/fakevideo.md"; State = "Partial manifest/client-server streaming/catalog/caller review; Discussion pending" }
-    "glue-system" = @{ Dossier = "docs/resources/glue-system.md"; State = "Full manifest/client command/server attachment event review; Discussion pending" }
-    "heligrab" = @{ Dossier = "docs/resources/heligrab.md"; State = "Full manifest/player interaction/server export/event-flow review; source issue #449; Discussion pending" }
-    "forums" = @{ Dossier = "docs/resources/forums.md"; State = "Full manifest/script/caller review; legacy bridge tracked by issue #122; Discussion pending" }
-    "guied" = @{ Dossier = "docs/resources/guied.md"; State = "Partial developer-tool manifest, startup, ACL, remote-file, and client workflow review; issue #450; Discussion pending" }
-    "hardwaresurvey" = @{ Dossier = "docs/resources/hardwaresurvey.md"; State = "Full manifest/client/server/JSON persistence and staff-read review; issues #451-#452; Discussion pending" }
-    "item-texture" = @{ Dossier = "docs/resources/item-texture.md"; State = "Partial manifest/caller/persistence/remote-stream and vehicle-mutation review; issues #453-#455; Discussion pending" }
-    "LSFD" = @{ Dossier = "docs/resources/LSFD.md"; State = "Full manifest/incident/alarm/faction/admin workflow review; issues #456-#457; Discussion pending" }
-    "model-system" = @{ Dossier = "docs/resources/model-system.md"; State = "Full client model-loader/manifest asset review; issue #458; Discussion pending" }
+    "ipb" = @{ Number = 534; Dossier = "docs/resources/ipb.md"; State = "Full manifest/access/settings/sampling/player-event source review; individual Discussion published" }
+    "runcode" = @{ Number = 531; Dossier = "docs/resources/runcode.md"; State = "Full manifest/command/UI/remote/export/ACL source review; individual Discussion published" }
+    "sfxbrowser" = @{ Number = 547; Dossier = "docs/resources/sfxbrowser.md"; State = "Full client-only manifest/GUI/catalog/playback source review; individual Discussion published" }
+    "fonts" = @{ Number = 548; Dossier = "docs/resources/fonts.md"; State = "Full asset manifest/direct client consumer review; individual Discussion published" }
+    "health-addon" = @{ Number = 532; Dossier = "docs/resources/health-addon.md"; State = "Partial manifest/injury/diagnosis flow and treatment event inventory; source review continuing; individual Discussion published" }
+    "fakevideo" = @{ Number = 545; Dossier = "docs/resources/fakevideo.md"; State = "Partial manifest/client-server streaming/catalog/caller review; issue #447; individual Discussion published" }
+    "glue-system" = @{ Number = 537; Dossier = "docs/resources/glue-system.md"; State = "Full manifest/client command/server attachment event review; issue #448; individual Discussion published" }
+    "heligrab" = @{ Number = 542; Dossier = "docs/resources/heligrab.md"; State = "Full manifest/player interaction/server export/event-flow review; issue #449; individual Discussion published" }
+    "forums" = @{ Number = 539; Dossier = "docs/resources/forums.md"; State = "Full manifest/script/caller review; legacy bridge #122 and inactive GameMaster School workflow #541; individual Discussion published" }
+    "guied" = @{ Number = 543; Dossier = "docs/resources/guied.md"; State = "Partial developer-tool manifest, startup, ACL, remote-file, and client workflow review; issue #450; individual Discussion published" }
+    "hardwaresurvey" = @{ Number = 544; Dossier = "docs/resources/hardwaresurvey.md"; State = "Full manifest/client/server/JSON persistence and staff-read review; issues #451-#452; individual Discussion published" }
+    "item-texture" = @{ Number = 538; Dossier = "docs/resources/item-texture.md"; State = "Partial manifest/caller/persistence/remote-stream and vehicle-mutation review; issues #453-#455 and #540; individual Discussion published" }
+    "LSFD" = @{ Number = 533; Dossier = "docs/resources/LSFD.md"; State = "Full manifest/incident/alarm/faction/admin workflow review; issues #456-#457; individual Discussion published" }
+    "model-system" = @{ Number = 535; Dossier = "docs/resources/model-system.md"; State = "Full client model-loader/manifest asset review; issue #458; individual Discussion published" }
+    "mods" = @{ Number = 536; Dossier = "docs/resources/mods.md"; State = "Full manifest/two client scripts/server mall script review; issue #459; individual Discussion published" }
+    "object-browser" = @{ Number = 546; Dossier = "docs/resources/object-browser.md"; State = "Full manifest/client script/object catalog review; issue #464; individual Discussion published" }
     "OwlGamingLogs" = @{ Number = 467; Dossier = "docs/resources/OwlGamingLogs.md"; State = "Full manifest/client settings/phone transcript caller review; issue #465; individual Discussion published" }
     "parachute" = @{ Number = 468; Dossier = "docs/resources/parachute.md"; State = "Full manifest/script/direct-caller source review; issue #466; individual Discussion published" }
     "ped-system" = @{ Number = 475; Dossier = "docs/resources/ped-system.md"; State = "Full manifest/schema/event/caller review; issues #469-#474; individual Discussion published" }
@@ -64,7 +66,6 @@ $published = @{
     "sfia" = @{ Number = 513; Dossier = "docs/resources/sfia.md"; State = "Full manifest and major client/server workflow review; issues #501-#508; individual Discussion published" }
     "shader_car_paint" = @{ Number = 511; Dossier = "docs/resources/shader_car_paint.md"; State = "Full manifest/client/effect/direct-caller source review; issues #509-#510; individual Discussion published" }
     "shader_radar" = @{ Number = 517; Dossier = "docs/resources/shader_radar.md"; State = "Full manifest/client/effect/settings/caller source review; issues #514-#516; individual Discussion published" }
-    "mods" = @{ Dossier = "docs/resources/mods.md"; State = "Full manifest/two client scripts/server mall script review; issue #459; Discussion pending" }
     "factions" = @{ Number = 101; Dossier = "docs/resources/factions.md"; State = "Full manifest-script source review; individual Discussion published" }
     "item-system" = @{ Number = 102; Dossier = "docs/resources/item-system.md"; State = "Full manifest-script source review; individual Discussion published" }
     "vehicle" = @{ Number = 107; Dossier = "docs/resources/vehicle.md" }
@@ -76,7 +77,6 @@ $published = @{
     "carshop-system" = @{ Number = 116; Dossier = "docs/resources/carshop-system.md"; State = "Full manifest-script source review; individual Discussion published" }
     "vehicleplate" = @{ Number = 117; Dossier = "docs/resources/vehicleplate.md"; State = "Full manifest-script source review; individual Discussion published" }
     "mysql" = @{ Number = 123; Dossier = "docs/resources/mysql.md"; State = "Partial manifest/connection/export/migration/maintenance/query-handle review; issues #460-#463; individual Discussion #123 published"; NextAction = "Continue complete exported API and caller/SQL review" }
-    "object-browser" = @{ Dossier = "docs/resources/object-browser.md"; State = "Full manifest/client script/object catalog review; issue #464; Discussion pending" }
     "data" = @{ Number = 124; Dossier = "docs/resources/data.md"; State = "Full manifest-script source review; individual Discussion published" }
     "pool" = @{ Number = 125; Dossier = "docs/resources/pool.md"; State = "Full manifest-script source review; individual Discussion published" }
     "integration" = @{ Number = 126; Dossier = "docs/resources/integration.md"; State = "Full manifest-script source review; individual Discussion published" }
@@ -136,6 +136,9 @@ $published = @{
     "gatekeepers-system" = @{ Number = "334"; Dossier = "docs/resources/gatekeepers-system.md"; State = "Full manifest-script and direct-caller source review; Discussion published" }
     "animation-system" = @{ Number = "336"; Dossier = "docs/resources/animation-system.md"; State = "Full manifest-script and direct-caller source review; Discussion published" }
     "help" = @{ Number = "339"; Dossier = "docs/resources/help.md"; State = "Full manifest-script and direct-caller source review; Discussion published" }
+    "spike-system" = @{ Number = 552; Dossier = "docs/resources/spike-system.md"; State = "Full manifest-script and direct roadblock-consumer review; issues #523-#524; individual Discussion published" }
+    "snow" = @{ Number = 553; Dossier = "docs/resources/snow.md"; State = "Full manifest/client particle/GUI/settings review; issues #525-#526; individual Discussion published" }
+    "weather-system" = @{ Number = 554; Dossier = "docs/resources/weather-system.md"; State = "Full manifest/scheduler/staff command/settings review; issue #522; individual Discussion published" }
 }
 
 $publishedByPath = @{
