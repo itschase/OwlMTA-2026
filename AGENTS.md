@@ -33,6 +33,22 @@ This file is a high-level, human- and AI-agent readable guide and chronological 
 
 ## 2. Activity Read Log
 
+### [2026-10-29] — Codex / ChatGPT (Autonomous Operations and Identity Migration)
+* **Goal**: Replace low-evidence autonomous work with a durable contributor program, reconcile weak trackers/Milestones, and make the legacy-login-to-Discord-session path explicit.
+* **Work Completed**:
+  1. Added the autonomous evidence loop and Milestone quality standard to the canonical agent rules. Published the **AI & Agent Operations** category and nine source-linked Discussions [#560](https://github.com/itschase/OwlMTA-2026/discussions/560)–[#568](https://github.com/itschase/OwlMTA-2026/discussions/568), covering orientation, priority, resource audit, development/diagnostics, tracker quality, publication/handoff, Discord authority, shared-checkout coordination, and the legacy-login migration.
+  2. Added [`docs/architecture/LEGACY_LOGIN_DISCORD_MIGRATION.md`](docs/architecture/LEGACY_LOGIN_DISCORD_MIGRATION.md). Source review confirmed that existing-link Discord admission and a server-only capability facade exist, but password registration/login and forum credentials remain active, numeric staff/GameMaster/supporter authority is still loaded, no gameplay action consumes the facade, and full account logout/provisioning/runtime evidence remain incomplete. Published checkpoints to [Issue #2](https://github.com/itschase/OwlMTA-2026/issues/2#issuecomment-6508706544) and [Issue #96](https://github.com/itschase/OwlMTA-2026/issues/96#issuecomment-6508706865).
+  3. Rewrote [Issue #556](https://github.com/itschase/OwlMTA-2026/issues/556) as a lower-priority, source-backed vehicle-distance authority/canonical-fuel-owner unit. Closed stale [#557](https://github.com/itschase/OwlMTA-2026/issues/557) in favor of #281 and duplicate [#558](https://github.com/itschase/OwlMTA-2026/issues/558) in favor of #130/#131. Closed the empty/single-Issue Advertisement Refactor, Login UI Enhancement, and Core Systems Refactor Milestones.
+* **Commits**:
+  - [`24f6352`](https://github.com/itschase/OwlMTA-2026/commit/24f6352) — `docs(agents): define autonomous operations and identity migration`
+  - [`a28f135`](https://github.com/itschase/OwlMTA-2026/commit/a28f135) — `docs(project): record agent operations publication`
+* **Validation**: Focused source searches traced login/registration, forum credentials, identity-session state, capability consumers, and legacy authority consumers; the referenced Issue titles were verified live; all nine Discussions and tracker comments were returned by GitHub; `git diff --check` and staged diff checks passed. No MTA server, client, Discord application, identity-service runtime, database, or gameplay test was run.
+* **Current Status**: Documentation and public operations records are published; all authentication/session/gameplay runtime behavior remains unverified. Final branch/remote cleanliness is checked after committing this handoff.
+* **Recommended Next Work**:
+  1. Implement one bounded part of Issue #96: a canonical full-account logout distinct from character change, with save/cleanup ordering, pending-callback invalidation, adapter-state clearing, and bounded diagnostics.
+  2. Build the Issue #3/#14 action inventory and capability shadow matrix before migrating any numeric staff/GameMaster consumer; keep supporter entitlement separate.
+  3. Revoke the previously exposed credential manually, then continue durable provisioning and service-contract work under #2/#43/#68/#551.
+
 ### [2026-10-29] — Codex / ChatGPT (Shared-Agent Reconciliation)
 * **Goal**: Reclaim the shared checkout safely, correct unverified project records, establish durable agent pickup instructions, and review the pushed character spawn-correction security change.
 * **Work Completed**:
