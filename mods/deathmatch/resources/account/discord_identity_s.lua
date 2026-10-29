@@ -2,6 +2,7 @@ local identityResourceName = "mta-discord-identity"
 local requiredIdentityExports = {
 	beginLogin = true,
 	exchangeLoginTicket = true,
+	activateLoginSession = true,
 	clearPlayerSession = true,
 }
 
@@ -85,6 +86,10 @@ function exchangeDiscordLoginTicket(player, ticket)
 	return callIdentity(player, "exchangeLoginTicket", ticket)
 end
 
+function activateDiscordIdentitySession(player, accountID)
+	return callIdentity(player, "activateLoginSession", accountID)
+end
+
 function cancelDiscordLogin(player)
 	if not isElement(player) or getElementType(player) ~= "player" then
 		return false
@@ -127,6 +132,7 @@ end)
 addEventHandler("onResourceStop", root, function()
 	local identityResource = getResourceFromName(identityResourceName)
 	if identityResource and source == getResourceRootElement(identityResource) then
+		cancelPendingDiscordAccountAdmissions()
 		publishIdentityAvailability(false)
 	end
 end)
@@ -152,6 +158,8 @@ addEvent("mta-discord-identity:resolve-account", false)
 addEvent("mta-discord-identity:login-challenge", false)
 addEvent("mta-discord-identity:login-authorized", false)
 addEvent("mta-discord-identity:login-failed", false)
+addEvent("mta-discord-identity:login-session-activated", false)
+addEvent("mta-discord-identity:login-session-failed", false)
 
 addEventHandler("mta-discord-identity:resolve-account", root, function(player, reply)
 	if not isTrustedIdentityEvent() or type(reply) ~= "function" then
@@ -195,6 +203,7 @@ addEventHandler("mta-discord-identity:login-authorized", root, function(player, 
 	if not isElement(player) or getElementType(player) ~= "player" then return end
 	local started = admitAccountById(player, accountID, "discord")
 	if not started then
+		cancelDiscordLogin(player)
 		reportDiscordLoginFailure(player, "account_admission_not_started",
 			"This linked account could not be loaded. Contact server staff for assistance.", 1)
 	end
@@ -208,4 +217,28 @@ addEventHandler("mta-discord-identity:login-failed", root, function(player, stat
 	local statusClass = type(statusCode) == "number" and math.floor(statusCode / 100) or 0
 	reportDiscordLoginFailure(player, "identity_rejected status_class=" .. tostring(statusClass),
 		"Discord sign-in could not be completed. Restart the sign-in and try again.")
+end)
+
+addEventHandler("mta-discord-identity:login-session-activated", root, function(player, accountID)
+	if not isTrustedIdentityEvent() then
+		outputDebugString("[ACCOUNT][DISCORD] rejected untrusted login-session activation event", 2)
+		return
+	end
+	if not finalizeDiscordAccountAdmission(player, accountID) then
+		cancelDiscordLogin(player)
+		reportDiscordLoginFailure(player, "local_admission_commit_failed",
+			"Discord sign-in could not complete local account admission. Please start again.", 1)
+		return
+	end
+	outputDebugString("[ACCOUNT][DISCORD] outcome=session_activated", 3)
+end)
+
+addEventHandler("mta-discord-identity:login-session-failed", root, function(player, statusCode)
+	if not isTrustedIdentityEvent() then
+		outputDebugString("[ACCOUNT][DISCORD] rejected untrusted login-session failure event", 2)
+		return
+	end
+	local statusClass = type(statusCode) == "number" and math.floor(statusCode / 100) or 0
+	rejectDiscordAccountAdmission(player)
+	outputDebugString("[ACCOUNT][DISCORD] outcome=session_activation_failed status_class=" .. tostring(statusClass), 2)
 end)

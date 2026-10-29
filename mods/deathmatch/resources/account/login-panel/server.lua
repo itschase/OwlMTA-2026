@@ -13,6 +13,7 @@ local accountCharacters = {}
 local tutorialSessions = {}
 local tutorialSessionSequence = 0
 local authenticationBudgets = { login = {}, registration = {} }
+local pendingDiscordAdmissions = {}
 
 function consumeAuthenticationBudget(player, action, playerLimit, playerWindow, ipLimit, ipWindow)
 	local now = os.time()
@@ -59,6 +60,7 @@ addEventHandler("onPlayerQuit", root, function()
 	for _, actionBudgets in pairs(authenticationBudgets) do
 		actionBudgets[source] = nil
 	end
+	pendingDiscordAdmissions[source] = nil
 end)
 
 local function getAuthenticatedAccountID(player)
@@ -147,7 +149,7 @@ local function reportLoginFailure(player, reason, message, level)
 	end
 end
 
-local function completeAccountAdmission(player, accountData, method)
+local function prepareAccountAdmission(player, accountData, method)
 	if not isElement(player) or getElementType(player) ~= "player" then
 		outputDebugString("[ACCOUNT][ADMISSION] outcome=requester_disconnected method=" .. tostring(method), 3)
 		return false
@@ -192,6 +194,29 @@ local function completeAccountAdmission(player, accountData, method)
 	local accountDataMta = getAccountDetails(accountID)
 	if not accountDataMta then
 		reportLoginFailure(player, "account_details_unavailable", "Sign-in is temporarily unavailable. Please try again later.", 1)
+		return false
+	end
+	return {
+		player = player,
+		accountData = accountData,
+		accountDataMta = accountDataMta,
+		accountID = accountID,
+		method = method,
+	}
+end
+
+local function commitAccountAdmission(context)
+	local player = context.player
+	local accountData = context.accountData
+	local accountDataMta = context.accountDataMta
+	local accountID = context.accountID
+	local method = context.method
+	if not isElement(player) or getElementType(player) ~= "player" then
+		outputDebugString("[ACCOUNT][ADMISSION] outcome=requester_disconnected method=" .. tostring(method), 3)
+		return false
+	end
+	if getElementData(player, "account:loggedin") == true then
+		reportLoginFailure(player, "already_authenticated", "You are already signed in.")
 		return false
 	end
 
@@ -276,6 +301,72 @@ local function completeAccountAdmission(player, accountData, method)
 	return true
 end
 
+local function completeAccountAdmission(player, accountData, method)
+	if pendingDiscordAdmissions[player] then
+		reportLoginFailure(player, "admission_in_progress", "A Discord sign-in is already being processed.")
+		return false
+	end
+	local context = prepareAccountAdmission(player, accountData, method)
+	if not context then return false end
+	if method ~= "discord" then
+		return commitAccountAdmission(context)
+	end
+	pendingDiscordAdmissions[player] = context
+	if type(activateDiscordIdentitySession) ~= "function" or not activateDiscordIdentitySession(player, tostring(context.accountID)) then
+		pendingDiscordAdmissions[player] = nil
+		reportLoginFailure(player, "identity_session_not_started", "Discord sign-in could not establish a secure session. Please try again.", 1)
+		return false
+	end
+	outputDebugString("[ACCOUNT][ADMISSION] outcome=identity_session_pending method=discord", 3)
+	return true
+end
+
+function finalizeDiscordAccountAdmission(player, accountID)
+	local callerName = sourceResource and getResourceName(sourceResource)
+	if callerName ~= "mta-discord-identity" then
+		outputDebugString("[ACCOUNT][ADMISSION] rejected untrusted identity-session caller", 2)
+		return false
+	end
+	local context = pendingDiscordAdmissions[player]
+	local trustedAccountID = tonumber(accountID)
+	if not context or not trustedAccountID or context.accountID ~= trustedAccountID then
+		return false
+	end
+	pendingDiscordAdmissions[player] = nil
+	local query = dbQuery(exports.mysql:getConn("core"), "SELECT * FROM accounts WHERE id=? LIMIT 1", trustedAccountID)
+	if not query then
+		reportLoginFailure(player, "identity_commit_query_start_failed", "Sign-in is temporarily unavailable. Please try again later.", 1)
+		return false
+	end
+	local result = dbPoll(query, -1)
+	if not result or #result ~= 1 then
+		reportLoginFailure(player, "identity_commit_account_unavailable", "This linked account could not be revalidated. Please try again later.", 1)
+		return false
+	end
+	local refreshedContext = prepareAccountAdmission(player, result[1], "discord")
+	if not refreshedContext then return false end
+	return commitAccountAdmission(refreshedContext)
+end
+
+function rejectDiscordAccountAdmission(player)
+	local callerName = sourceResource and getResourceName(sourceResource)
+	if callerName ~= "mta-discord-identity" then return false end
+	if not pendingDiscordAdmissions[player] then return false end
+	pendingDiscordAdmissions[player] = nil
+	reportLoginFailure(player, "identity_session_failed", "Discord sign-in could not establish a secure session. Please start again.", 1)
+	outputDebugString("[ACCOUNT][ADMISSION] outcome=identity_session_failed method=discord", 2)
+	return true
+end
+
+function cancelPendingDiscordAccountAdmissions()
+	for player in pairs(pendingDiscordAdmissions) do
+		pendingDiscordAdmissions[player] = nil
+		if isElement(player) and getElementType(player) == "player" then
+			reportLoginFailure(player, "identity_resource_stopped", "Discord sign-in became unavailable. Please try again later.", 2)
+		end
+	end
+end
+
 function admitAccountById(player, accountID, method)
 	local callerName = sourceResource and getResourceName(sourceResource)
 	if callerName ~= "mta-discord-identity" then
@@ -301,16 +392,21 @@ function admitAccountById(player, accountID, method)
 		end
 		if not result then
 			reportLoginFailure(player, "core_query_failed", "Sign-in is temporarily unavailable. Please try again later.", 1)
+			if type(cancelDiscordLogin) == "function" then cancelDiscordLogin(player) end
 			return
 		end
 		if #result ~= 1 then
 			reportLoginFailure(player, "identity_account_unavailable", "This linked account is no longer available. Contact server staff for assistance.")
+			if type(cancelDiscordLogin) == "function" then cancelDiscordLogin(player) end
 			return
 		end
-		completeAccountAdmission(player, result[1], admissionMethod)
+		if not completeAccountAdmission(player, result[1], admissionMethod) and type(cancelDiscordLogin) == "function" then
+			cancelDiscordLogin(player)
+		end
 	end, {player, method}, exports.mysql:getConn("core"), "SELECT * FROM accounts WHERE id=? LIMIT 1", trustedAccountID)
 	if not query then
 		reportLoginFailure(player, "core_query_start_failed", "Sign-in is temporarily unavailable. Please try again later.", 1)
+		if type(cancelDiscordLogin) == "function" then cancelDiscordLogin(player) end
 		return false, "query failed"
 	end
 	return true
