@@ -247,7 +247,10 @@ function executePunishment(admin, targetPlayer, reason, repeated, pointsum, ip, 
 		end
 
 		-- Check if already banned?
-		if exports.bans:checkAccountBan((isElement(targetPlayer) and getElementData(targetPlayer, "account:id") or targetPlayer)) then
+		local accountBanned = exports.bans:checkAccountBan((isElement(targetPlayer) and getElementData(targetPlayer, "account:id") or targetPlayer))
+		if accountBanned == nil then
+			outputChatBox("Unable to verify the account's current ban state. Points were added, but no ban was created. Try again after the database is available.", admin, 255, 0, 0)
+		elseif accountBanned then
 			outputChatBox("This player is already banned. Points were added but ban was not adjusted. Use manual /unban and /oban.", admin)
 		else
 			local banID = exports.bans:addToBan(isElement(targetPlayer) and getElementData(targetPlayer, "account:id") or targetPlayer, serial, ip, getElementData(admin, "account:id"), reason, hours)

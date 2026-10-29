@@ -533,9 +533,28 @@ end
 addEventHandler("onPlayerJoin", getRootElement(), proxyCheck)
 
 function checkAccountBan(userid)
-	local resultQ = dbQuery(mysql:getConn("core"), "SELECT * FROM bans WHERE account=? AND (until IS NULL OR until > NOW() ) LIMIT 1", userid)
-	local result = dbPoll(resultQ, 10000)
-	if result and #result > 0 then
+	local accountID = tonumber(userid)
+	if not accountID or accountID < 1 or accountID ~= math.floor(accountID) then
+		outputDebugString("[BANS][ACCOUNT_CHECK] outcome=invalid_account", 2)
+		return nil
+	end
+
+	local connection = mysql:getConn("core")
+	local resultQ = connection and dbQuery(connection, "SELECT * FROM bans WHERE account=? AND (until IS NULL OR until > NOW() ) LIMIT 1", accountID)
+	if not resultQ then
+		outputDebugString("[BANS][ACCOUNT_CHECK] outcome=query_start_failed account=" .. accountID, 1)
+		return nil
+	end
+
+	local result, errorCode = dbPoll(resultQ, 10000)
+	if result == nil then
+		dbFree(resultQ)
+		outputDebugString("[BANS][ACCOUNT_CHECK] outcome=query_timeout account=" .. accountID, 1)
+		return nil
+	elseif result == false then
+		outputDebugString("[BANS][ACCOUNT_CHECK] outcome=query_failed code=" .. tostring(errorCode) .. " account=" .. accountID, 1)
+		return nil
+	elseif #result > 0 then
 		lastBan = result
 		if lastBanTimer and isTimer(lastBanTimer) then
 			killTimer(lastBanTimer)
@@ -544,10 +563,8 @@ function checkAccountBan(userid)
 		lastBanTimer = setTimer(function()
 			lastBan = nil
 		end, 1000*60*5,1) --5 minutes
-		exports.global:sendMessageToAdmins("[BAN] Rejected connection from account "..exports.cache:getUsernameFromId(userid).." as account is banned. /showban for details.")
+		exports.global:sendMessageToAdmins("[BAN] Rejected connection from account "..exports.cache:getUsernameFromId(accountID).." as account is banned. /showban for details.")
 		return true
-	else
-		dbFree(resultQ)
 	end
 	return false
 end

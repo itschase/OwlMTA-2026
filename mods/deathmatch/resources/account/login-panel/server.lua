@@ -197,7 +197,11 @@ function playerLogin(username,password,checksave)
 						end
 					end
 
-					if exports.bans:checkAccountBan(accountData["id"]) then
+					local accountBanned = exports.bans:checkAccountBan(accountData["id"])
+					if accountBanned == nil then
+						reportLoginFailure(client, "ban_check_failed", "Sign-in is temporarily unavailable. Please try again later.", 1)
+						return false
+					elseif accountBanned then
 						reportLoginFailure(client, "account_banned", "This account is banned. Contact server staff for assistance.")
 						exports.logs:dbLog("ac"..tostring(accountData["id"]), 27, "ac"..tostring(accountData["id"]), "Rejected account login: banned.")
 						return false
