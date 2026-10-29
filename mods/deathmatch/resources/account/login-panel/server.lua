@@ -130,6 +130,15 @@ function getAccountDetails(id)
 	return data
 end
 
+-- Reasons are server-owned constants; never include submitted credentials or identifiers.
+local function reportLoginFailure(player, reason, message, level)
+	outputDebugString("[ACCOUNT][LOGIN] outcome=" .. reason, level or 2)
+	if isElement(player) and getElementType(player) == "player" then
+		triggerClientEvent(player, "set_warning_text", player, "Login",
+			message or "Unable to sign in. Check your credentials or contact server staff for assistance.")
+	end
+end
+
 function playerLogin(username,password,checksave)
 	if not isElement(client) or getElementType(client) ~= "player" then
 		outputDebugString("[ACCOUNT][LOGIN] rejected request without player event client", 2)
@@ -151,27 +160,24 @@ function playerLogin(username,password,checksave)
 
 	--Get Encyption Rule for user.
 	preparedQuery = "SELECT * FROM `accounts` WHERE `username`=?"
-	dbQuery(function(qh, username, password, checksave, client)
+	local loginQuery = dbQuery(function(qh, username, password, checksave, client)
 			local result = dbPoll(qh, 0)
-			if result and client then
+			-- Consume the result even if the requester disconnected while the query ran.
+			if not isElement(client) or getElementType(client) ~= "player" then
+				outputDebugString("[ACCOUNT][LOGIN] outcome=requester_disconnected", 3)
+				return
+			end
+			if result then
 				if #result > 0 then
 					local accountData = result[1]
-					-- Check if the account is banned
-					if exports.bans:checkAccountBan(accountData["id"]) then
-						triggerClientEvent(client,"set_warning_text",client,"Login","Account is banned. Appeal at www.owlgaming.net")
-						exports.logs:dbLog("ac"..tostring(accountData["id"]), 27, "ac"..tostring(accountData["id"]), "Rejected connection from " .. getPlayerIP(client) .. " - ".. getPlayerSerial(client) .. " as account is banned.")
-						return false
-					end
-
-					--Now check if passwords are matched or the account is activated, this is to prevent user with fake emails.
-					triggerClientEvent(client,"set_authen_text",client,"Login","Password Accepted! Authenticating..")
+					-- Prove account control before checking ban/activation state or producing their side effects.
 					-- Check if old method
 					if not string.find(accountData["password"], "$", 1, true) then -- Plain search, not regex
 						local encryptionRule = accountData["salt"]
 						local encryptedPW = string.lower(md5(string.lower(md5(password))..encryptionRule))
 
 						if accountData["password"] ~= encryptedPW then
-							triggerClientEvent(client,"set_warning_text",client,"Login","Password(legacy) is incorrect for account name '".. username .."'!")
+							reportLoginFailure(client, "credentials_rejected")
 							return false
 						end
 
@@ -179,20 +185,26 @@ function playerLogin(username,password,checksave)
 						-- Run conversions // https://docs.djangoproject.com/en/1.10/topics/auth/passwords/#increasing-the-work-factor // Since Django prefixes it's passwords with the type we do this for compatibility
 						local new_pass = "bcrypt_sha256$" .. bcrypt_hashpw(sha256(password):lower(), bcrypt_gensalt(12)) -- 12 work factor // https://github.com/django/django/blob/master/django/contrib/auth/hashers.py#L404
 						if not dbExec(exports.mysql:getConn("core"), "UPDATE `accounts` SET `password`=?, `salt`=NULL WHERE id=?", new_pass, accountData["id"]) then
-							triggerClientEvent(client,"set_warning_text",client,"Login","Password conversion failed for account name '".. username .."'!")
+							reportLoginFailure(client, "legacy_upgrade_failed", "Sign-in is temporarily unavailable. Please try again later.", 1)
 							return false
 						end
 					else -- Else if new
 						local verified = bcrypt_checkpw(sha256(password):lower(), accountData["password"]:gsub("bcrypt_sha256%$", "")) -- Take out Django's junk to verify
 
 						if not verified then
-							triggerClientEvent(client,"set_warning_text",client,"Login","Password is incorrect for account name '".. username .."'!")
+							reportLoginFailure(client, "credentials_rejected")
 							return false
 						end
 					end
 
+					if exports.bans:checkAccountBan(accountData["id"]) then
+						reportLoginFailure(client, "account_banned", "This account is banned. Contact server staff for assistance.")
+						exports.logs:dbLog("ac"..tostring(accountData["id"]), 27, "ac"..tostring(accountData["id"]), "Rejected account login: banned.")
+						return false
+					end
+
 					if tonumber(accountData["activated"]) == 0 then
-						triggerClientEvent(client,"set_warning_text",client,"Login","Account '".. username .."' is not activated.")
+						reportLoginFailure(client, "account_inactive", "Your account is not activated. Contact server staff for assistance.")
 						return false
 					end
 
@@ -358,13 +370,16 @@ function playerLogin(username,password,checksave)
 
 					goFromLoginToSelectionScreen(client)
 				else
-					triggerClientEvent(client,"set_warning_text",client,"Login","Account name '".. username .."' doesn't exist!")
+					reportLoginFailure(client, "credentials_rejected")
 				end
 			else
-				triggerClientEvent(client,"set_warning_text",client,"Login","Failed to connect to game server. Database error!")
-				dbFree(qh)
+				-- dbPoll releases a failed query handle itself.
+				reportLoginFailure(client, "core_query_failed", "Sign-in is temporarily unavailable. Please try again later.", 1)
 			end
 		end, {username, password, checksave, client}, exports.mysql:getConn("core"), preparedQuery, username)
+	if not loginQuery then
+		reportLoginFailure(client, "core_query_start_failed", "Sign-in is temporarily unavailable. Please try again later.", 1)
+	end
 end
 addEvent("accounts:login:attempt",true)
 addEventHandler("accounts:login:attempt",getRootElement(),playerLogin)
