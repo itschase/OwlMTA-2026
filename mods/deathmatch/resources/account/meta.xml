@@ -2,6 +2,7 @@
     <info author="Maxime - OwlGaming MTA Server Development Team" type="script" description="Account System" />
 
     <script src="login-panel/server.lua" type="server" />
+    <script src="discord_identity_s.lua" type="server" />
     <script src="login-panel/client.lua" type="client" />
 
     <file src="login-panel/login_window.png" />

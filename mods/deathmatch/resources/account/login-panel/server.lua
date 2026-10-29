@@ -14,7 +14,7 @@ local tutorialSessions = {}
 local tutorialSessionSequence = 0
 local authenticationBudgets = { login = {}, registration = {} }
 
-local function consumeAuthenticationBudget(player, action, playerLimit, playerWindow, ipLimit, ipWindow)
+function consumeAuthenticationBudget(player, action, playerLimit, playerWindow, ipLimit, ipWindow)
 	local now = os.time()
 	local ip = getPlayerIP(player)
 	local ipKey = type(ip) == "string" and ip ~= "" and ip or tostring(player)
@@ -109,14 +109,22 @@ addEvent("onRequestLogin",true)
 addEventHandler("onRequestLogin",getRootElement(),validateCredentials)
 
 function getAccountDetails(id)
-	data = false
+	local data = false
 	local qb = dbQuery(exports.mysql:getConn("mta"), "SELECT * FROM account_details WHERE account_id=?", id)
+	if not qb then
+		outputDebugString("[ACCOUNT][ADMISSION] account details query did not start", 1)
+		return false
+	end
 	local result_mta = dbPoll(qb, -1)
 	if not result_mta then
 		outputDebugString("Magic Data connection failed!")
 	elseif #result_mta == 0 then
-		if dbExec(exports.mysql:getConn("mta", "INSERT INTO account_details SET `account_id`=?", id)) then
+		if dbExec(exports.mysql:getConn("mta"), "INSERT INTO account_details SET `account_id`=?", id) then
 			local qb = dbQuery(exports.mysql:getConn("mta"), "SELECT * FROM account_details WHERE account_id=?", id)
+			if not qb then
+				outputDebugString("[ACCOUNT][ADMISSION] created account details but reload query did not start", 1)
+				return false
+			end
 			local result_mta = dbPoll(qb, -1)
 			if result_mta and #result_mta == 1 then
 				data = result_mta[1]
@@ -137,6 +145,175 @@ local function reportLoginFailure(player, reason, message, level)
 		triggerClientEvent(player, "set_warning_text", player, "Login",
 			message or "Unable to sign in. Check your credentials or contact server staff for assistance.")
 	end
+end
+
+local function completeAccountAdmission(player, accountData, method)
+	if not isElement(player) or getElementType(player) ~= "player" then
+		outputDebugString("[ACCOUNT][ADMISSION] outcome=requester_disconnected method=" .. tostring(method), 3)
+		return false
+	end
+	if getElementData(player, "account:loggedin") == true then
+		reportLoginFailure(player, "already_authenticated", "You are already signed in.")
+		return false
+	end
+
+	local accountID = tonumber(accountData and accountData.id)
+	if not accountID or accountID < 1 or accountID ~= math.floor(accountID)
+		or type(accountData.username) ~= "string" or accountData.username == "" then
+		reportLoginFailure(player, "invalid_account_result", "Sign-in is temporarily unavailable. Please try again later.", 1)
+		return false
+	end
+
+	local accountBanned = exports.bans:checkAccountBan(accountID)
+	if accountBanned == nil then
+		reportLoginFailure(player, "ban_check_failed", "Sign-in is temporarily unavailable. Please try again later.", 1)
+		return false
+	elseif accountBanned then
+		reportLoginFailure(player, "account_banned", "This account is banned. Contact server staff for assistance.")
+		exports.logs:dbLog("ac"..tostring(accountID), 27, "ac"..tostring(accountID), "Rejected account login: banned.")
+		return false
+	end
+
+	if tonumber(accountData.activated) ~= 1 then
+		reportLoginFailure(player, "account_inactive", "Your account is not activated. Contact server staff for assistance.")
+		return false
+	end
+
+	local requiresSerialWhitelist = (tonumber(accountData.admin) or 0) >= 1
+		or (tonumber(accountData.supporter) or 0) >= 1
+		or (tonumber(accountData.scripter) or 0) >= 2
+		or (tonumber(accountData.fmt) or 0) >= 1
+	if not exports.serialwhitelist:check(player, accountID, requiresSerialWhitelist) then
+		triggerClientEvent(player, "set_warning_text", player, "Login", "This account is not authorized to connect from this PC. Contact server staff for assistance.")
+		outputDebugString("[ACCOUNT][ADMISSION] outcome=device_rejected method=" .. tostring(method), 2)
+		return false
+	end
+
+	local accountDataMta = getAccountDetails(accountID)
+	if not accountDataMta then
+		reportLoginFailure(player, "account_details_unavailable", "Sign-in is temporarily unavailable. Please try again later.", 1)
+		return false
+	end
+
+	-- Preserve the legacy single-session policy, but only displace the current session
+	-- after every database-backed admission gate for the replacement session succeeded.
+	for _, otherPlayer in ipairs(exports.pool:getPoolElementsByType("player")) do
+		if otherPlayer ~= player and tonumber(getElementData(otherPlayer, "account:id")) == accountID then
+			kickPlayer(otherPlayer, otherPlayer, "Someone else has logged into your account.")
+			triggerClientEvent(player, "set_authen_text", player, "Login", "Account is currently online. Disconnecting other user..")
+			break
+		end
+	end
+
+	triggerClientEvent(player, "set_authen_text", player, "Login", "Account authenticated!")
+	triggerClientEvent(player, "items:inventory:hideinv", player)
+
+	setElementDataEx(player, "account:loggedin", true, true)
+	setElementDataEx(player, "account:id", accountID, true)
+	setElementDataEx(player, "account:username", accountData.username, true)
+	setElementDataEx(player, "account:email", accountData.email, true)
+	setElementDataEx(player, "electionsvoted", accountDataMta.electionsvoted, true)
+	setElementDataEx(player, "credits", tonumber(accountData.credits), true)
+	setElementDataEx(player, "avatar", tonumber(accountData.avatar), true)
+	setElementData(player, "account:forumid", tonumber(accountData.forumid), true)
+
+	-- Legacy account ranks remain source-compatible until the capability migration is explicit.
+	setElementDataEx(player, "admin_level", tonumber(accountData.admin), true)
+	setElementDataEx(player, "supporter_level", tonumber(accountData.supporter), true)
+	setElementDataEx(player, "vct_level", tonumber(accountData.vct), true)
+	setElementDataEx(player, "mapper_level", tonumber(accountData.mapper), true)
+	setElementDataEx(player, "scripter_level", tonumber(accountData.scripter), true)
+	setElementDataEx(player, "fmt_level", tonumber(accountData.fmt), true)
+
+	setElementDataEx(player, "punishment:points", tonumber(accountData.punishpoints), true)
+	setElementDataEx(player, "punishment:date", accountData.punishdate, true)
+	exports.report:reportLazyFix(player)
+	setElementDataEx(player, "adminreports", tonumber(accountDataMta.adminreports), true)
+	setElementDataEx(player, "adminreports_saved", tonumber(accountDataMta.adminreports_saved))
+
+	if accountData.referrer and tonumber(accountData.referrer) then
+		setElementDataEx(player, "referrer", tonumber(accountData.referrer), false, true)
+	end
+
+	if exports.integration:isPlayerLeadAdmin(player) then
+		setElementDataEx(player, "hiddenadmin", accountDataMta.hiddenadmin, true)
+	else
+		setElementDataEx(player, "hiddenadmin", 0, true)
+	end
+
+	local vehicleConsultationTeam = exports.integration:isPlayerVehicleConsultant(player)
+	setElementDataEx(player, "vehicleConsultationTeam", vehicleConsultationTeam, false)
+
+	setElementDataEx(player, "adminjailed", tonumber(accountDataMta.adminjail) == 1, true)
+	setElementDataEx(player, "jailtime", tonumber(accountDataMta.adminjail_time), true)
+	setElementDataEx(player, "jailadmin", accountDataMta.adminjail_by, true)
+	setElementDataEx(player, "jailreason", accountDataMta.adminjail_reason, true)
+	if type(accountDataMta.monitored) == "string" and accountDataMta.monitored ~= "" then
+		setElementDataEx(player, "admin:monitor", accountDataMta.monitored, true)
+	end
+
+	exports.logs:dbLog("ac"..tostring(accountID), 27, "ac"..tostring(accountID), "Connected from "..getPlayerIP(player) .. " - "..getPlayerSerial(player))
+	dbExec(exports.mysql:getConn("mta"), "UPDATE account_details SET mtaserial=? WHERE account_id=?", getPlayerSerial(player), accountID)
+	dbExec(exports.mysql:getConn("core"), "UPDATE accounts SET ip=? WHERE id=?", getPlayerIP(player), accountID)
+
+	local sum = mysql:query_fetch_assoc("SELECT SUM(hoursPlayed) AS hours FROM `characters` WHERE account = " .. mysql:escape_string(accountID))
+	setElementData(player, "account:hours", sum and sum.hours or 0)
+	setElementDataEx(player, "account:lastlogin", accountDataMta.lastlogin, true)
+	setElementDataEx(player, "account:creationdate", accountData.registerdate, true)
+	setElementDataEx(player, "account:email", accountData.email, true)
+
+	triggerEvent("updateCharacters", player)
+	exports.donators:loadAllPerks(player)
+	local togNewsPerk, togNewsStatus = exports.donators:hasPlayerPerk(player, 3)
+	if togNewsPerk then
+		setElementDataEx(player, "tognews", tonumber(togNewsStatus), false, true)
+	end
+
+	loadAccountSettings(player, accountID)
+	exports.anticheat:setEld(player, "appstate", tonumber(accountDataMta.appstate))
+	outputDebugString("[ACCOUNT][ADMISSION] outcome=accepted method=" .. tostring(method), 3)
+	goFromLoginToSelectionScreen(player)
+	return true
+end
+
+function admitAccountById(player, accountID, method)
+	local callerName = sourceResource and getResourceName(sourceResource)
+	if callerName ~= "mta-discord-identity" then
+		outputDebugString("[ACCOUNT][ADMISSION] rejected untrusted resource caller", 2)
+		return false, "untrusted caller"
+	end
+	if method ~= "discord" then
+		return false, "unsupported admission method"
+	end
+	if not isElement(player) or getElementType(player) ~= "player" then
+		return false, "invalid player"
+	end
+	local trustedAccountID = tonumber(accountID)
+	if not trustedAccountID or trustedAccountID < 1 or trustedAccountID ~= math.floor(trustedAccountID) then
+		return false, "invalid account"
+	end
+	tutorialSessions[player] = nil
+	local query = dbQuery(function(qh, player, admissionMethod)
+		local result = dbPoll(qh, 0)
+		if not isElement(player) or getElementType(player) ~= "player" then
+			outputDebugString("[ACCOUNT][ADMISSION] outcome=requester_disconnected method=" .. admissionMethod, 3)
+			return
+		end
+		if not result then
+			reportLoginFailure(player, "core_query_failed", "Sign-in is temporarily unavailable. Please try again later.", 1)
+			return
+		end
+		if #result ~= 1 then
+			reportLoginFailure(player, "identity_account_unavailable", "This linked account is no longer available. Contact server staff for assistance.")
+			return
+		end
+		completeAccountAdmission(player, result[1], admissionMethod)
+	end, {player, method}, exports.mysql:getConn("core"), "SELECT * FROM accounts WHERE id=? LIMIT 1", trustedAccountID)
+	if not query then
+		reportLoginFailure(player, "core_query_start_failed", "Sign-in is temporarily unavailable. Please try again later.", 1)
+		return false, "query failed"
+	end
+	return true
 end
 
 function playerLogin(username,password,checksave)
@@ -197,182 +374,7 @@ function playerLogin(username,password,checksave)
 						end
 					end
 
-					local accountBanned = exports.bans:checkAccountBan(accountData["id"])
-					if accountBanned == nil then
-						reportLoginFailure(client, "ban_check_failed", "Sign-in is temporarily unavailable. Please try again later.", 1)
-						return false
-					elseif accountBanned then
-						reportLoginFailure(client, "account_banned", "This account is banned. Contact server staff for assistance.")
-						exports.logs:dbLog("ac"..tostring(accountData["id"]), 27, "ac"..tostring(accountData["id"]), "Rejected account login: banned.")
-						return false
-					end
-
-					if tonumber(accountData["activated"]) == 0 then
-						reportLoginFailure(client, "account_inactive", "Your account is not activated. Contact server staff for assistance.")
-						return false
-					end
-
-					--Validation is done, fetching some more details
-					triggerClientEvent(client,"set_authen_text",client,"Login","Account authenticated!")
-
-					-- Validate device policy before displacing an existing session or publishing account state.
-					local requiresSerialWhitelist = (tonumber(accountData['admin']) or 0) >= 1
-						or (tonumber(accountData['supporter']) or 0) >= 1
-						or (tonumber(accountData['scripter']) or 0) >= 2
-						or (tonumber(accountData['fmt']) or 0) >= 1
-					if not exports.serialwhitelist:check(client, accountData.id, requiresSerialWhitelist) then
-						triggerClientEvent(client,"set_warning_text",client,"Login","This account is not authorized to connect from this PC. Contact server staff for assistance.")
-						return false
-					end
-
-					-- Check the account is already logged in
-					local found = false
-					for _, thePlayer in ipairs(exports.pool:getPoolElementsByType("player")) do
-						local playerAccountID = tonumber(getElementData(thePlayer, "account:id"))
-						if (playerAccountID) then
-							if (playerAccountID == tonumber(accountData["id"])) and (thePlayer ~= client) then
-								kickPlayer(thePlayer, thePlayer, "Someone else has logged into your account.")
-								triggerClientEvent(client,"set_authen_text",client,"Login","Account is currently online. Disconnecting other user..")
-								break
-							end
-						end
-					end
-
-					local qb = dbQuery(exports.mysql:getConn("mta"), "SELECT * FROM account_details WHERE account_id=?", accountData.id)
-					local result_mta = dbPoll(qb, -1)
-					if not result_mta then
-						triggerClientEvent(client,"set_authen_text",client,"Login","Magic Data connection failed!")
-						return
-					elseif #result_mta == 0 then
-						if dbExec(exports.mysql:getConn("mta"), "INSERT INTO account_details SET `account_id`=?", accountData.id) then
-							local qb = dbQuery(exports.mysql:getConn("mta"), "SELECT * FROM account_details WHERE account_id=?", accountData.id)
-							local result_mta = dbPoll(qb, -1)
-
-						else
-
-						end
-					else
-						accountData_mta = result_mta[1]
-					end
-
-					local accountData_mta = getAccountDetails( accountData.id )
-					if not accountData_mta then
-						triggerClientEvent(client,"set_authen_text",client,"Login","Magic Data connection failed!")
-						return
-					end
-
-					-----------------------------------------------------------------------START THE MAGIC-----------------------------------------------------------------------------------
-					triggerClientEvent(client, "items:inventory:hideinv", client)
-				
-					-- Start the magic
-					setElementDataEx(client, "account:loggedin", true, true)
-					setElementDataEx(client, "account:id", tonumber(accountData["id"]), true)
-					setElementDataEx(client, "account:username", accountData["username"], true)
-					setElementDataEx(client, "account:email", accountData["email"], true)
-					setElementDataEx(client, "electionsvoted", accountData_mta["electionsvoted"], true)
-					setElementDataEx(client, "credits", tonumber(accountData["credits"]), true)
-					setElementDataEx(client, "avatar", tonumber(accountData["avatar"]), true)
-					setElementData(client, "account:forumid", tonumber(accountData["forumid"]), true)
-				
-					--STAFF PERMISSIONS
-					setElementDataEx(client, "admin_level", tonumber(accountData['admin']), true)
-					setElementDataEx(client, "supporter_level", tonumber(accountData['supporter']), true)
-					setElementDataEx(client, "vct_level", tonumber(accountData['vct']), true)
-					setElementDataEx(client, "mapper_level", tonumber(accountData['mapper']), true)
-					setElementDataEx(client, "scripter_level", tonumber(accountData['scripter']), true)
-					setElementDataEx(client, "fmt_level", tonumber(accountData['fmt']), true)
-				
-					-- Punishment points
-					setElementDataEx(client, "punishment:points", tonumber(accountData['punishpoints']), true)
-					setElementDataEx(client, "punishment:date", accountData['punishdate'], true)
-				
-					exports['report']:reportLazyFix(client)
-				
-					setElementDataEx(client, "adminreports", tonumber(accountData_mta["adminreports"]), true)
-					setElementDataEx(client, "adminreports_saved", tonumber(accountData_mta["adminreports_saved"]))
-				
-					if accountData['referrer'] and tonumber(accountData['referrer']) then
-						setElementDataEx(client, "referrer", tonumber(accountData['referrer']), false, true)
-					end
-				
-					if exports.integration:isPlayerLeadAdmin(client) then
-						setElementDataEx(client, "hiddenadmin", accountData_mta["hiddenadmin"], true)
-					else
-						setElementDataEx(client, "hiddenadmin", 0, true)
-					end
-				
-					--[[
-					--ADMINS
-					local staffDuty = tonumber(accountData["duty_admin"]) or 0
-					if exports.integration:isPlayerTrialAdmin(client) then
-						setElementDataEx(client, "duty_admin", staffDuty , true)
-						setElementDataEx(client, "wrn:style", tonumber(accountData["warn_style"]), true)
-					end
-				
-					--GMs
-					if exports.integration:isPlayerSupporter(client) then --GMs
-						setElementDataEx(client, "duty_supporter", staffDuty , true)
-					end
-					]]
-				
-					--MAXIME / VEHICLECONSULTATIONTEAM / 18.02.14
-					local vehicleConsultationTeam = exports.integration:isPlayerVehicleConsultant(client)
-					setElementDataEx(client, "vehicleConsultationTeam", vehicleConsultationTeam, false)
-				
-					if  tonumber(accountData_mta["adminjail"]) == 1 then
-						setElementDataEx(client, "adminjailed", true, true)
-					else
-						setElementDataEx(client, "adminjailed", false, true)
-					end
-					setElementDataEx(client, "jailtime", tonumber(accountData_mta["adminjail_time"]), true)
-					setElementDataEx(client, "jailadmin", accountData_mta["adminjail_by"], true)
-					setElementDataEx(client, "jailreason", accountData_mta["adminjail_reason"], true)
-				
-					if accountData_mta["monitored"] ~= "" then
-						setElementDataEx(client, "admin:monitor", accountData_mta["monitored"], true)
-					end
-				
-					exports.logs:dbLog("ac"..tostring(accountData["id"]), 27, "ac"..tostring(accountData["id"]), "Connected from "..getPlayerIP(client) .. " - "..getPlayerSerial(client) )
-					mysql:query_free("UPDATE `account_details` SET `mtaserial`='" .. mysql:escape_string(getPlayerSerial(client)) .. "' WHERE `account_id`='".. mysql:escape_string(tostring(accountData["id"])) .."'")
-					dbExec(exports.mysql:getConn("core"), "UPDATE `accounts` SET `ip`=? WHERE id=?", getPlayerIP(client), accountData.id)
-					--[[
-					local dataTable = { }
-					table.insert(dataTable, { "account:characters", characterList( client ) } )
-					accountCharacters[tonumber(accountData["id"])] = dataTable
-					]]
-					local sum = mysql:query_fetch_assoc("SELECT SUM(hoursPlayed) AS hours FROM `characters` WHERE account = " .. mysql:escape_string(accountData["id"]))
-					if sum then
-						setElementData(client, "account:hours", sum.hours)
-					else
-						setElementData(client, "account:hours", 0)
-					end
-				
-					setElementDataEx(client, "jailreason", accountData_mta["adminjail_reason"], true)
-					setElementDataEx(client, "account:lastlogin", accountData_mta["lastlogin"], true)
-					setElementDataEx(client, "account:creationdate", accountData["registerdate"], true)
-					setElementDataEx(client, "account:email", accountData["email"], true)
-				
-					triggerEvent("updateCharacters", client)
-				
-					exports.donators:loadAllPerks(client)
-					local togNewsPerk, togNewsStatus = exports.donators:hasPlayerPerk(client, 3)
-					if (togNewsPerk) then
-						setElementDataEx(client, "tognews", tonumber(togNewsStatus), false, true)
-					end
-				
-					--SETTINGS / MAXIME
-					loadAccountSettings(client, accountData["id"])
-				
-					exports.anticheat:setEld(client, "appstate", tonumber(accountData_mta["appstate"])) --Server only
-					--[[
-					if exports.global:isResourceRunning("interior_system") and exports.global:isResourceRunning("elevator-system") then
-						triggerClientEvent(client, "screenStandBy", client, "setState", true)
-					else
-						goFromLoginToSelectionScreen(client)
-					end
-					]]
-
-					goFromLoginToSelectionScreen(client)
+					completeAccountAdmission(client, accountData, "password")
 				else
 					reportLoginFailure(client, "credentials_rejected")
 				end

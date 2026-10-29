@@ -21,6 +21,8 @@ local fade = { }
 local logoScale = 0.5
 local logoSize = { sw*logoScale, sw*455/1920*logoScale }
 local uFont
+local discordLogin = { available = false }
+local showingRegisterPanel = false
 
 function startLoginSound()
 	local setting = loadMusicSetting()
@@ -108,6 +110,11 @@ function open_log_reg_pannel()
 		addEventHandler("onClientGUIClick",panel.login.register,OnBtnRegister, false )
 		addEventHandler( "onClientMouseEnter",panel.login.register,SignupSH)
 		addEventHandler("onClientMouseLeave",panel.login.register,SErem)
+
+		panel.login.discord = guiCreateButton(X + 23, Y + 326, 301, 22, "Sign in with Discord (linked accounts)", false)
+		addEventHandler("onClientGUIClick", panel.login.discord, startDiscordLogin, false)
+		guiSetVisible(panel.login.discord, false)
+		triggerServerEvent("account:discord:availability:request", resourceRoot)
 
 		panel.login.toplabel = guiCreateLabel(X - 70,Y + 388+70-120,500,30,"",false)
 		guiLabelSetColor(panel.login.toplabel,255,234,55)
@@ -410,7 +417,125 @@ function startLoggingIn()
 	end
 end
 
+local function destroyDiscordLoginWindow(sendCancel)
+	local available = discordLogin.available == true
+	if sendCancel then
+		triggerServerEvent("account:discord:cancel", resourceRoot)
+	end
+	if discordLogin.window and isElement(discordLogin.window) then
+		destroyElement(discordLogin.window)
+	end
+	discordLogin = { available = available }
+	if panel.login.discord and isElement(panel.login.discord) then
+		guiSetEnabled(panel.login.discord, true)
+	end
+end
+
+function startDiscordLogin(button, state)
+	if button and (button ~= "left" or state ~= "up" or source ~= panel.login.discord) then return end
+	if discordLogin.window and isElement(discordLogin.window) then
+		guiBringToFront(discordLogin.window)
+		return
+	end
+	guiSetEnabled(panel.login.discord, false)
+	authen_msg("Login", "Requesting a secure Discord sign-in challenge..")
+	triggerServerEvent("account:discord:begin", resourceRoot)
+end
+
+local function showDiscordLoginChallenge(result)
+	if type(result) ~= "table" or type(result.code) ~= "string" or type(result.verificationUrl) ~= "string" then
+		Error_msg("Login", "Discord returned an invalid sign-in challenge.")
+		destroyDiscordLoginWindow(false)
+		return
+	end
+	destroyDiscordLoginWindow(false)
+
+	discordLogin.window = guiCreateWindow(0, 0, 540, 300, "Sign in with Discord", false)
+	exports.global:centerWindow(discordLogin.window)
+	guiWindowSetMovable(discordLogin.window, true)
+	guiWindowSetSizable(discordLogin.window, false)
+	guiSetProperty(discordLogin.window, "AlwaysOnTop", "True")
+
+	discordLogin.instructions = guiCreateLabel(16, 30, 508, 48,
+		"Open the verification address in your normal browser, enter the one-time code, then paste the ticket returned after Discord authorization.",
+		false, discordLogin.window)
+	guiLabelSetHorizontalAlign(discordLogin.instructions, "left", true)
+
+	guiCreateLabel(16, 84, 105, 22, "Verification URL", false, discordLogin.window)
+	discordLogin.url = guiCreateEdit(122, 80, 300, 26, result.verificationUrl, false, discordLogin.window)
+	guiEditSetReadOnly(discordLogin.url, true)
+	discordLogin.copyUrl = guiCreateButton(430, 80, 94, 26, "Copy URL", false, discordLogin.window)
+
+	guiCreateLabel(16, 120, 105, 22, "One-time code", false, discordLogin.window)
+	discordLogin.code = guiCreateEdit(122, 116, 300, 26, result.code, false, discordLogin.window)
+	guiEditSetReadOnly(discordLogin.code, true)
+	discordLogin.copyCode = guiCreateButton(430, 116, 94, 26, "Copy code", false, discordLogin.window)
+
+	guiCreateLabel(16, 156, 105, 22, "Login ticket", false, discordLogin.window)
+	discordLogin.ticket = guiCreateEdit(122, 152, 402, 28, "", false, discordLogin.window)
+	guiEditSetMaxLength(discordLogin.ticket, 256)
+
+	discordLogin.expiry = guiCreateLabel(16, 188, 508, 34,
+		"This challenge is short-lived and bound to this connection. If it expires or you reconnect, start again.",
+		false, discordLogin.window)
+	guiLabelSetHorizontalAlign(discordLogin.expiry, "left", true)
+
+	discordLogin.submit = guiCreateButton(122, 232, 196, 38, "Submit one-time ticket", false, discordLogin.window)
+	discordLogin.cancel = guiCreateButton(328, 232, 196, 38, "Cancel", false, discordLogin.window)
+
+	addEventHandler("onClientGUIClick", discordLogin.copyUrl, function()
+		if source == discordLogin.copyUrl then setClipboard(guiGetText(discordLogin.url)) end
+	end, false)
+	addEventHandler("onClientGUIClick", discordLogin.copyCode, function()
+		if source == discordLogin.copyCode then setClipboard(guiGetText(discordLogin.code)) end
+	end, false)
+	addEventHandler("onClientGUIClick", discordLogin.submit, function()
+		if source ~= discordLogin.submit then return end
+		local ticket = guiGetText(discordLogin.ticket):match("^%s*(.-)%s*$")
+		if type(ticket) ~= "string" or ticket == "" then
+			Error_msg("Login", "Paste the one-time ticket returned by Discord authorization.")
+			return
+		end
+		guiSetEnabled(discordLogin.submit, false)
+		authen_msg("Login", "Verifying the one-time Discord ticket..")
+		triggerServerEvent("account:discord:exchange", resourceRoot, ticket)
+	end, false)
+	addEventHandler("onClientGUIClick", discordLogin.cancel, function()
+		if source == discordLogin.cancel then destroyDiscordLoginWindow(true) end
+	end, false)
+
+	guiBringToFront(discordLogin.window)
+	showCursor(true)
+end
+addEvent("account:discord:challenge", true)
+addEventHandler("account:discord:challenge", resourceRoot, showDiscordLoginChallenge)
+
+local function discordLoginFailed()
+	if discordLogin.submit and isElement(discordLogin.submit) then
+		guiSetEnabled(discordLogin.submit, true)
+	end
+	if panel.login.discord and isElement(panel.login.discord) then
+		guiSetEnabled(panel.login.discord, true)
+	end
+end
+addEvent("account:discord:failed", true)
+addEventHandler("account:discord:failed", resourceRoot, discordLoginFailed)
+
+local function setDiscordLoginAvailability(available)
+	discordLogin.available = available == true
+	if not discordLogin.available and discordLogin.window and isElement(discordLogin.window) then
+		destroyDiscordLoginWindow(false)
+	end
+	if panel.login.discord and isElement(panel.login.discord) then
+		guiSetVisible(panel.login.discord, discordLogin.available and not showingRegisterPanel)
+		guiSetEnabled(panel.login.discord, discordLogin.available)
+	end
+end
+addEvent("account:discord:availability", true)
+addEventHandler("account:discord:availability", resourceRoot, setDiscordLoginAvailability)
+
 function hideLoginPanel(keepBG)
+	destroyDiscordLoginWindow(false)
 	showCursor(true)
 	if keepBG then
 		for name, gui in pairs( panel.login ) do
@@ -445,6 +570,7 @@ function onClickCancel()
 end
 
 function switchToLoginPanel()
+	showingRegisterPanel = false
 	guiSetText(panel.login.error, "")
 	guiSetText(panel.login.authen, "")
 	guiSetText(panel.login.toplabel, "")
@@ -461,6 +587,7 @@ function switchToLoginPanel()
 	guiSetVisible(panel.login.password2,false)
 	guiSetVisible(panel.login.username2,false)
 	guiSetVisible(panel.login.register, true)
+	guiSetVisible(panel.login.discord, discordLogin.available == true)
 	guiSetVisible(panel.login.login, true)
 	guiSetVisible(panel.login.password, true)
 	guiSetVisible(panel.login.username, true)
@@ -469,6 +596,7 @@ function switchToLoginPanel()
 end
 
 function switchToRegisterPanel()
+	showingRegisterPanel = true
 	guiSetText(panel.login.error, "")
 	guiSetText(panel.login.authen, "")
 	guiSetText(panel.login.toplabel, "")
@@ -485,6 +613,7 @@ function switchToRegisterPanel()
 	guiSetVisible(panel.login.email,true)
 	guiSetEnabled (panel.login.email, true)
 	guiSetVisible(panel.login.register, false)
+	guiSetVisible(panel.login.discord, false)
 	guiSetVisible(panel.login.login, false)
 	guiSetVisible(panel.login.password, false)
 	guiSetVisible(panel.login.username, false)
@@ -606,6 +735,7 @@ showCursor(true)
 	if Tab == "Login" then
 		playSoundFrontEnd ( 4)
 		guiSetVisible(panel.login.register, true)
+		guiSetVisible(panel.login.discord, discordLogin.available == true)
 		guiSetVisible(panel.login.login, true)
 		guiSetVisible(panel.login.password, true)
 		guiSetVisible(panel.login.username, true)
@@ -630,6 +760,7 @@ showCursor(true)
 		if panel.login.authen and isElement(panel.login.authen) and guiGetVisible(panel.login.authen) then
 			--playSoundFrontEnd ( 12)
 			guiSetVisible(panel.login.register, true)
+			guiSetVisible(panel.login.discord, discordLogin.available == true)
 			guiSetVisible(panel.login.login, true)
 			guiSetVisible(panel.login.password, true)
 			guiSetVisible(panel.login.username, true)

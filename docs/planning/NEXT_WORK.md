@@ -1,6 +1,12 @@
 # Next work record
 
-Last updated: 2026-10-29 after publishing the standalone Discord pre-authentication source contract.
+Last updated: 2026-10-29 after adding the Owl existing-link Discord admission consumer.
+
+## Latest continuation — Owl existing-link Discord admission
+
+The account resource now contains the first Owl consumer for standalone identity revision [`21fced3`](https://github.com/itschase/mta-discord-identity/commit/21fced3). A compatible running adapter enables a **Sign in with Discord (linked accounts)** control; otherwise it stays hidden and Owl has no startup dependency on the integration. The server derives the player from MTA `client`, accepts no account or Discord identifier, validates the adapter through `sourceResource` plus resource-root provenance, and passes only the adapter-returned opaque account reference into a shared admission function. Password and Discord proof now share activation, current-ban, device, `account_details`, duplicate-session, legacy-rank, perk, application/tutorial, and character-selection handling.
+
+The refactor also corrects the malformed missing-`account_details` insert, removes its redundant query path, checks reload failures, parameterizes serial/IP persistence, and waits until database-backed gates succeed before displacing an existing session. Logs contain only bounded outcome/method data beyond the legacy connection audit. Lua 5.1 syntax, manifest XML, and diff whitespace have been checked; MTA, Discord, identity-service, database, GUI, and race behavior remain runtime-unverified. Next identity work is post-admission capability-session activation and bounded revocation/disconnect (#68/#96), not new-account provisioning or silent password fallback.
 
 ## Latest continuation — reusable Discord pre-authentication source
 
@@ -196,7 +202,7 @@ Audited `artifacts`, added its source dossier, and published [Script Resource Di
 
 Added Issue #330 for source-confirmed client texture-handle cleanup in `artifacts`; this issue separates a resource-owned presentation lifecycle from shared attachment state.
 
-Checked the standalone identity plugin at revision `619d18f`: it exposes server-side named-capability and donor-tier checks, and asks the host gamemode to resolve account identity through a server-only callback. Updated the audit standards to record a Discord capability decision for every resource command, protected event, export, and staff control. The intended pattern is one Owl-side authorization facade calling the reusable plugin, followed by each resource's local ownership, faction/duty, proximity, target, and state checks. The external adapter is not integrated into Owl yet; no resource receives a Discord grant by default.
+At this earlier checkpoint, the standalone identity plugin at revision `619d18f` exposed server-side named-capability and donor-tier checks and asked the host gamemode to resolve account identity through a server-only callback. The audit standards were updated to record a Discord capability decision for every resource command, protected event, export, and staff control. The intended pattern remains one Owl-side authorization facade calling the reusable plugin, followed by each resource's local ownership, faction/duty, proximity, target, and state checks. The later existing-link admission slice does not yet activate capabilities; no resource receives a Discord grant by default.
 
 Audited `gatekeepers-system`, published [Script Resource Discussion #334](https://github.com/itschase/OwlMTA-2026/discussions/334), and created Issues #331-#333 for locksmith key settlement, factionless key-list handling, and global ped-damage suppression. No commands are loaded in that resource; its existing NPC context menu is documented as the current interface and an input for future third-eye/context unification.
 
