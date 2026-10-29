@@ -57,6 +57,7 @@
 
     <export function="checkValidCharacterName" type="client" />
 	<export function="checkValidCharacterName" type="server" />
+	<export function="hasDiscordCapability" type="server" />
 
     <export function="screenStandBy" type="client" />
 

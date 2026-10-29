@@ -3,6 +3,7 @@ local requiredIdentityExports = {
 	beginLogin = true,
 	exchangeLoginTicket = true,
 	activateLoginSession = true,
+	hasCapability = true,
 	clearPlayerSession = true,
 }
 
@@ -88,6 +89,27 @@ end
 
 function activateDiscordIdentitySession(player, accountID)
 	return callIdentity(player, "activateLoginSession", accountID)
+end
+
+-- Server-only Owl authorization facade. The reusable adapter independently
+-- re-resolves this resource's trusted account callback before returning a grant.
+-- Callers must still enforce duty, hierarchy, target, ownership, proximity,
+-- organization and action-state policy for the operation they are protecting.
+function hasDiscordCapability(player, capability)
+	if not isElement(player) or getElementType(player) ~= "player"
+		or getElementData(player, "account:loggedin") ~= true then
+		return false
+	end
+	local accountID = tonumber(getElementData(player, "account:id"))
+	if not accountID or accountID < 1 or accountID ~= math.floor(accountID)
+		or type(capability) ~= "string" or #capability < 1 or #capability > 128
+		or not capability:match("^[a-z0-9][a-z0-9%._:%-]*$") then
+		return false
+	end
+	local identityResource = getRunningIdentityResource()
+	if not identityResource then return false end
+	local callSucceeded, allowed = pcall(call, identityResource, "hasCapability", player, capability)
+	return callSucceeded and allowed == true
 end
 
 function cancelDiscordLogin(player)

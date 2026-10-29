@@ -1,6 +1,12 @@
 # Next work record
 
-Last updated: 2026-10-29 after staging Discord capability-session activation behind Owl admission.
+Last updated: 2026-10-29 after adding the server-only Owl capability facade.
+
+## Latest continuation — server-only capability facade
+
+The `account` resource now exports `hasDiscordCapability(player, capability)` to server resources only. It rejects invalid or logged-out players, malformed capability names, missing/incompatible adapters, and adapter errors. The reusable adapter v0.2.1 source at [`246dfe3`](https://github.com/itschase/mta-discord-identity/commit/246dfe3) records the resource that established each session, accepts grant queries only from that resource, re-resolves the current server-side account on every query, and clears a mismatched session before returning authority. No capability, donor tier, session token, role ID, or account claim is synchronized to client Lua.
+
+This is an authorization boundary, not a rank migration. No gameplay action consumes a Discord capability by default yet. Each future call-site migration must name the narrow action and retain its independent duty, hierarchy, organization/faction, target, ownership, proximity, settlement, and state checks. Donor tiers remain outside this facade. The next bounded identity unit is confirmed authorization-loss handling: distinguish role/grant changes from identity revocation, invalidate the exact Owl session, and disconnect only when the identity authorization itself is no longer valid under the documented lease. Runtime remains unverified.
 
 ## Latest continuation — post-check Discord session activation
 
@@ -8,7 +14,7 @@ Published standalone identity-service v0.2 source [`03489a6`](https://github.com
 
 Owl's account resource now stages a Discord admission after the first Core/ban/device/account-details checks, requests adapter activation, then reloads Core and repeats the gates before committing `account:loggedin`, legacy ranks, perks, or character selection. Local rejection, activation failure, adapter stop, cancel, or disconnect clears pending state. The optional adapter remains a boot-independent dependency and legacy password behavior is unchanged. Lua 5.1, Node syntax, manifest XML, and diff whitespace checks passed; automated tests were updated but not executed, and no MTA, Discord, database, transport, or GUI runtime was exercised.
 
-The next identity unit is one server-only Owl capability facade that rebinds the current account at every authorization boundary, followed by bounded revocation/disconnect handling under #68/#96. Do not migrate staff, GameMaster, faction/duty, or donor call sites wholesale; each action keeps its independent local policy checks.
+The next identity unit after that checkpoint was the server-only Owl capability facade recorded above. Bounded revocation/disconnect handling remains next under #68/#96. Do not migrate staff, GameMaster, faction/duty, or donor call sites wholesale; each action keeps its independent local policy checks.
 
 Published Owl source: [`151dd1f`](https://github.com/itschase/OwlMTA-2026/commit/151dd1f). Durable tracker updates: [Issue #551 admission/runtime evidence](https://github.com/itschase/OwlMTA-2026/issues/551#issuecomment-6504058834), [Issue #68 adapter/facade boundary](https://github.com/itschase/OwlMTA-2026/issues/68#issuecomment-6504059880), [Issue #96 remaining revocation lifecycle](https://github.com/itschase/OwlMTA-2026/issues/96#issuecomment-6504060847), [standalone Issue #1](https://github.com/itschase/mta-discord-identity/issues/1#issuecomment-6504061812), [Discussion #99 account update](https://github.com/itschase/OwlMTA-2026/discussions/99#discussioncomment-19274327), and [Discussion #98 architecture checkpoint](https://github.com/itschase/OwlMTA-2026/discussions/98#discussioncomment-19274328).
 

@@ -19,8 +19,8 @@
 ## Current API contract follow-up
 
 - Owl's [`API_CONTRACT.md`](../architecture/API_CONTRACT.md) is a target proposal; its `/api/v1` routes do not match the standalone identity service's implemented `/v1` routes.
-- [Issue #68](https://github.com/itschase/OwlMTA-2026/issues/68) tracks route/schema reconciliation plus the still-missing production capability/session facade and revocation handler. The narrow existing-link admission consumer is now fixed in source under #551.
-- Standalone v0.2 revision [`03489a6`](https://github.com/itschase/mta-discord-identity/commit/03489a6) adds a server-held activation ticket and host-bound adapter activation. Owl's account resource now stages local checks, activates the bounded session, and revalidates before login commit. [Issue #551](https://github.com/itschase/OwlMTA-2026/issues/551) remains open for disposable-runtime races; general capability enforcement and revocation remain in #68/#96.
+- [Issue #68](https://github.com/itschase/OwlMTA-2026/issues/68) tracks route/schema reconciliation plus the remaining production capability/session migration and revocation handler. The narrow existing-link admission consumer and server-only facade are now fixed in source under #551/#68.
+- Standalone v0.2.1 revision [`246dfe3`](https://github.com/itschase/mta-discord-identity/commit/246dfe3) adds current-account and establishing-host binding to every grant query. Owl's account resource stages local checks, activates the bounded session, revalidates before login commit, and exposes the only server-side named-capability facade. [Issue #551](https://github.com/itschase/OwlMTA-2026/issues/551) remains open for disposable-runtime races; action-by-action enforcement and revocation remain in #3/#68/#96.
 - The separate service's process-local state and unverified MTA adapter runtime are explicit limits. Do not claim end-to-end Discord login or role authorization exists in OwlMTA.
 
 ## Current account and character follow-up
