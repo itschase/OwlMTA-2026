@@ -27,6 +27,7 @@ The inherited database and configuration still reflect the legacy gamemode. Sche
 Start with the [documentation hub](docs/README.md). The principal guides are:
 
 - [Rebuild plan](docs/planning/REBUILD_PLAN.md) — phases, priorities, and readiness work.
+- [Agent guidelines and activity read log](AGENTS.md) — operational conventions, rules, and chronological read log for multi-agent collaboration.
 - [Gamemode architecture guide](docs/architecture/GAMEMODE_GUIDE.md) — major systems and resource relationships.
 - [Resource catalog](docs/reference/RESOURCE_CATALOG.md), [resource dossiers](docs/resources/README.md), [documentation status ledger](RESOURCE_DOCUMENTATION_STATUS.csv), and [resource startup inventory](RESOURCE_INVENTORY.csv) — manifest coverage, maintained source reviews, row-by-row documentation progress, and startup inventory.
 - [Resource and script audit playbook](docs/planning/RESOURCE_AUDIT_PLAYBOOK.md) — documentation coverage, evidence standards, and completion gates.

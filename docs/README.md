@@ -29,6 +29,7 @@ All runtime behavior remains unverified unless a document explicitly records a c
 ## Planning and project governance
 
 - [Rebuild Plan](planning/REBUILD_PLAN.md)
+- [Agent guidelines and activity read log](../AGENTS.md) — multi-agent collaboration protocol and chronological read log.
 - [Enhancement Register](planning/ENHANCEMENT_REGISTER.md)
 - [Documentation and Planning Program](planning/DOCUMENTATION_PROGRAM.md)
 - [Resource Audit Playbook](planning/RESOURCE_AUDIT_PLAYBOOK.md)
