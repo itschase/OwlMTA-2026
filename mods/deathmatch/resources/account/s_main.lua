@@ -56,6 +56,9 @@ function onJoin()
 		mysql:free_result(mQuery1)
 	end
 	if not skipreset then
+		if type(clearDiscordIdentitySession) == "function" then
+			clearDiscordIdentitySession(source)
+		end
 		-- Set the user as not logged in, so they can't see chat or use commands
 		exports.anticheat:changeProtectedElementDataEx(source, "loggedin", 0, false)
 		exports.anticheat:changeProtectedElementDataEx(source, "account:loggedin", false, false)

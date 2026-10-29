@@ -219,6 +219,9 @@ local function commitAccountAdmission(context)
 		reportLoginFailure(player, "already_authenticated", "You are already signed in.")
 		return false
 	end
+	if method ~= "discord" and type(clearDiscordIdentitySession) == "function" then
+		clearDiscordIdentitySession(player)
+	end
 
 	-- Preserve the legacy single-session policy, but only displace the current session
 	-- after every database-backed admission gate for the replacement session succeeded.

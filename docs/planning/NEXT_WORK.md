@@ -1,6 +1,12 @@
 # Next work record
 
-Last updated: 2026-10-29 after adding confirmed Discord-authorization revocation handling.
+Last updated: 2026-10-29 after binding identity cleanup to Owl account lifecycle boundaries.
+
+## Latest continuation — synchronous identity-session cleanup
+
+Standalone adapter v0.2.3 source [`64fda3a`](https://github.com/itschase/mta-discord-identity/commit/64fda3a) centralizes internal state clearing, restricts the exported `clearPlayerSession` operation to the resource owning the current cached or pending lifecycle, and clears any older cache when a new pre-auth login begins. Internal expiry, mismatch, refresh failure, and player-quit paths use the same cleanup primitive without depending on an export-call context.
+
+Owl now clears adapter state before committing a password admission, whenever a non-seamless account reset removes local authentication, and for every player when the `account` resource stops. Character change deliberately retains the account-level identity lease because `account:id` and `account:loggedin` remain unchanged. On account-resource teardown, only sessions originally admitted through Discord are disconnected; password-admitted sessions may use the inherited seamless path but lose external cached grants. The apparent **logout to login panel** client helper remains incomplete: it emits `accounts:characters:logout`, but no account server handler terminates the account session. That legacy workflow was documented rather than activated without a complete save/cleanup design. Static validation only; resource-stop ordering and every lifecycle branch remain runtime-unverified.
 
 ## Latest continuation — confirmed identity revocation disconnect
 

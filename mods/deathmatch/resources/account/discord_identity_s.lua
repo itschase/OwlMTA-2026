@@ -123,6 +123,12 @@ function cancelDiscordLogin(player)
 	return callSucceeded and cleared == true
 end
 
+function clearDiscordIdentitySession(player)
+	if not isElement(player) or getElementType(player) ~= "player" then return false end
+	setElementData(player, "account:discord_authenticated_id", false, false)
+	return cancelDiscordLogin(player)
+end
+
 -- The login UI may invoke only these narrow operations. Player identity is always
 -- MTA's event client; account and Discord identifiers are never accepted.
 addEvent("account:discord:begin", true)
@@ -157,6 +163,23 @@ addEventHandler("onResourceStop", root, function()
 	if identityResource and source == getResourceRootElement(identityResource) then
 		cancelPendingDiscordAccountAdmissions()
 		publishIdentityAvailability(false)
+	end
+end)
+
+-- The account resource cannot safely preserve an external identity lease through
+-- its own restart. Clear adapter state for every player and disconnect only the
+-- sessions whose local account admission was completed through Discord.
+addEventHandler("onResourceStop", resourceRoot, function()
+	for _, player in ipairs(getElementsByType("player")) do
+		local discordAccountID = tonumber(getElementData(player, "account:discord_authenticated_id"))
+		local currentAccountID = tonumber(getElementData(player, "account:id"))
+		local disconnect = getElementData(player, "account:loggedin") == true
+			and discordAccountID and discordAccountID == currentAccountID
+		clearDiscordIdentitySession(player)
+		if disconnect then
+			outputDebugString("[ACCOUNT][DISCORD] outcome=account_resource_stopped disconnect=true", 2)
+			kickPlayer(player, getRootElement(), "Account services restarted. Reauthorize with Discord before signing in again.")
+		end
 	end
 end)
 
