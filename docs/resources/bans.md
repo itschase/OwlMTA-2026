@@ -5,6 +5,7 @@
 - Tree/startup state: active and present before account login in the tracked startup snapshot; live startup unverified.
 - Evidence: full manifest-script source review.
 - Runtime: unverified.
+- Discussion: [Script Resource: bans](https://github.com/itschase/OwlMTA-2026/discussions/177).
 
 ## What it does
 

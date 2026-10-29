@@ -25,12 +25,19 @@
 
 ## Current account and character follow-up
 
-- The player-facing account/character overview is [Q&A Discussion #530](https://github.com/itschase/OwlMTA-2026/discussions/530); the detailed technical source remains [`docs/resources/account.md`](../resources/account.md).
+- The technical resource overview is [Script Resource Discussion #99](https://github.com/itschase/OwlMTA-2026/discussions/99), the player-facing account/character overview is [Q&A Discussion #530](https://github.com/itschase/OwlMTA-2026/discussions/530), and the detailed maintained source is [`docs/resources/account.md`](../resources/account.md).
 - [Issue #527](https://github.com/itschase/OwlMTA-2026/issues/527) and [#528](https://github.com/itschase/OwlMTA-2026/issues/528) are fixed in source and remain open for disposable-client/runtime verification of authenticated email updates and legacy password-file cleanup.
 - [Issue #529](https://github.com/itschase/OwlMTA-2026/issues/529) tracks the fixed-in-source legacy input/rate boundaries, unified unknown-user/password response, post-credential ban lookup, safe outcome diagnostics, and the remaining timing/runtime checks. [Issue #158](https://github.com/itschase/OwlMTA-2026/issues/158) records that the device check runs before session takeover/commit; enrollment, policy, privacy, and runtime work remain.
 - [Issue #160](https://github.com/itschase/OwlMTA-2026/issues/160) owns ban-enforcement consistency. Its account-ban export now distinguishes an active ban, a completed no-match query, and an invalid/failed/timed-out check; login and punishment automation fail closed when current ban state is unavailable. Other identifier/range/outage paths remain open.
 - Registration activation/provisioning remains under [#13](https://github.com/itschase/OwlMTA-2026/issues/13) and [#43](https://github.com/itschase/OwlMTA-2026/issues/43). Discord-first identity and host binding remain proposed under [#2](https://github.com/itschase/OwlMTA-2026/issues/2), [#68](https://github.com/itschase/OwlMTA-2026/issues/68), [#96](https://github.com/itschase/OwlMTA-2026/issues/96), and pre-auth challenge [#551](https://github.com/itschase/OwlMTA-2026/issues/551); OwlMTA does not yet have integrated Discord login.
 - Character creation, hydration, and spawn correction remain tracked by [#201](https://github.com/itschase/OwlMTA-2026/issues/201)–[#204](https://github.com/itschase/OwlMTA-2026/issues/204). All source fixes and findings remain runtime-unverified unless a tracker explicitly says otherwise.
+
+## Current ban-enforcement follow-up
+
+- The maintained source is the [`bans` dossier](../resources/bans.md), with [Script Resource Discussion #177](https://github.com/itschase/OwlMTA-2026/discussions/177) as its public overview.
+- [Issue #160](https://github.com/itschase/OwlMTA-2026/issues/160) owns identifier and outage consistency. The account-ban export now returns a distinct unavailable state for invalid input, query-start failure, timeout, or database error; account login and punishment automation stop rather than assuming no ban.
+- Parent policy and legacy-source reconciliation remains in [#57](https://github.com/itschase/OwlMTA-2026/issues/57). Inserted ban IDs, provider retirement, and wider identifier behavior remain in #159, #163, and the remaining #160 scope.
+- All changes are fixed in source only. Ban database outage, timeout, exact/range matches, punishment integration, and restart behavior remain runtime-unverified.
 
 ## Current resource follow-up — `death`
 
