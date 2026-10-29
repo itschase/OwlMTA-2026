@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This guide lets a human contributor or automation agent resume OwlMTA-2026 from evidence instead of chat memory. It describes the repository's actual workflow; it does not create a separate public "AI" product surface or replace maintained technical documentation.
+This guide lets a human contributor or automation agent resume OwlMTA-2026 from evidence instead of chat memory. It is the canonical source for the public **AI & Agent Operations** Discussion category; public topics explain and link to these maintained rules rather than replacing them.
 
 The root [`AGENTS.md`](../AGENTS.md) is mandatory. Repository Markdown is the source of truth, GitHub Discussions make that material discoverable, Issues own bounded work, and Milestones group delivery outcomes.
 
@@ -46,6 +46,19 @@ Choose the next bounded unit from current evidence, not convenience:
 6. user experience, cosmetic, and archived-resource work.
 
 Search open and closed Issues before creating anything. Update an existing Issue when it already owns the outcome. A TODO or FIXME is a review lead, not proof of a defect and not sufficient by itself for a new Issue.
+
+For a normal autonomous unit, continue beyond reporting when the evidence supports a safe bounded change:
+
+1. prove the current behavior and authority boundary from source;
+2. reconcile the existing tracker or create one bounded, nonduplicate Issue;
+3. implement the smallest coherent correction or improvement;
+4. add useful, privacy-conscious failure/rejection diagnostics;
+5. update the resource dossier and project records;
+6. perform focused static validation without inflating it into a runtime claim;
+7. publish/cross-link the Issue and relevant audience Discussion;
+8. commit, push, verify remote state, and leave the next evidence-based unit.
+
+Pause only for material product policy, destructive or irreversible action, missing authority, ambiguous ownership, unexpected concurrent edits, or a runtime/deployment boundary that the owner has not authorized.
 
 ## Code and security rules
 
@@ -101,8 +114,19 @@ Repository documentation remains the detailed reference. Discussions provide an 
 - Operator runbooks belong in **Server Operators**.
 - Discord/API architecture belongs in **Discord & API Integration**.
 - Cross-resource proposals belong in **Plans & Enhancements**.
+- Durable automated-contributor onboarding, workflow, coordination, and quality standards belong in **AI & Agent Operations**.
 
-Internal agent coordination belongs in this repository, not in a public AI-branded category. Do not paste entire maintained files into Discussions; publish a useful summary with source, status, connections, open work, and links.
+Repository instructions remain authoritative. Do not paste entire maintained files or private transcripts into Discussions; publish a useful project-voice summary with source, status, connections, open work, and links. Never publish credentials, machine-specific paths, private prompts, or model-specific secrets.
+
+### Milestones
+
+A Milestone represents a coherent delivery outcome with multiple related Issues, a meaningful completion gate, and a distinct place in the rebuild sequence. Do not create one merely because an Issue mentions a subsystem. Before creating or assigning one:
+
+- search existing Milestones and current plans;
+- define outcome, scope, prerequisites, non-goals, and completion evidence;
+- group multiple genuinely related Issues;
+- keep runtime/release gates explicit;
+- avoid duplicate, vanity, single-TODO, or agent-specific Milestones.
 
 ### Publication checkpoint
 

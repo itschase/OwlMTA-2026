@@ -10,6 +10,7 @@ All runtime behavior remains unverified unless a document explicitly records a c
 - [Gamemode guide](architecture/GAMEMODE_GUIDE.md) — lifecycle, domains, resource relationships, persistence, and security boundaries.
 - [Codebase review](architecture/CODEBASE_REVIEW.md) — audit findings, risks, and review state.
 - [Discord authorization design](architecture/DISCORD_AUTH_DESIGN.md) and [integration plan](architecture/DISCORD_INTEGRATION_PLAN.md) — identity, role mapping, capabilities, leases, revocation, and migration.
+- [Legacy Login to Discord Session Migration](architecture/LEGACY_LOGIN_DISCORD_MIGRATION.md) — source-reviewed consumer map and ordered conversion from password/forum authority to Discord-backed account sessions.
 - [API contract](architecture/API_CONTRACT.md) — optional self-hosted external service and website boundary.
 - [UI framework plan](architecture/UI_FRAMEWORK_PLAN.md) — shared in-game application and interaction direction.
 - [Organizations Framework](architecture/ORGANIZATIONS_FRAMEWORK.md) — compatibility-first migration from legacy factions.
@@ -31,6 +32,7 @@ All runtime behavior remains unverified unless a document explicitly records a c
 - [Rebuild Plan](planning/REBUILD_PLAN.md)
 - [Agent operations guide](agent-guidelines.md) — model-neutral startup, shared-checkout, security, publication, credential, and handoff workflow.
 - [Mandatory agent rules and activity read log](../AGENTS.md) — repository requirements and chronological verified handoffs.
+- [AI & Agent Operations Discussion Program](planning/AGENT_OPERATIONS_DISCUSSIONS.md) — public category structure for autonomous contributor onboarding, research, development, documentation, publication, and coordination.
 - [Enhancement Register](planning/ENHANCEMENT_REGISTER.md)
 - [Documentation and Planning Program](planning/DOCUMENTATION_PROGRAM.md)
 - [Resource Audit Playbook](planning/RESOURCE_AUDIT_PLAYBOOK.md)

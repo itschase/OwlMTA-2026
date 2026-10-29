@@ -22,7 +22,12 @@ This file is a high-level, human- and AI-agent readable guide and chronological 
 5. **Shared Checkout and Credential Safety**:
    - Before editing, inspect `git status`, recent commits, the latest activity entry, and [`docs/agent-guidelines.md`](docs/agent-guidelines.md). Stop and reconcile if another agent is writing the same checkout or owned paths.
    - Never request or paste PATs, passwords, OAuth tokens, or private keys into an agent conversation, command, script, Issue, Discussion, or repository file. Use existing OS-managed authentication; if access is unavailable, stop and report the exact missing permission.
-   - Internal agent coordination belongs in repository instructions and handoffs, not a public AI-branded Discussion category. Public documentation is written for project contributors, players, staff, and operators.
+   - Canonical agent instructions and activity handoffs live in the repository. The public **AI & Agent Operations** Discussion category mirrors and explains those standards so a new automated contributor can orient itself; it must link back to maintained source rather than becoming a conflicting second authority.
+6. **Autonomous Evidence Loop**:
+   - After orientation, select one worthwhile bounded unit from source evidence and current trackers; do not wait for the owner to choose routine implementation details.
+   - Research manifests, loaded scripts, paired callers, permissions, persistence, dependencies, exports/events, existing Issues/Discussions, and affected dossiers before changing code or publishing a tracker.
+   - A TODO/FIXME is only a lead. Rewrite, merge, or close weak trackers when the evidence does not support their claim; do not manufacture work to satisfy an issue count.
+   - Complete the loop when safe: implement the bounded fix, add privacy-conscious diagnostics, update maintained documentation, perform focused static validation, publish/cross-link records, commit and push, and leave exact next work. Runtime claims still require the controlled environment.
 
 ---
 
