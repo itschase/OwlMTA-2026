@@ -1,5 +1,6 @@
 local identityResourceName = "mta-discord-identity"
 local requiredIdentityExports = {
+	getContractVersion = true,
 	beginLogin = true,
 	exchangeLoginTicket = true,
 	activateLoginSession = true,
@@ -182,6 +183,7 @@ addEvent("mta-discord-identity:login-authorized", false)
 addEvent("mta-discord-identity:login-failed", false)
 addEvent("mta-discord-identity:login-session-activated", false)
 addEvent("mta-discord-identity:login-session-failed", false)
+addEvent("mta-discord-identity:authorization-revoked", false)
 
 addEventHandler("mta-discord-identity:resolve-account", root, function(player, reply)
 	if not isTrustedIdentityEvent() or type(reply) ~= "function" then
@@ -263,4 +265,25 @@ addEventHandler("mta-discord-identity:login-session-failed", root, function(play
 	local statusClass = type(statusCode) == "number" and math.floor(statusCode / 100) or 0
 	rejectDiscordAccountAdmission(player)
 	outputDebugString("[ACCOUNT][DISCORD] outcome=session_activation_failed status_class=" .. tostring(statusClass), 2)
+end)
+
+addEventHandler("mta-discord-identity:authorization-revoked", root, function(player, accountID)
+	if not isTrustedIdentityEvent() then
+		outputDebugString("[ACCOUNT][DISCORD] rejected untrusted authorization-revoked event", 2)
+		return
+	end
+	if not isElement(player) or getElementType(player) ~= "player"
+		or getElementData(player, "account:loggedin") ~= true then
+		return
+	end
+	local revokedAccountID = tonumber(accountID)
+	local currentAccountID = tonumber(getElementData(player, "account:id"))
+	local discordAccountID = tonumber(getElementData(player, "account:discord_authenticated_id"))
+	if not revokedAccountID or revokedAccountID < 1 or revokedAccountID ~= math.floor(revokedAccountID)
+		or currentAccountID ~= revokedAccountID or discordAccountID ~= revokedAccountID then
+		return
+	end
+	setElementData(player, "account:discord_authenticated_id", false, false)
+	outputDebugString("[ACCOUNT][DISCORD] outcome=confirmed_authorization_revoked disconnect=true", 2)
+	kickPlayer(player, getRootElement(), "Discord authorization was revoked. Reauthorize before signing in again.")
 end)

@@ -235,6 +235,9 @@ local function commitAccountAdmission(context)
 
 	setElementDataEx(player, "account:loggedin", true, true)
 	setElementDataEx(player, "account:id", accountID, true)
+	-- Server-only lifecycle marker: confirmed identity revocation disconnects only
+	-- sessions admitted through Discord, never a password session that linked later.
+	setElementData(player, "account:discord_authenticated_id", method == "discord" and accountID or false, false)
 	setElementDataEx(player, "account:username", accountData.username, true)
 	setElementDataEx(player, "account:email", accountData.email, true)
 	setElementDataEx(player, "electionsvoted", accountDataMta.electionsvoted, true)
