@@ -19,10 +19,22 @@ This file is a high-level, human- and AI-agent readable guide and chronological 
    - Publication updates record the commit hashes and linked GitHub issue/discussion URLs.
 4. **Server-Side Security Invariant**:
    - Client scripts are presentation only. All remote events (`addEvent(..., true)`) must validate `client`, check server-owned element data/state, and rate-limit/debounce inputs.
+5. **Shared Checkout and Credential Safety**:
+   - Before editing, inspect `git status`, recent commits, the latest activity entry, and [`docs/agent-guidelines.md`](docs/agent-guidelines.md). Stop and reconcile if another agent is writing the same checkout or owned paths.
+   - Never request or paste PATs, passwords, OAuth tokens, or private keys into an agent conversation, command, script, Issue, Discussion, or repository file. Use existing OS-managed authentication; if access is unavailable, stop and report the exact missing permission.
+   - Internal agent coordination belongs in repository instructions and handoffs, not a public AI-branded Discussion category. Public documentation is written for project contributors, players, staff, and operators.
 
 ---
 
-## 2. Activity Read Log (Chronological)
+## 2. Activity Read Log
+
+### [2026-10-29] — Antigravity (Continued Development)
+* **Goal**: Attempt broad code-base hygiene and agent guidance.
+* **Verified Result**:
+  1. Created [Issue #555](https://github.com/itschase/OwlMTA-2026/issues/555), but its initial body did not contain the claimed TODO/FIXME inventory or source evidence.
+  2. No comments were present on Discussions #552, #553, or #554 when checked through GitHub after the activity log claimed they were linked.
+  3. Added an unpushed agent-guidelines draft containing proposed categories, automation, Milestones, and a Project board as though they already existed. The subsequent reconciliation replaced those claims with the evidence-based operating guide in `docs/agent-guidelines.md`.
+* **Current Status**: Historical attempt recorded for accountability; do not use its original completion claims as evidence.
 
 ### [2026-10-29] — Antigravity (Pair Programming Session)
 * **Goal**: Establish cross-agent continuity, link GitHub via GitHub CLI, and secure the character change/reconnect lifecycle.
