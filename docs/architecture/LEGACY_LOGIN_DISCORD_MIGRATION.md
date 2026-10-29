@@ -20,7 +20,7 @@ The migration is not complete:
 - `playerRegister` still provisions password accounts and calls the inherited activation path.
 - Login still synchronizes numeric `admin_level`, `account:gmlevel`, specialist ranks, and `supporter_level` as legacy authorities.
 - No active gameplay resource calls `account:hasDiscordCapability`; capability migration has not begun.
-- Full account logout is incomplete: character change exists, but the client-side `accounts:characters:logout`/`accounts:logout` paths do not establish a complete server account-session termination workflow.
+- A first canonical full-account logout slice is fixed in source. It is distinct from character change, verifies server-side character cleanup, clears Discord-derived and legacy account authority, and forces a clean same-server reconnect with disconnect fallback. Listener ordering, persistence, redirect/reconnect, outage, and race behavior remain runtime-unverified; broader session lease/revocation work in Issue #96 remains open.
 - Legacy forum link UI still sends a forum username and password to `forum:login`; it is unrelated to Discord OAuth and should not survive the identity migration.
 - The adapter/service runtime, durable identity storage, new-account provisioning, recovery, restart, outage, and reconnect matrices remain unverified.
 
@@ -51,7 +51,7 @@ Complete Issue #43 with an idempotent Core/MTA account transaction and recovery 
 
 ### 3. Canonical account logout, reconnect, and account switch
 
-Complete Issue #96 before retiring password login. Define one server workflow that saves/clears the character, invalidates pending callbacks and adapter state, clears non-synchronized claims, ends the local account session, and returns the client to admission. Character change must remain distinct and preserve the same account lease.
+Continue Issue #96 before retiring password login. The fixed-in-source workflow now saves/clears the character, emits terminal cleanup, invalidates adapter/legacy authority, ends local account authority, and returns through a clean reconnect; character change remains distinct and preserves the same account lease. Runtime evidence and the wider bounded-lease/revocation/recovery matrix are still required.
 
 ### 4. Staff and GameMaster capability migration
 

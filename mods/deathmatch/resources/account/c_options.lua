@@ -775,7 +775,19 @@ end
 addEvent("accounts:characters:change:result", true)
 addEventHandler("accounts:characters:change:result", resourceRoot, finishCharacterChange)
 
-function options_logOutToLoginPanel( message )
-	triggerServerEvent("accounts:characters:logout", localPlayer, "Change Character")
-	open_log_reg_pannel()
+local accountLogoutPending = false
+
+function options_logOutToLoginPanel(message)
+	if accountLogoutPending then return end
+	accountLogoutPending = true
+	triggerServerEvent("accounts:session:logout:request", resourceRoot)
 end
+
+addEvent("accounts:session:logout:result", true)
+addEventHandler("accounts:session:logout:result", resourceRoot, function(accepted, rejectionMessage)
+	if accepted == true then return end
+	accountLogoutPending = false
+	if rejectionMessage then
+		LoginScreen_showWarningMessage(rejectionMessage)
+	end
+end)

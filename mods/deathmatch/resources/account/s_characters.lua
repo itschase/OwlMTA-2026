@@ -721,6 +721,140 @@ end
 addEvent("accounts:characters:change:request", true)
 addEventHandler("accounts:characters:change:request", resourceRoot, requestCharacterChange)
 
+local accountLogoutRequests = setmetatable({}, { __mode = "k" })
+
+local function rejectAccountLogout(player, reason, message)
+    outputDebugString("[ACCOUNT][SESSION_LOGOUT] outcome=rejected reason=" .. tostring(reason), 2)
+    triggerClientEvent(player, "accounts:session:logout:result", resourceRoot, false,
+        message or "Your account session could not be ended safely.")
+    return false
+end
+
+local function clearAccountAuthorityForReconnect(player)
+    -- Keep only account:id briefly for existing onPlayerQuit settings/cache
+    -- and audit consumers. The replacement player element is initialized from
+    -- a clean unauthenticated state after redirect.
+    setElementDataEx(player, "account:loggedin", false, true)
+    setElementDataEx(player, "account:seamless:validated", false, false, true)
+    setElementDataEx(player, "account:username", "", true)
+    setElementDataEx(player, "account:email", "", true)
+    setElementDataEx(player, "account:forumid", false, true)
+    setElementDataEx(player, "account:hours", 0, true)
+    setElementDataEx(player, "account:lastlogin", false, true)
+    setElementDataEx(player, "account:creationdate", false, true)
+    setElementDataEx(player, "credits", 0, true)
+    setElementDataEx(player, "avatar", 0, true)
+    setElementDataEx(player, "electionsvoted", false, true)
+    setElementDataEx(player, "admin_level", 0, true)
+    setElementDataEx(player, "account:gmlevel", 0, true)
+    setElementDataEx(player, "supporter_level", 0, true)
+    setElementDataEx(player, "vct_level", 0, true)
+    setElementDataEx(player, "mapper_level", 0, true)
+    setElementDataEx(player, "scripter_level", 0, true)
+    setElementDataEx(player, "fmt_level", 0, true)
+    setElementDataEx(player, "hiddenadmin", 0, true)
+    setElementDataEx(player, "vehicleConsultationTeam", false, false)
+    setElementDataEx(player, "duty_admin", false, true)
+    setElementDataEx(player, "duty_supporter", false, true)
+    setElementDataEx(player, "donation-system:perks", false, true)
+    setElementDataEx(player, "tognews", false, false, true)
+    setElementDataEx(player, "punishment:points", 0, true)
+    setElementDataEx(player, "punishment:date", false, true)
+    setElementDataEx(player, "adminreports", 0, true)
+    setElementDataEx(player, "adminreports_saved", 0, false, true)
+    setElementDataEx(player, "referrer", false, false, true)
+    setElementDataEx(player, "admin:monitor", false, true)
+    exports.anticheat:setEld(player, "appstate", 0)
+
+    local numericClaims = {
+        "credits", "admin_level", "account:gmlevel", "supporter_level",
+        "vct_level", "mapper_level", "scripter_level", "fmt_level"
+    }
+    for _, claim in ipairs(numericClaims) do
+        if (tonumber(getElementData(player, claim)) or 0) ~= 0 then
+            return false
+        end
+    end
+    return getElementData(player, "account:loggedin") ~= true
+        and not getElementData(player, "account:discord_authenticated_id")
+        and not getElementData(player, "vehicleConsultationTeam")
+        and not getElementData(player, "duty_admin")
+        and not getElementData(player, "duty_supporter")
+        and not getElementData(player, "donation-system:perks")
+end
+
+local function requestAccountLogout()
+    local player = client
+    if not player or source ~= resourceRoot or not isElement(player) or getElementType(player) ~= "player" then
+        return
+    end
+
+    local now = getTickCount()
+    local lastRequest = accountLogoutRequests[player]
+    if lastRequest and now >= lastRequest and now - lastRequest < 5000 then
+        return rejectAccountLogout(player, "rate_limited", "Please wait before trying to sign out again.")
+    end
+    accountLogoutRequests[player] = now
+
+    local accountID = tonumber(getElementData(player, "account:id"))
+    if getElementData(player, "account:loggedin") ~= true or not accountID or accountID < 1
+        or accountID ~= math.floor(accountID) then
+        return rejectAccountLogout(player, "invalid_account_session")
+    end
+
+    local characterLoggedIn = getElementData(player, "loggedin") == 1
+    local characterID = tonumber(getElementData(player, "dbid"))
+    if characterLoggedIn then
+        if not characterID or characterID < 1 or characterID ~= math.floor(characterID) then
+            return rejectAccountLogout(player, "invalid_character_session")
+        end
+        local changeTriggered = triggerEvent("accounts:characters:change", player, "Account Logout")
+        if changeTriggered ~= true or getElementData(player, "loggedin") == 1
+            or (tonumber(getElementData(player, "dbid")) or 0) > 0 then
+            return rejectAccountLogout(player, "character_cleanup_failed",
+                "Your character could not be saved and cleared safely. Please try again.")
+        end
+    elseif (characterID or 0) > 0 then
+        return rejectAccountLogout(player, "inconsistent_character_session")
+    end
+
+    -- Preserve a distinct server-only terminal event for resources that need
+    -- account-logout cleanup in addition to ordinary character change.
+    triggerEvent("accounts:characters:logout", player, "Account Logout")
+
+    if type(clearDiscordIdentitySession) == "function" then
+        clearDiscordIdentitySession(player)
+    else
+        setElementData(player, "account:discord_authenticated_id", false, false)
+    end
+    if not clearAccountAuthorityForReconnect(player) then
+        outputDebugString("[ACCOUNT][SESSION_LOGOUT] outcome=authority_clear_failed fallback=disconnect", 1)
+        kickPlayer(player, getRootElement(), "Your account session ended. Reconnect to sign in again.")
+        return false
+    end
+
+    local auditWritten = pcall(function()
+        exports.logs:dbLog("ac" .. tostring(accountID), 27, { "ac" .. tostring(accountID), player },
+            "Ended account session and requested a clean reconnect")
+    end)
+    if not auditWritten then
+        -- Audit availability must not prevent an already de-authorized player
+        -- from leaving the old session. This contains no account or credential.
+        outputDebugString("[ACCOUNT][SESSION_LOGOUT] outcome=audit_unavailable", 1)
+    end
+    outputDebugString("[ACCOUNT][SESSION_LOGOUT] outcome=redirect_requested", 3)
+
+    if redirectPlayer(player, "", 0) then
+        return true
+    end
+
+    outputDebugString("[ACCOUNT][SESSION_LOGOUT] outcome=redirect_failed fallback=disconnect", 1)
+    kickPlayer(player, getRootElement(), "Your account session ended. Reconnect to sign in again.")
+    return false
+end
+addEvent("accounts:session:logout:request", true)
+addEventHandler("accounts:session:logout:request", resourceRoot, requestAccountLogout)
+
 -- sometimes your character position is not properly set, and your position is retained from the char selection (somewhere near angel pine) albeit it shouldn't be.
 -- The client request carries no coordinates: the server validates the session,
 -- consumes the one-time spawn context, and re-applies its own stored destination.

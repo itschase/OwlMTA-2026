@@ -1,6 +1,14 @@
 # Next work record
 
-Last updated: 2026-10-29 after defining autonomous agent operations, reconciling low-value trackers, and mapping the legacy-login-to-Discord-session migration.
+Last updated: 2026-10-29 after implementing the first canonical full-account logout slice, defining autonomous agent operations, reconciling low-value trackers, and mapping the legacy-login-to-Discord-session migration.
+
+## Latest continuation — canonical full account logout
+
+The unused client helper no longer emits the remotely callable cleanup notification and immediately paints a login UI over a still-authorized player. It now requests `accounts:session:logout:request` at `resourceRoot`. The server binds the player to MTA `client`, validates an active integer account session, limits requests to one per five seconds, validates/executes character cleanup through the existing server-only change lifecycle, and verifies that `loggedin`/`dbid` were cleared before continuing.
+
+`accounts:characters:logout` is now a server-only terminal cleanup notification. After emitting it, the account resource clears the Discord adapter session marker/cache, synchronized account identity/profile/credit values, account seamless flag, legacy staff/GameMaster/supporter/specialist ranks, duty flags, donor perk cache, and related account authority. It verifies the critical synchronized authority claims before redirect; a failed clear disconnects immediately. It retains only the account identifier for the existing quit/settings/cache/audit consumers, attempts a credential-free durable audit without allowing logger outage to strand the session, and requests a clean same-server reconnect. A failed redirect also falls back to disconnect after authority is removed. Character change remains separate and keeps the account-level identity lease.
+
+Focused source review checked every definition/consumer of the logout/change events, the manifest load order, the identity cleanup facade, settings/quit handlers, and the official MTA `triggerEvent` and `redirectPlayer` return contracts. MTA, Discord, the adapter/service, database saves, listener order, redirect/reconnect, cancellation, duplicate requests, and failure fallback remain runtime-unverified under Issue #96.
 
 ## Latest continuation — autonomous operations and Discord-session migration
 

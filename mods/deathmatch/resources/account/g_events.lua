@@ -6,7 +6,9 @@ addEvent("accounts:characters:spawn", true)
 -- Server-only lifecycle event. Clients request a change through the bound
 -- accounts:characters:change:request wrapper in s_characters.lua.
 addEvent("accounts:characters:change", false)
-addEvent("accounts:characters:logout", true)
+-- Server-only terminal character/account cleanup notification. Clients request
+-- full account logout through accounts:session:logout:request.
+addEvent("accounts:characters:logout", false)
 addEvent("accounts:options", true)
 addEvent("accounts:options:settings", true)	-- 
 addEvent("accounts:options:settings", true)
