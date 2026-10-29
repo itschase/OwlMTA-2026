@@ -1,6 +1,12 @@
 # Next work record
 
-Last updated: 2026-10-29 after hardening legacy login failure handling and diagnostics.
+Last updated: 2026-10-29 after publishing the standalone Discord pre-authentication source contract.
+
+## Latest continuation — reusable Discord pre-authentication source
+
+Published standalone identity-service commit [`21fced3`](https://github.com/itschase/mta-discord-identity/commit/21fced3). The reusable service and generic MTA adapter now implement a distinct pre-authentication challenge for already-linked Discord identities: the adapter retains a random connection token, binds exchange to the installation and current player generation, emits only public challenge fields, rejects replay/mismatched connection state, and returns only the opaque linked account reference. Link creation prevents one Discord subject from becoming ambiguous across multiple accounts in the same installation. Registration/provisioning, Owl account admission, capability-session activation after local acceptance, durable service storage, and revocation-driven Owl disconnects remain separate work.
+
+Owl [Issue #551](https://github.com/itschase/OwlMTA-2026/issues/551) remains open because this repository does not yet consume the new events or run activation, ban, device, duplicate-session, and atomic session-commit checks around the result. JavaScript syntax, the example configuration, and diff cleanliness were checked; the local automated test suite, MTA, Discord application, and live service were not run.
 
 ## Latest continuation — legacy login failure boundary
 
@@ -32,7 +38,7 @@ Corrected Issues [#527](https://github.com/itschase/OwlMTA-2026/issues/527) and 
 
 ## Immediate priority order — core identity and playability
 
-1. **Login safety:** retain #529 for timing-resistant and disposable-runtime verification, then complete the separate pre-auth challenge in [#551](https://github.com/itschase/OwlMTA-2026/issues/551) and reconcile the exact identity-service contract before any Discord login cutover (#2/#68). No automatic password fallback after a Discord authorization failure.
+1. **Login safety:** retain #529 for timing-resistant and disposable-runtime verification, then integrate the standalone pre-auth contract from `21fced3` through Owl's trusted admission path under [#551](https://github.com/itschase/OwlMTA-2026/issues/551) before any Discord login cutover (#2/#68). No automatic password fallback after a Discord authorization failure.
 2. **Account lifecycle:** make cross-schema registration recoverable and remove the missing local activation-service dependency (#43/#13); preserve the now-pre-session device gate while completing its operator workflow (#158).
 3. **Session authority:** bind session creation, resource-restart behavior, unlink/revocation, and expiry to one account/session contract (#68/#96). Existing restart behavior and disconnect-dependent logout remain source-level gaps, not solved by the device-gate fix.
 4. **Character continuity:** resolve client-shipped account hash material, atomic character creation, staged spawn hydration, and server-derived spawn correction (#201–#204) before broad feature work.

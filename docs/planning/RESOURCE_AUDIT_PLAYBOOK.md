@@ -30,7 +30,7 @@ The cross-resource proposal and evaluation criteria are maintained in [`COMMAND_
 
 ## Discord capability review for scripts
 
-The reusable [MTA Discord Identity adapter](https://github.com/itschase/mta-discord-identity) exposes server exports for `hasCapability(player, name)`, `getDonorTier(player)`, linking/ticket exchange, and session clearing. Owl's host integration still has to resolve the trusted local account ID and make local policy decisions. The adapter returns only named capabilities and a separate donor tier; raw Discord role IDs remain in the operator-managed identity-service configuration.
+The reusable [MTA Discord Identity adapter](https://github.com/itschase/mta-discord-identity) exposes server exports for connection-bound pre-auth login, authenticated linking/session exchange, `hasCapability(player, name)`, `getDonorTier(player)`, and local session clearing. Owl's host integration still has to validate the returned opaque account reference through trusted Core state, resolve logged-in account IDs for linking, and make every local policy decision. The adapter returns only named capabilities and a separate donor tier; raw Discord role IDs remain in the operator-managed identity-service configuration.
 
 For each resource command, remote event, export, and staff control, auditors should record:
 
