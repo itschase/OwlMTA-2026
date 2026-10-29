@@ -1,6 +1,14 @@
 # Next work record
 
-Last updated: 2026-10-29 after restricting character-change and reconnect lifecycles to server-validated boundaries.
+Last updated: 2026-10-29 after deriving character spawn correction from server-issued state instead of client-supplied coordinates.
+
+## Latest continuation — server-derived character spawn correction
+
+The `accounts:characters:fixCharacterSpawnPosition` remote no longer trusts a client-provided expected location. When `spawnCharacter` commits a spawn, the server now issues a short-lived, one-time correction context keyed to the player element (weak table), binding the persisted-row destination (`{x, y, z, rot, int, dim}`), the character ID, a 60-second expiry, and a per-player spawn generation counter for audit correlation. Character change clears the context, and disconnect is handled by the weak-key table.
+
+The client request now carries no payload at all; the client keeps only its local "stuck near Angel Pine" heuristic before asking for the correction. On the server, the handler binds the caller to MTA's `client` with `source == client`, requires an active account/character session (`account:loggedin`, `loggedin`, positive `account:id`/`dbid`), consumes the context on every processed request, and rejects expiry, character mismatch, vehicle occupancy, current positions outside the character-selection radius, corrupt destinations (NaN/world/interior/dimension sanity bounds, with the admin-jail dimension band excluded), and destinations already inside the selection area. Only the server-stored destination is re-applied (position, interior with coordinates, dimension, camera interior, normalized rotation), with credential-free `SPAWN_CORRECTION` outcome codes logged per request.
+
+This covers all spawn paths because normal selection, fresh creation, and staff `/loginto` all flow through the same `spawnCharacter` commit. Lua 5.1-syntax parses, manifest XML, and diff whitespace checks passed; no MTA server, client, database, or automated test was run, so the correction matrix (forged coordinates now structurally impossible, but replay, timing, boundary distances, interior/dimension cases, reconnect, and character switch) remains runtime-unverified under [Issue #204](https://github.com/itschase/OwlMTA-2026/issues/204). The wider staged-hydration lifecycle remains open under #203.
 
 ## Latest continuation — character change and reconnect lifecycle boundary
 

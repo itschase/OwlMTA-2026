@@ -12,6 +12,47 @@ addEvent( "account:character:spawned", true )
 addEvent( 'account:character:select', true )
 addEvent( 'accounts:characters:fixCharacterSpawnPosition', true )
 
+-- Spawn-position correction contexts: short-lived, server-issued destinations
+-- bound to one committed character spawn. A client may only ask that the
+-- correction be applied; the destination always comes from this server-held
+-- context, never from the request (Issue #204).
+local spawnCorrectionContexts = setmetatable({}, { __mode = "k" })
+local spawnCorrectionGenerations = setmetatable({}, { __mode = "k" })
+local SPAWN_CORRECTION_WINDOW_MS = 60000
+local SPAWN_CORRECTION_SELECTION_RADIUS = 20
+
+local function clearCharacterSpawnCorrectionContext(player)
+    spawnCorrectionContexts[player] = nil
+end
+
+local function issueCharacterSpawnCorrectionContext(player, characterID, location)
+    spawnCorrectionGenerations[player] = (spawnCorrectionGenerations[player] or 0) + 1
+    spawnCorrectionContexts[player] = {
+        characterID = characterID,
+        location = { tonumber(location[1]), tonumber(location[2]), tonumber(location[3]),
+            tonumber(location[4]), tonumber(location[5]), tonumber(location[6]) },
+        expires = getTickCount() + SPAWN_CORRECTION_WINDOW_MS,
+        generation = spawnCorrectionGenerations[player],
+    }
+end
+
+-- Sanity bounds for a persisted character destination. These reject corrupt
+-- database rows; the authority is the server-held context, not caller input.
+local function isValidCharacterSpawnCorrectionDestination(destination)
+    local x, y, z = tonumber(destination[1]), tonumber(destination[2]), tonumber(destination[3])
+    local interior, dimension = tonumber(destination[5]) or 0, tonumber(destination[6]) or 0
+    if not x or not y or not z or x ~= x or y ~= y or z ~= z then
+        return false
+    end
+    if math.abs(x) > 4000 or math.abs(y) > 4000 or z < -300 or z > 3000 then
+        return false
+    end
+    if interior < 0 or interior > 255 or dimension < 0 or dimension >= 55000 then -- 55000+ is reserved for admin jail
+        return false
+    end
+    return true
+end
+
 function characterList( theClient )
     local characters = { }
     local clientAccountID = getElementDataEx(theClient, "account:id") or -1
@@ -476,6 +517,8 @@ function spawnCharacter(characterID, remoteAccountID, theAdmin, targetAccountNam
             location = { locationToSpawn.x, locationToSpawn.y, locationToSpawn.z, locationToSpawn.rot, locationToSpawn.int, locationToSpawn.dim }
         end
 
+        issueCharacterSpawnCorrectionContext(client, characterID, location)
+
         triggerClientEvent(client, "accounts:characters:spawn", client, fixedName, adminLevel, gmLevel, location)
         triggerClientEvent(client, "item:updateclient", client)
 
@@ -543,6 +586,8 @@ addEventHandler("accounts:characters:spawn", getRootElement(), spawnCharacter)
 function Characters_onCharacterChange()
     local player = source
     if not isElement(player) or getElementType(player) ~= "player" then return false end
+
+    clearCharacterSpawnCorrectionContext(player)
 
     triggerClientEvent(player, "items:inventory:hideinv", player)
     --triggerEvent("updateCharacters", client) -- Refresh the character selection screen, perhaps? / No it's too late to update shit here
@@ -648,15 +693,72 @@ addEvent("accounts:characters:change:request", true)
 addEventHandler("accounts:characters:change:request", resourceRoot, requestCharacterChange)
 
 -- sometimes your character position is not properly set, and your position is retained from the char selection (somewhere near angel pine) albeit it shouldn't be.
-function fixCharacterSpawnPosition(expectedLocation)
-    local currentPositionX, currentPositionY = getElementPosition(client)
-    local expectedPositionX, expectedPositionY = expectedLocation[1], expectedLocation[2]
-    if getDistanceBetweenPoints2D( currentPositionX, currentPositionY, unpack( defaultCharacterSelectionSpawnPosition ) ) < 20 and -- we are near angel pine
-            getDistanceBetweenPoints2D( expectedPositionX, expectedPositionY, unpack( defaultCharacterSelectionSpawnPosition ) ) > 20 then -- but we shouldn't actually be near angel pine
-        setElementPosition(client, expectedPositionX, expectedPositionY, expectedLocation[3])
-        setElementInterior(client, expectedLocation[5] or 0)
-        setElementDimension(client, expectedLocation[6] or 0)
+-- The client request carries no coordinates: the server validates the session,
+-- consumes the one-time spawn context, and re-applies its own stored destination.
+function fixCharacterSpawnPosition()
+    local player = client
+    if not player or source ~= player or not isElement(player) or getElementType(player) ~= "player" then
+        return false
     end
+
+    local context = spawnCorrectionContexts[player]
+    spawnCorrectionContexts[player] = nil -- one-time operation: consumed on every processed request
+
+    local accountID = tonumber(getElementDataEx(player, "account:id"))
+    local characterID = tonumber(getElementDataEx(player, "dbid"))
+    if getElementData(player, "account:loggedin") ~= true or getElementData(player, "loggedin") ~= 1
+        or not accountID or accountID < 1 or not characterID or characterID < 1 then
+        outputDebugString("[ACCOUNT][SPAWN_CORRECTION] outcome=rejected reason=invalid_session generation=" .. tostring(context and context.generation), 2)
+        return false
+    end
+
+    if not context then
+        outputDebugString("[ACCOUNT][SPAWN_CORRECTION] outcome=rejected reason=no_context", 2)
+        return false
+    end
+
+    if getTickCount() > context.expires then
+        outputDebugString("[ACCOUNT][SPAWN_CORRECTION] outcome=rejected reason=expired generation=" .. tostring(context.generation), 2)
+        return false
+    end
+
+    if context.characterID ~= characterID then
+        outputDebugString("[ACCOUNT][SPAWN_CORRECTION] outcome=rejected reason=character_mismatch generation=" .. tostring(context.generation), 2)
+        return false
+    end
+
+    if getPedOccupiedVehicle(player) then
+        outputDebugString("[ACCOUNT][SPAWN_CORRECTION] outcome=rejected reason=in_vehicle generation=" .. tostring(context.generation), 2)
+        return false
+    end
+
+    local currentPositionX, currentPositionY = getElementPosition(player)
+    local selectionX, selectionY = unpack(defaultCharacterSelectionSpawnPosition)
+    if getDistanceBetweenPoints2D(currentPositionX, currentPositionY, selectionX, selectionY) >= SPAWN_CORRECTION_SELECTION_RADIUS then -- we are not near angel pine
+        outputDebugString("[ACCOUNT][SPAWN_CORRECTION] outcome=rejected reason=outside_selection_area generation=" .. tostring(context.generation), 2)
+        return false
+    end
+
+    local destination = context.location
+    if not isValidCharacterSpawnCorrectionDestination(destination) then
+        outputDebugString("[ACCOUNT][SPAWN_CORRECTION] outcome=rejected reason=invalid_destination generation=" .. tostring(context.generation), 2)
+        return false
+    end
+
+    if getDistanceBetweenPoints2D(destination[1], destination[2], selectionX, selectionY) <= SPAWN_CORRECTION_SELECTION_RADIUS then -- destination itself is near angel pine, nothing to fix
+        outputDebugString("[ACCOUNT][SPAWN_CORRECTION] outcome=skipped reason=destination_in_selection_area generation=" .. tostring(context.generation), 3)
+        return false
+    end
+
+    setElementPosition(player, destination[1], destination[2], destination[3])
+    setElementInterior(player, destination[5], destination[1], destination[2], destination[3])
+    setElementDimension(player, destination[6])
+    setCameraInterior(player, destination[5])
+    if destination[4] then
+        setPedRotation(player, destination[4] % 360)
+    end
+    outputDebugString("[ACCOUNT][SPAWN_CORRECTION] outcome=corrected generation=" .. tostring(context.generation) .. " character=" .. tostring(characterID), 3)
+    return true
 end
 addEventHandler("accounts:characters:fixCharacterSpawnPosition", root, fixCharacterSpawnPosition)
 

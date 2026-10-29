@@ -798,15 +798,15 @@ function characters_onSpawn(fixedName, adminLevel, gmLevel, location)
 		toggleSoundLabel = nil
 	end
 
-	setTimer(function(expectedLocation)
+	setTimer(function()
 		local currentPositionX, currentPositionY = getElementPosition(localPlayer)
-		local expectedPositionX, expectedPositionY = expectedLocation[1], expectedLocation[2]
-		if getDistanceBetweenPoints2D( currentPositionX, currentPositionY, unpack( defaultCharacterSelectionSpawnPosition ) ) < 20 and -- we are near angel pine
-				getDistanceBetweenPoints2D( expectedPositionX, expectedPositionY, unpack( defaultCharacterSelectionSpawnPosition ) ) > 20 then -- but we shouldn't actually be near angel pine
+		if getDistanceBetweenPoints2D( currentPositionX, currentPositionY, unpack( defaultCharacterSelectionSpawnPosition ) ) < 20 then -- we are stuck near angel pine
 			outputDebugString('We got stuck in a river near Angel Pine, oooh~', 2)
-			triggerServerEvent('accounts:characters:fixCharacterSpawnPosition', localPlayer, expectedLocation)
+			-- The server holds the authoritative destination from our persisted
+			-- character row; this request carries no coordinates.
+			triggerServerEvent('accounts:characters:fixCharacterSpawnPosition', localPlayer)
 		end
-	end, 5000, 1, location)
+	end, 5000, 1)
 end
 addEventHandler("accounts:characters:spawn", getRootElement(), characters_onSpawn)
 
