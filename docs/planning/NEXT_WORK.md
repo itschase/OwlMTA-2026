@@ -8,6 +8,8 @@ The `accounts:characters:change` event is now server-only (`addEvent("accounts:c
 
 `Characters_onCharacterChange` now derives the player element from `source` instead of trusting `client`, eliminating remote-event spoofing and ensuring consistency when invoked from server-side character selection or administrative flows. `item-system`'s character-change listener is updated to use `source` for player bottle tracking. Additionally, character list refresh (`updateCharacters`) is bound to `resourceRoot`, rate-limited to 3 seconds, and requires an active login; reconnect events (`accounts:reconnectMe` and `accounts:settings:reconnectPlayer`) now enforce `client and source == client`. Static source inspection only; runtime behavior, GUI transitions, and rate-limit feel remain runtime-unverified under Issues #1 and #203.
 
+Published source and trackers: Owl [`40060be`](https://github.com/itschase/OwlMTA-2026/commit/40060be), [Issue #1](https://github.com/itschase/OwlMTA-2026/issues/1#issuecomment-6505950528), and [account Discussion #99](https://github.com/itschase/OwlMTA-2026/discussions/99#discussioncomment-19276405).
+
 ## Latest continuation — synchronous identity-session cleanup
 
 Standalone adapter v0.2.3 source [`64fda3a`](https://github.com/itschase/mta-discord-identity/commit/64fda3a) centralizes internal state clearing, restricts the exported `clearPlayerSession` operation to the resource owning the current cached or pending lifecycle, and clears any older cache when a new pre-auth login begins. Internal expiry, mismatch, refresh failure, and player-quit paths use the same cleanup primitive without depending on an export-call context.
