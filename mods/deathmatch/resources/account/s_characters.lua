@@ -25,31 +25,60 @@ local function clearCharacterSpawnCorrectionContext(player)
     spawnCorrectionContexts[player] = nil
 end
 
-local function issueCharacterSpawnCorrectionContext(player, characterID, location)
-    spawnCorrectionGenerations[player] = (spawnCorrectionGenerations[player] or 0) + 1
-    spawnCorrectionContexts[player] = {
-        characterID = characterID,
-        location = { tonumber(location[1]), tonumber(location[2]), tonumber(location[3]),
-            tonumber(location[4]), tonumber(location[5]), tonumber(location[6]) },
-        expires = getTickCount() + SPAWN_CORRECTION_WINDOW_MS,
-        generation = spawnCorrectionGenerations[player],
-    }
+local function finiteNumber(value)
+    local number = tonumber(value)
+    if not number or number ~= number or number == math.huge or number == -math.huge then
+        return nil
+    end
+    return number
 end
 
 -- Sanity bounds for a persisted character destination. These reject corrupt
 -- database rows; the authority is the server-held context, not caller input.
 local function isValidCharacterSpawnCorrectionDestination(destination)
-    local x, y, z = tonumber(destination[1]), tonumber(destination[2]), tonumber(destination[3])
-    local interior, dimension = tonumber(destination[5]) or 0, tonumber(destination[6]) or 0
-    if not x or not y or not z or x ~= x or y ~= y or z ~= z then
+    if type(destination) ~= "table" then
+        return false
+    end
+
+    local x, y, z = finiteNumber(destination[1]), finiteNumber(destination[2]), finiteNumber(destination[3])
+    local rotation = finiteNumber(destination[4])
+    local interior, dimension = finiteNumber(destination[5]), finiteNumber(destination[6])
+    if not x or not y or not z or not rotation or not interior or not dimension then
         return false
     end
     if math.abs(x) > 4000 or math.abs(y) > 4000 or z < -300 or z > 3000 then
         return false
     end
-    if interior < 0 or interior > 255 or dimension < 0 or dimension >= 55000 then -- 55000+ is reserved for admin jail
+    if interior % 1 ~= 0 or dimension % 1 ~= 0
+        or interior < 0 or interior > 255 or dimension < 0 or dimension >= 55000 then -- 55000+ is reserved for admin jail
         return false
     end
+    return true
+end
+
+local function issueCharacterSpawnCorrectionContext(player, characterID, location)
+    local sessionAccountID = tonumber(getElementDataEx(player, "account:id"))
+    characterID = tonumber(characterID)
+    local destination = { finiteNumber(location and location[1]), finiteNumber(location and location[2]),
+        finiteNumber(location and location[3]), finiteNumber(location and location[4]),
+        finiteNumber(location and location[5]), finiteNumber(location and location[6]) }
+
+    if not sessionAccountID or sessionAccountID < 1 or sessionAccountID % 1 ~= 0
+        or not characterID or characterID < 1 or characterID % 1 ~= 0
+        or not isValidCharacterSpawnCorrectionDestination(destination) then
+        clearCharacterSpawnCorrectionContext(player)
+        outputDebugString("[ACCOUNT][SPAWN_CORRECTION] outcome=context_not_issued reason=invalid_binding_or_destination", 2)
+        return false
+    end
+
+    spawnCorrectionGenerations[player] = (spawnCorrectionGenerations[player] or 0) + 1
+    spawnCorrectionContexts[player] = {
+        sessionAccountID = sessionAccountID,
+        characterID = characterID,
+        location = destination,
+        issuedAt = getTickCount(),
+        generation = spawnCorrectionGenerations[player],
+    }
     return true
 end
 
@@ -717,8 +746,14 @@ function fixCharacterSpawnPosition()
         return false
     end
 
-    if getTickCount() > context.expires then
+    local contextAge = getTickCount() - context.issuedAt
+    if contextAge < 0 or contextAge > SPAWN_CORRECTION_WINDOW_MS then
         outputDebugString("[ACCOUNT][SPAWN_CORRECTION] outcome=rejected reason=expired generation=" .. tostring(context.generation), 2)
+        return false
+    end
+
+    if context.sessionAccountID ~= accountID then
+        outputDebugString("[ACCOUNT][SPAWN_CORRECTION] outcome=rejected reason=account_mismatch generation=" .. tostring(context.generation), 2)
         return false
     end
 
@@ -750,12 +785,14 @@ function fixCharacterSpawnPosition()
         return false
     end
 
-    setElementPosition(player, destination[1], destination[2], destination[3])
-    setElementInterior(player, destination[5], destination[1], destination[2], destination[3])
-    setElementDimension(player, destination[6])
-    setCameraInterior(player, destination[5])
-    if destination[4] then
-        setPedRotation(player, destination[4] % 360)
+    local dimensionApplied = setElementDimension(player, destination[6])
+    local interiorApplied = setElementInterior(player, destination[5], destination[1], destination[2], destination[3])
+    local positionApplied = setElementPosition(player, destination[1], destination[2], destination[3])
+    local rotationApplied = setPedRotation(player, destination[4] % 360)
+    local cameraApplied = setCameraInterior(player, destination[5])
+    if not dimensionApplied or not interiorApplied or not positionApplied or not rotationApplied or not cameraApplied then
+        outputDebugString("[ACCOUNT][SPAWN_CORRECTION] outcome=failed reason=apply_failed generation=" .. tostring(context.generation), 1)
+        return false
     end
     outputDebugString("[ACCOUNT][SPAWN_CORRECTION] outcome=corrected generation=" .. tostring(context.generation) .. " character=" .. tostring(characterID), 3)
     return true
