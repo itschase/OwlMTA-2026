@@ -8,6 +8,8 @@ Last updated: 2026-10-29 after extending the non-granting capability shadow and 
 
 Static parsing and source checks cover the changed Lua and event/caller boundary; the official MTA `triggerClientEvent` destination/return contract and `getTickCount` wrap behavior were reviewed. MTA sound/window behavior, target disconnect timing, repeated/parallel commands, Discord capability freshness, logger outage, and all gameplay behavior remain runtime-unverified under Issue #3. The next bounded migration is application override only after its live/offline target and database-result behavior are reviewed.
 
+Publication checkpoint: source commit [`432aa0f`](https://github.com/itschase/OwlMTA-2026/commit/432aa0f), [Issue #3 comment](https://github.com/itschase/OwlMTA-2026/issues/3#issuecomment-6513827353), [admin-system Discussion #178 comment](https://github.com/itschase/OwlMTA-2026/discussions/178#discussioncomment-19284075), and [Discord Discussion #70 comment](https://github.com/itschase/OwlMTA-2026/discussions/70#discussioncomment-19284076).
+
 ## Latest continuation — first capability shadow and donor separation
 
 The maintained [`CAPABILITY_MIGRATION_MATRIX.md`](../architecture/CAPABILITY_MIGRATION_MATRIX.md) now classifies the first high-risk global actions by legacy predicate, proposed named capability, independent local gates, migration state, and tracker. It keeps Discord authentication, global capability, GameMaster, donor entitlement, organization/duty authority, specialty teams, and MTA ACL as separate decisions.

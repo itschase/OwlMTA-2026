@@ -7,6 +7,7 @@
 - Runtime: unverified.
 - Latest source state: `/freeze`, `/unfreeze`, and `/nudge` no longer accept donor `supporter_level`; they retain Trial Admin enforcement while comparing narrow proposed capabilities in non-authoritative shadow mode. Nudge additionally requires an active target, limits successful actor requests to one per five seconds, sends only to the intended client, and attempts an actor/target audit with a bounded outage diagnostic. The local `playthenoise` developer command and unused remotely callable `remoteFreezePlayer` wrapper were removed.
 - Publication checkpoint: source commit [`2ffbfc1`](https://github.com/itschase/OwlMTA-2026/commit/2ffbfc1), [Issue #3 update](https://github.com/itschase/OwlMTA-2026/issues/3#issuecomment-6513765640), [Issue #164 update](https://github.com/itschase/OwlMTA-2026/issues/164#issuecomment-6513765906), and [Script Resource Discussion #178 update](https://github.com/itschase/OwlMTA-2026/discussions/178#discussioncomment-19284015).
+- Nudge checkpoint: source commit [`432aa0f`](https://github.com/itschase/OwlMTA-2026/commit/432aa0f), [Issue #3 update](https://github.com/itschase/OwlMTA-2026/issues/3#issuecomment-6513827353), [Script Resource Discussion #178 update](https://github.com/itschase/OwlMTA-2026/discussions/178#discussioncomment-19284075), and [Discord Discussion #70 update](https://github.com/itschase/OwlMTA-2026/discussions/70#discussioncomment-19284076).
 
 ## What it does
 

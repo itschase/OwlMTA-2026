@@ -33,6 +33,22 @@ This file is a high-level, human- and AI-agent readable guide and chronological 
 
 ## 2. Activity Read Log
 
+### [2026-10-29] — Codex / ChatGPT (Bounded Player Nudge Authority)
+* **Goal**: Continue the action-by-action Discord capability migration through a second donor-backed player-control command without allowing shadow data to grant access.
+* **Work Completed**:
+  1. Removed donor/supporter authorization from `/nudge`; Trial Admin remains the enforced legacy predicate while `moderation.player.nudge` is resolved only for comparison evidence.
+  2. Required a live logged-in target, added a wrap-safe five-second successful-delivery cooldown per actor, explicitly addressed the intended client and checked event delivery, and removed the unreferenced local `/playthenoise` developer command.
+  3. Added actor/target audit attempt and bounded `rate_limited`, `delivery_failed`, and `audit_unavailable` diagnostics without Discord identity, role, token, target name, or message content. Logger outage cannot undo a completed notification.
+  4. Updated the capability matrix, admin-system dossier, work queue, and tracker index. Published the checkpoint to [Issue #3](https://github.com/itschase/OwlMTA-2026/issues/3#issuecomment-6513827353), [admin-system Discussion #178](https://github.com/itschase/OwlMTA-2026/discussions/178#discussioncomment-19284075), and [Discord Discussion #70](https://github.com/itschase/OwlMTA-2026/discussions/70#discussioncomment-19284076).
+* **Commit**:
+  - [`432aa0f`](https://github.com/itschase/OwlMTA-2026/commit/432aa0f) — `security(admin): separate donor nudge authority`
+* **Validation**: All three changed Lua files parsed successfully with `luaparser`; focused invariants confirmed donor removal, non-granting shadow evaluation, explicit target delivery, wrap-safe throttling, bounded diagnostics, and developer-command removal; changed-document links and `git diff --check` passed. Official MTA `triggerClientEvent` and `getTickCount` contracts were reviewed. No MTA server/client, Discord application, identity adapter/service, database, sound/window, or gameplay test was run.
+* **Current Status**: Fixed in source, shadow-only, and published; runtime unverified. Discord capability remains non-authoritative. Issue #3 stays open for application override and the wider action matrix.
+* **Recommended Next Work**:
+  1. Audit `/forceapp`, `/oforceapp`, and `/unforceapp` live/offline lookup, SQL result handling, state transitions, notification, and audit before changing authority.
+  2. Remove donor fallthrough and add comparison-only `moderation.application.override` only after that persistence review establishes fail-closed behavior.
+  3. Reconcile GameMaster persistence/exports/report duty separately; never derive it from donor/supporter status.
+
 ### [2026-10-29] — Codex / ChatGPT (First Capability Shadow and Donor Separation)
 * **Goal**: Begin action-by-action Discord capability migration without granting from shadow data, while removing donor authority from a high-impact moderation action and closing an unsafe remote surface.
 * **Work Completed**:
