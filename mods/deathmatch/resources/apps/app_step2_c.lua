@@ -2,8 +2,10 @@
 local guiStep2 = {}
 local quests_p2 = {}
 local q2 = {}
+local submissionPending = false
 function startStep2(questsFromServer)
 	triggerEvent("account:hideRules", localPlayer)
+	submissionPending = false
 	
 	if guiStep2.back and isElement(guiStep2.back) then
 		showGUIPart(guiStep2)
@@ -91,6 +93,9 @@ addEvent("apps:startStep2", true)
 addEventHandler("apps:startStep2", root, startStep2)
 
 function validateApp()
+	if submissionPending then
+		return false
+	end
 	local quest1 = string.len(guiGetText(q2[1]))
 	local quest2 = string.len(guiGetText(q2[2]))
 	local quest3 = string.len(guiGetText(q2[3]))
@@ -106,9 +111,9 @@ function validateApp()
 		guiSetEnabled(guiStep2.q2, false)
 		guiSetEnabled(guiStep2.q3, false)
 		guiSetEnabled(guiStep2.q4, false)
+		submissionPending = true
 		setTimer(function()
-			triggerServerEvent("apps:processPart2", localPlayer, quests_p2, {guiGetText(q2[1]), guiGetText(q2[2]), guiGetText(q2[3]), guiGetText(q2[4])})
-			destroyGUIPart2()
+			triggerServerEvent("apps:processPart2", localPlayer, {guiGetText(q2[1]), guiGetText(q2[2]), guiGetText(q2[3]), guiGetText(q2[4])})
 		end, 3000, 1)
 	else
 		guiSetText(guiStep2.intro2, "You didn't answer all the questions.")
@@ -116,6 +121,33 @@ function validateApp()
 		guiLabelSetColor(guiStep2.intro, 255,0,0)
 	end
 end
+
+function handlePart2Result(succeeded, message)
+	if source ~= localPlayer then
+		return false
+	end
+	if succeeded then
+		destroyGUIPart2()
+		return
+	end
+	submissionPending = false
+	if guiStep2.intro and isElement(guiStep2.intro) then
+		local failureMessage = type(message) == "string" and message or "The application could not be submitted. Please try again."
+		guiSetText(guiStep2.intro2, failureMessage)
+		guiSetText(guiStep2.intro, failureMessage)
+		guiLabelSetColor(guiStep2.intro, 255, 0, 0)
+		guiSetEnabled(guiStep2.back, true)
+		guiSetEnabled(guiStep2.next, true)
+		guiSetEnabled(guiStep2.q1, true)
+		guiSetEnabled(guiStep2.q2, true)
+		guiSetEnabled(guiStep2.q3, true)
+		guiSetEnabled(guiStep2.q4, true)
+	elseif type(message) == "string" then
+		outputChatBox(message, 255, 100, 100)
+	end
+end
+addEvent("apps:processPart2:result", true)
+addEventHandler("apps:processPart2:result", root, handlePart2Result)
 
 function resetNoti()
 	if guiStep2.intro and isElement(guiStep2.intro) and guiGetVisible(guiStep2.intro) then
@@ -132,4 +164,5 @@ function destroyGUIPart2()
 		end
 	end
 	guiStep2 = {}
+	submissionPending = false
 end

@@ -1,6 +1,14 @@
 # Next work record
 
-Last updated: 2026-10-29 after consolidating application decision and account-state persistence into one conditional statement.
+Last updated: 2026-10-29 after binding Part 2 essay submission to server-issued questions, stored account stage, and insert-first persistence.
+
+## Latest continuation — server-authoritative Part 2 submission
+
+The Part 2 remotes now bind MTA `client` to an authenticated integer account, load the stored application state, and apply per-action cooldowns. Question selection filters invalid/oversized rows, rejects a bank with fewer than four valid prompts, uses a bounded shuffle, and retains the exact four-question snapshot server-side for 30 minutes. Submission accepts only four answer strings; client-supplied question text is removed. Answers are trimmed and bounded to the schema's 500-character fields, while diagnostics and audit omit their content.
+
+Persistence is now insert-first: the new application row is created before a conditional state-1-to-state-2 account update. A positive immediate `ROW_COUNT()` is required before success. Definite transition/no-match failure compensates only the new row, preserving any older pending row; indeterminate row-count failure keeps state for recovery rather than guessing. Older pending rows are cleaned only after the account transition is confirmed. The client no longer destroys its form optimistically: it waits for a server result and re-enables the form with bounded feedback on failure.
+
+Part 1 remains client-graded and sends answer keys; the Part 2 snapshot is memory-only; live MyISAM failure, reconnect, duplicate cleanup, and event-order behavior are unverified. Continue #281/#282 with a server-graded Part 1 snapshot and explicit recovery/reconciliation, not by treating this source review as runtime proof.
 
 ## Latest continuation — application decision persistence boundary
 
