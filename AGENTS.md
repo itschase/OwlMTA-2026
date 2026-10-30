@@ -33,6 +33,22 @@ This file is a high-level, human- and AI-agent readable guide and chronological 
 
 ## 2. Activity Read Log
 
+### [2026-10-29] — Codex / ChatGPT (Application-Gate Donor Separation)
+* **Goal**: Remove donor authority from the post-admission application bypass and make the retained legacy staff bypass fail closed on persistence/session-state failure before changing the riskier force/unforce workflows.
+* **Work Completed**:
+  1. Removed supporter/donor authorization from the account application gate. Trial Admin remains enforcement while `moderation.application.bypass` is comparison-only and cannot grant.
+  2. Added an internal capability result that distinguishes invalid session/input, unavailable adapter, adapter error, and resolved allow/deny while preserving the existing exported boolean facade. No Discord identity, role list/ID, token, or credential reaches gameplay or diagnostics.
+  3. The bypass now validates the authenticated numeric account ID, requires the legacy query wrapper to report execution success, synchronizes and reads back `appstate=3`, and attempts actor-bound audit before character selection. Persistence/session-state failures return to the application flow with bounded diagnostics.
+  4. Audited `/forceapp`, `/oforceapp`, and `/unforceapp` and left them unchanged: they perform unchecked sequential writes across legacy MyISAM tables and need explicit failure/reconciliation design. Updated the capability/login/API architecture, account/apps dossiers, work queue, and tracker index. Published to [Issue #3](https://github.com/itschase/OwlMTA-2026/issues/3#issuecomment-6513910888), [Issue #281](https://github.com/itschase/OwlMTA-2026/issues/281#issuecomment-6513911222), [account Discussion #99](https://github.com/itschase/OwlMTA-2026/discussions/99#discussioncomment-19284166), [apps Discussion #286](https://github.com/itschase/OwlMTA-2026/discussions/286#discussioncomment-19284167), and [Discord Discussion #70](https://github.com/itschase/OwlMTA-2026/discussions/70#discussioncomment-19284168).
+* **Commit**:
+  - [`81667d9`](https://github.com/itschase/OwlMTA-2026/commit/81667d9) — `security(account): separate donor application bypass`
+* **Validation**: Both changed Lua files parsed successfully with `luaparser`; focused invariants confirmed donor removal, shadow-only resolution states, checked query execution, synchronized readback, and bounded diagnostics; changed-document relative links and `git diff --check` passed. The repository `query_free` implementation and official MTA `dbExec` return contract were reviewed; `dbExec` was not treated as SQL-success evidence. No MTA server/client, database, Discord application, identity adapter/service, application UI, or gameplay test was run.
+* **Current Status**: Fixed in source, shadow-only, and published; runtime unverified. Issues #3/#281 remain open. Force/unforce application transitions and manager authority remain legacy and unresolved.
+* **Recommended Next Work**:
+  1. Design a failure-aware application transition helper or schema migration before modifying `/forceapp`, `/oforceapp`, `/unforceapp`, or reviewer decisions.
+  2. Remove supporter authority from application manager reads/mutations only alongside server-side reviewer checks and caller-derived targets under Issue #280.
+  3. Keep Discord application capabilities non-granting until database/outage/replay/concurrency behavior is validated in the disposable environment.
+
 ### [2026-10-29] — Codex / ChatGPT (Bounded Player Nudge Authority)
 * **Goal**: Continue the action-by-action Discord capability migration through a second donor-backed player-control command without allowing shadow data to grant access.
 * **Work Completed**:

@@ -7,6 +7,7 @@
 - The tracked backup startup list places it after account and shared service resources; this is not proof of current deployment order.
 - No MTA server or database was started. Runtime behavior, live schema, ACL, and startup are unverified.
 - [Discussion #286](https://github.com/itschase/OwlMTA-2026/discussions/286).
+- Application-gate checkpoint: source commit [`81667d9`](https://github.com/itschase/OwlMTA-2026/commit/81667d9), [Issue #281 update](https://github.com/itschase/OwlMTA-2026/issues/281#issuecomment-6513911222), and [Script Resource Discussion #286 update](https://github.com/itschase/OwlMTA-2026/discussions/286#discussioncomment-19284167).
 
 ## Purpose and user workflows
 
