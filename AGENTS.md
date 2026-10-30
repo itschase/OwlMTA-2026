@@ -33,6 +33,22 @@ This file is a high-level, human- and AI-agent readable guide and chronological 
 
 ## 2. Activity Read Log
 
+### [2026-10-29] — Codex / ChatGPT (Application Decision Persistence Boundary)
+* **Goal**: Reduce split application/account state without changing the existing three-declines-in-a-row policy or overstating legacy MyISAM guarantees.
+* **Work Completed**:
+  1. Replaced the separate reviewed-application and `account_details.appstate` writes with one conditional joined update. The path reloads both stored states, derives the applicant from the pending row, and requires a positive immediate `ROW_COUNT()` before any notification, movement, staff-report credit, or UI refresh.
+  2. Made third-decline cooldown staging explicit and checked. Definite execution/no-match failure attempts cleanup and records compensation outcome; an indeterminate affected-row read fails closed without guessing whether potentially committed cooldown state should be removed.
+  3. Kept the decline streak memory-only rather than silently converting “three in a row” into a lifetime historical limit. Added bounded, credential-free diagnostics for audit, report-count, timer, and redirect follow-up failures.
+  4. Updated the `apps` dossier, continuation record, and tracker index. Published checkpoints to [Issue #281](https://github.com/itschase/OwlMTA-2026/issues/281#issuecomment-6514121793), [Issue #6](https://github.com/itschase/OwlMTA-2026/issues/6#issuecomment-6514122023), and [Script Resource Discussion #286](https://github.com/itschase/OwlMTA-2026/discussions/286#discussioncomment-19284319).
+* **Commit**:
+  - [`e371b21`](https://github.com/itschase/OwlMTA-2026/commit/e371b21) — `fix(apps): consolidate application decision state`
+* **Validation**: The changed Lua parsed successfully; focused checks confirmed the joined pending/account-state predicates, immediate affected-row check, failure/compensation diagnostics, retained in-memory streak semantics, and absence of the old split account update. Changed-document links, `git diff --check`, and staged checks passed. MariaDB's official multi-table `UPDATE` and `ROW_COUNT()` contracts were checked. No MTA server, client, database, Discord application/service, or gameplay test was run.
+* **Current Status**: Fixed in source and published; runtime and crash behavior remain unverified. Final branch/remote cleanliness is checked after committing this handoff.
+* **Recommended Next Work**:
+  1. Under #281/#6, design restart-safe decline-streak and operation identity semantics before adding durable fields; do not infer a lifetime-decline policy.
+  2. Stage uniqueness/recovery for `force_apps.account` and transactional-engine migration through the versioned migration plan, with rollback and failure injection.
+  3. Continue the remaining server-authoritative application progression/replacement path only after tracing each client/server stage and persistence boundary.
+
 ### [2026-10-29] — Codex / ChatGPT (Application Manager Authority and Target Binding)
 * **Goal**: Secure the full application-manager remote surface, separate review from question-bank capabilities, remove donor authority, and stop clients from choosing decision targets.
 * **Work Completed**:
