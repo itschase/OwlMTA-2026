@@ -33,6 +33,22 @@ This file is a high-level, human- and AI-agent readable guide and chronological 
 
 ## 2. Activity Read Log
 
+### [2026-10-29] — Codex / ChatGPT (First Capability Shadow and Donor Separation)
+* **Goal**: Begin action-by-action Discord capability migration without granting from shadow data, while removing donor authority from a high-impact moderation action and closing an unsafe remote surface.
+* **Work Completed**:
+  1. Added [`docs/architecture/CAPABILITY_MIGRATION_MATRIX.md`](docs/architecture/CAPABILITY_MIGRATION_MATRIX.md), classifying initial administrative, GameMaster, donor, specialty-team, organization/duty, and operator/ACL action families by legacy decision, proposed key, retained local gates, migration state, and tracker.
+  2. Added the server-only `admin-system/capability_shadow_s.lua` evaluator. It queries only the Owl account facade, rate-limits comparisons, records bounded legacy/capability/resolver outcomes, attempts actor-bound mismatch audit without Discord identity/role/token data, tolerates account/identity/logger outage, and always returns the reviewed legacy result.
+  3. Removed donor `supporter_level` from `/freeze` and `/unfreeze`; Trial Admin remains enforcement while `moderation.player.freeze` is comparison-only. Removed `remoteFreezePlayer` after repository-wide search confirmed it had no caller and exposed a caller-supplied actor through the command handler.
+  4. Updated the Discord design, login migration map, admin-system dossier, documentation hub, work queue, and tracker index. Published updates to [Issue #3](https://github.com/itschase/OwlMTA-2026/issues/3#issuecomment-6513765640), [Issue #164](https://github.com/itschase/OwlMTA-2026/issues/164#issuecomment-6513765906), [Issue #14](https://github.com/itschase/OwlMTA-2026/issues/14#issuecomment-6513766102), [admin-system Discussion #178](https://github.com/itschase/OwlMTA-2026/discussions/178#discussioncomment-19284015), [Discord Discussion #70](https://github.com/itschase/OwlMTA-2026/discussions/70#discussioncomment-19284016), and [adapter Discussion #239](https://github.com/itschase/OwlMTA-2026/discussions/239#discussioncomment-19284018).
+* **Commit**:
+  - [`2ffbfc1`](https://github.com/itschase/OwlMTA-2026/commit/2ffbfc1) — `security(admin): separate donor freeze authority`
+* **Validation**: Both changed Lua files parsed successfully with `luaparser`; `admin-system/meta.xml` parsed with 24 server scripts; `remoteFreezePlayer` has zero active-source references; focused source searches confirmed the command and donor predicate boundaries; changed-document relative links and `git diff --check` passed. Official MTA `getResourceState` and `call` contracts were reviewed. No MTA server/client, Discord application, identity adapter/service, database, or gameplay test was run.
+* **Current Status**: Fixed in source, shadow-only, and published; runtime unverified. No Discord capability is authoritative. Issues #3/#14/#164 remain open for further action migration, GameMaster reconciliation, remaining remote surfaces, and disposable-runtime evidence.
+* **Recommended Next Work**:
+  1. Review and convert `/nudge` as the next bounded donor-backed player-control action, including message bounds and target lifecycle, using the same non-granting shadow contract.
+  2. Audit `/forceapp`, `/oforceapp`, and `/unforceapp` persistence and offline-target outcomes before removing donor fallthrough and adding `moderation.application.override` shadow evidence.
+  3. Reconcile GameMaster storage, exports, report assignment/duty semantics, and UI naming before any `gamemaster.reports.handle` shadow implementation.
+
 ### [2026-10-29] — Codex / ChatGPT (Canonical Full-Account Logout)
 * **Goal**: Complete the first bounded Issue #96 account-session termination slice without conflating full logout with ordinary character change.
 * **Work Completed**:

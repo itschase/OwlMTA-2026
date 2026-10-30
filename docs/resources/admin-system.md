@@ -6,6 +6,7 @@
 - Evidence: server-focused review of all 24 manifest-loaded server scripts; client presentation review remains partial.
 - Runtime: unverified.
 - Latest source state: `/freeze` and `/unfreeze` no longer accept donor `supporter_level`; they retain Trial Admin enforcement while comparing the proposed `moderation.player.freeze` grant in non-authoritative shadow mode. The unused remotely callable `remoteFreezePlayer` wrapper was removed after no caller was found.
+- Publication checkpoint: source commit [`2ffbfc1`](https://github.com/itschase/OwlMTA-2026/commit/2ffbfc1), [Issue #3 update](https://github.com/itschase/OwlMTA-2026/issues/3#issuecomment-6513765640), [Issue #164 update](https://github.com/itschase/OwlMTA-2026/issues/164#issuecomment-6513765906), and [Script Resource Discussion #178 update](https://github.com/itschase/OwlMTA-2026/discussions/178#discussioncomment-19284015).
 
 ## What it does
 
