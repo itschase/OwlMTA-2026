@@ -6,7 +6,8 @@
 - Full manifest, both loaded scripts, exported helpers, and the only direct in-tree consumer were reviewed from source.
 - Source fix in this change set rejects invalid weapon/ped inputs, clamps total free ammunition at zero, restores the missing server `getFreeAmmo` export, and records each invalid server-input reason at most once per resource run.
 - Issues: [#549](https://github.com/itschase/OwlMTA-2026/issues/549) owns invalid-input robustness; [#550](https://github.com/itschase/OwlMTA-2026/issues/550) owns the unresolved donor-bonus policy; [#213](https://github.com/itschase/OwlMTA-2026/issues/213) owns the client-declared inventory transfer boundary.
-- Script Resource Discussion: publication pending.
+- Script Resource Discussion: [#569](https://github.com/itschase/OwlMTA-2026/discussions/569).
+- Fixed-in-source checkpoint: [`7a331bf`](https://github.com/itschase/OwlMTA-2026/commit/7a331bf); Issue updates [#549](https://github.com/itschase/OwlMTA-2026/issues/549#issuecomment-6517284837), [#550](https://github.com/itschase/OwlMTA-2026/issues/550#issuecomment-6517284871), and [#213](https://github.com/itschase/OwlMTA-2026/issues/213#issuecomment-6517284782).
 - Runtime: unverified. No MTA server/client or inventory workflow was run.
 
 ## What it does

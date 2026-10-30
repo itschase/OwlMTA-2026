@@ -2,14 +2,14 @@
 
 ## Current application-flow follow-up
 
-- The terminal application-flow change is fixed in source and awaiting end-of-batch publication: step-3 reopen is caller/state bound and rate-limited; only the trusted Part 2 commit can notify reviewers; supporter recipients and applicant-facing staff-name disclosure are removed; and `accounts:playerFinishApps` is server-only with stored accepted-state verification. Existing Issues [#281](https://github.com/itschase/OwlMTA-2026/issues/281) and [#1](https://github.com/itschase/OwlMTA-2026/issues/1), plus [Script Resource Discussion #286](https://github.com/itschase/OwlMTA-2026/discussions/286), own publication. Runtime remains unverified.
+- Terminal application-flow checkpoint: source commit [`7a331bf`](https://github.com/itschase/OwlMTA-2026/commit/7a331bf) makes step-3 reopen caller/state bound and rate-limited; only the trusted Part 2 commit can notify reviewers; supporter recipients and applicant-facing staff-name disclosure are removed; and `accounts:playerFinishApps` is server-only with stored accepted-state verification. Published to Issues [#281](https://github.com/itschase/OwlMTA-2026/issues/281#issuecomment-6517284775), [#1](https://github.com/itschase/OwlMTA-2026/issues/1#issuecomment-6517284961), and [#3](https://github.com/itschase/OwlMTA-2026/issues/3#issuecomment-6517284799), plus Discussions [#286](https://github.com/itschase/OwlMTA-2026/discussions/286#discussioncomment-19287480) and [#99](https://github.com/itschase/OwlMTA-2026/discussions/99#discussioncomment-19287479). Runtime remains unverified.
 
 ## Current resource follow-up — `weaponcap`
 
-- Maintained dossier: [`docs/resources/weaponcap.md`](../resources/weaponcap.md); standardized Script Resources Discussion publication is held until the end-of-batch pass.
-- [Issue #549](https://github.com/itschase/OwlMTA-2026/issues/549) is fixed in source for invalid IDs/elements, nonnegative remaining capacity, and the missing server export; runtime verification remains before closure.
-- [Issue #550](https://github.com/itschase/OwlMTA-2026/issues/550) remains open until the unused donor-bonus fields are explicitly retained as a server-owned entitlement or removed. Donor/supporter tiers do not grant staff authority.
-- [Issue #213](https://github.com/itschase/OwlMTA-2026/issues/213) already owns the source-confirmed `item-system` defect where client-calculated ammo reaches `moveFromElement` and is used by the server. Do not create a duplicate resource Issue; the capacity helper is presentation-only until the mutation boundary derives its grant from server state.
+- Maintained dossier: [`docs/resources/weaponcap.md`](../resources/weaponcap.md); published as [Script Resource Discussion #569](https://github.com/itschase/OwlMTA-2026/discussions/569).
+- [Issue #549 update](https://github.com/itschase/OwlMTA-2026/issues/549#issuecomment-6517284837) records source commit [`7a331bf`](https://github.com/itschase/OwlMTA-2026/commit/7a331bf) for invalid IDs/elements, nonnegative remaining capacity, and the missing server export; runtime verification remains before closure.
+- [Issue #550 update](https://github.com/itschase/OwlMTA-2026/issues/550#issuecomment-6517284871) keeps the unused donor-bonus fields as an explicit policy decision. Donor/supporter tiers do not grant staff authority.
+- [Issue #213 update](https://github.com/itschase/OwlMTA-2026/issues/213#issuecomment-6517284782) records the source-confirmed `item-system` defect where client-calculated ammo reaches `moveFromElement` and is used by the server. The capacity helper is presentation-only until the mutation boundary derives its grant from server state.
 
 ## Current project-operations follow-up
 

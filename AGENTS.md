@@ -33,6 +33,22 @@ This file is a high-level, human- and AI-agent readable guide and chronological 
 
 ## 2. Activity Read Log
 
+### [2026-10-30] — Codex / ChatGPT (Terminal Application Boundary and `weaponcap` Audit)
+* **Goal**: Close the next application privacy/replay/selection gap, then complete one high-value catalog-only resource review without creating duplicate trackers.
+* **Work Completed**:
+  1. Bound step-3 reopening to the authenticated MTA caller, stored state 2, the caller's pending application, and a cooldown. Only the trusted post-persistence Part 2 path can send one in-memory reviewer alert per application. Alerts now target on-duty administrators, exclude supporter duty, and never disclose staff usernames to applicants.
+  2. Made `accounts:playerFinishApps` server-only and required stored accepted state plus synchronized session readback before character selection. Added bounded action/outcome/follow-up diagnostics and source-checked client presentation/cleanup handlers.
+  3. Completed the `weaponcap` manifest/export/direct-caller review. Invalid weapon/ped inputs now return safe zero results, remaining capacity cannot go negative, the missing server `getFreeAmmo` export is restored, and each invalid server reason logs at most once per resource run. The dossier records that `item-system` still trusts client-declared pickup ammunition under existing #213; the unused donor fields remain policy-owned by #550.
+  4. Added a maintained README status-history convention, refreshed the public fixed-in-source checkpoint, published [Script Resource Discussion #569](https://github.com/itschase/OwlMTA-2026/discussions/569), and cross-linked Issues [#281](https://github.com/itschase/OwlMTA-2026/issues/281#issuecomment-6517284775), [#1](https://github.com/itschase/OwlMTA-2026/issues/1#issuecomment-6517284961), [#3](https://github.com/itschase/OwlMTA-2026/issues/3#issuecomment-6517284799), [#549](https://github.com/itschase/OwlMTA-2026/issues/549#issuecomment-6517284837), [#550](https://github.com/itschase/OwlMTA-2026/issues/550#issuecomment-6517284871), and [#213](https://github.com/itschase/OwlMTA-2026/issues/213#issuecomment-6517284782), plus Discussions [#286](https://github.com/itschase/OwlMTA-2026/discussions/286#discussioncomment-19287480) and [#99](https://github.com/itschase/OwlMTA-2026/discussions/99#discussioncomment-19287479).
+* **Commit**:
+  - [`7a331bf`](https://github.com/itschase/OwlMTA-2026/commit/7a331bf) — `security(core): harden application and ammo boundaries`
+* **Validation**: Six changed Lua files parsed successfully; both affected manifests parsed as XML; focused source checks confirmed the trusted application caller/state/recipient/terminal-event boundaries and guarded cap-table indexing; all changed-document relative links resolved; the ledger retained 179 rows and 179 unique manifest paths; generated catalog/status outputs and diff/staged checks passed. No MTA server/client, database, Discord application/service, notification UI, inventory flow, or gameplay runtime was run.
+* **Current Status**: Both units are fixed in source, documented, published, committed, and pushed; runtime remains unverified. #281/#1 remain open for application recovery/runtime, #549 for its runtime matrix, #550 for donor-perk policy, and #213 for authoritative inventory settlement.
+* **Recommended Next Work**:
+  1. Harden `item-system` `moveFromElement` as a bounded Issue #213 slice: bind `client`, re-resolve container/item/access/proximity, derive ammunition server-side, and design exactly-once split settlement before editing.
+  2. Continue durable application/session recovery and MyISAM migration planning under #281/#6; do not claim restart safety from memory-only markers.
+  3. Resume the catalog-only active-resource queue with the highest gameplay/security impact, maintaining one dossier and one standardized Discussion per resource.
+
 ### [2026-10-29] — Codex / ChatGPT (Current-State Documentation Refresh)
 * **Goal**: Reconcile public entry-point and audience documentation with the latest identity, capability, logout, and application hardening without turning source completion into runtime claims.
 * **Work Completed**:
