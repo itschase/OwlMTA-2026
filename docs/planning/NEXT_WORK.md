@@ -10,6 +10,8 @@ Persistence is now insert-first: the new application row is created before a con
 
 Part 1 remains client-graded and sends answer keys; the Part 2 snapshot is memory-only; live MyISAM failure, reconnect, duplicate cleanup, and event-order behavior are unverified. Continue #281/#282 with a server-graded Part 1 snapshot and explicit recovery/reconciliation, not by treating this source review as runtime proof.
 
+Publication checkpoint: source commit [`0e95ac7`](https://github.com/itschase/OwlMTA-2026/commit/0e95ac7); Issue comments [#281](https://github.com/itschase/OwlMTA-2026/issues/281#issuecomment-6514230474), [#282](https://github.com/itschase/OwlMTA-2026/issues/282#issuecomment-6514230673), and [#1](https://github.com/itschase/OwlMTA-2026/issues/1#issuecomment-6514230859); [Script Resource Discussion #286](https://github.com/itschase/OwlMTA-2026/discussions/286#discussioncomment-19284393).
+
 ## Latest continuation — application decision persistence boundary
 
 The authorized application decision path now reloads a pending application joined to `account_details` and requires the stored account to remain at application state 2. Accept/decline commits the reviewed application row and resulting account state (3 accepted, 1 ordinary decline, or 0 third decline) in one conditional joined statement, then immediately requires a positive `ROW_COUNT()` result before follow-up. This removes the prior window where the application could be reviewed while the account remained at the old stage and rejects a definite stale/no-match race. It is still a single MyISAM statement, not a transaction or crash-safety guarantee.

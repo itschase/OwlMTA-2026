@@ -33,6 +33,22 @@ This file is a high-level, human- and AI-agent readable guide and chronological 
 
 ## 2. Activity Read Log
 
+### [2026-10-29] — Codex / ChatGPT (Server-Authoritative Part 2 Application Submission)
+* **Goal**: Remove client question authority and delete-before-insert data loss from the written application stage while preserving explicit recovery boundaries.
+* **Work Completed**:
+  1. Bound `apps:startStep2` and `apps:processPart2` to the trusted remote caller, authenticated integer account, stored application state 1, and per-action cooldowns while retaining trusted internal player-source calls.
+  2. Replaced the unbounded selector with valid-question filtering, underfilled-bank rejection, finite shuffling, and a 30-minute server-held four-question snapshot. The client sends answers only; four trimmed 2–500 character answers are validated without logging their contents.
+  3. Made persistence insert-first. The account conditionally advances from state 1 to 2 only after a new row exists, requires a positive immediate affected-row result, compensates the new row on definite failure/no-match, and deletes older pending rows only after confirmation. Indeterminate state fails closed for recovery.
+  4. Changed the client to await an explicit server result and restore actionable form state on failure. Updated the dossier/work queue/tracker index and published to Issues [#281](https://github.com/itschase/OwlMTA-2026/issues/281#issuecomment-6514230474), [#282](https://github.com/itschase/OwlMTA-2026/issues/282#issuecomment-6514230673), [#1](https://github.com/itschase/OwlMTA-2026/issues/1#issuecomment-6514230859), and [Discussion #286](https://github.com/itschase/OwlMTA-2026/discussions/286#discussioncomment-19284393).
+* **Commit**:
+  - [`0e95ac7`](https://github.com/itschase/OwlMTA-2026/commit/0e95ac7) — `security(apps): bind essay submission state`
+* **Validation**: Both changed Lua files parsed successfully. Focused checks confirmed trusted-caller/session/state gates, answer-only client payload, snapshot TTL, answer bounds, insert/transition/cleanup ordering, positive affected-row requirement, failure diagnostics, and removal of optimistic client form destruction. Changed-document links and diff/staged checks passed. Official MTA event-security and targeted `triggerClientEvent` guidance plus MariaDB `ROW_COUNT()` behavior were reviewed. No MTA server/client, database, Discord application/service, or gameplay test was run.
+* **Current Status**: Fixed in source and published; runtime, reconnect, crash, and event-order behavior remain unverified. Final branch/remote cleanliness is checked after committing this handoff.
+* **Recommended Next Work**:
+  1. Replace Part 1 client grading with an expiring server-held quiz snapshot and server-side answer validation; never send answer keys to the client.
+  2. Harden `apps:finishStep1`, `apps:startStep3`, and `apps:retakeApplicationPart2` with the same caller/stored-state boundary and cooldown/replay rules.
+  3. Design restart/reconnect reconciliation for memory-only snapshots, pending-row duplicates, and indeterminate MyISAM results before claiming #281/#282 complete.
+
 ### [2026-10-29] — Codex / ChatGPT (Application Decision Persistence Boundary)
 * **Goal**: Reduce split application/account state without changing the existing three-declines-in-a-row policy or overstating legacy MyISAM guarantees.
 * **Work Completed**:
