@@ -10,6 +10,7 @@ All runtime behavior remains unverified unless a document explicitly records a c
 - [Gamemode guide](architecture/GAMEMODE_GUIDE.md) — lifecycle, domains, resource relationships, persistence, and security boundaries.
 - [Codebase review](architecture/CODEBASE_REVIEW.md) — audit findings, risks, and review state.
 - [Discord authorization design](architecture/DISCORD_AUTH_DESIGN.md) and [integration plan](architecture/DISCORD_INTEGRATION_PLAN.md) — identity, role mapping, capabilities, leases, revocation, and migration.
+- [Staff, GameMaster, and donor capability migration matrix](architecture/CAPABILITY_MIGRATION_MATRIX.md) — action-level legacy/shadow/cutover status, retained local gates, and donor separation.
 - [Legacy Login to Discord Session Migration](architecture/LEGACY_LOGIN_DISCORD_MIGRATION.md) — source-reviewed consumer map and ordered conversion from password/forum authority to Discord-backed account sessions.
 - [API contract](architecture/API_CONTRACT.md) — optional self-hosted external service and website boundary.
 - [UI framework plan](architecture/UI_FRAMEWORK_PLAN.md) — shared in-game application and interaction direction.

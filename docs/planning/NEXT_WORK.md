@@ -1,6 +1,14 @@
 # Next work record
 
-Last updated: 2026-10-29 after implementing the first canonical full-account logout slice, defining autonomous agent operations, reconciling low-value trackers, and mapping the legacy-login-to-Discord-session migration.
+Last updated: 2026-10-29 after implementing the first non-granting capability shadow, donor/staff separation for player freeze, and the canonical full-account logout slice.
+
+## Latest continuation — first capability shadow and donor separation
+
+The maintained [`CAPABILITY_MIGRATION_MATRIX.md`](../architecture/CAPABILITY_MIGRATION_MATRIX.md) now classifies the first high-risk global actions by legacy predicate, proposed named capability, independent local gates, migration state, and tracker. It keeps Discord authentication, global capability, GameMaster, donor entitlement, organization/duty authority, specialty teams, and MTA ACL as separate decisions.
+
+`admin-system` now loads a server-only shadow evaluator. It calls `account:hasDiscordCapability` only through the Owl facade, records bounded `[AUTH][CAPABILITY_SHADOW]` comparisons, attempts a durable actor-bound record only when an allowed/mismatched or resolver-unavailable decision needs reconciliation, and always returns the reviewed legacy result. It accepts no client payload, Discord identity, role ID/list, token, or credential. Resolver failure never grants access.
+
+`/freeze` and `/unfreeze` are the first action slice. Donor `supporter_level` is removed from their authorization; Trial Admin remains enforcement while `moderation.player.freeze` is comparison-only. Repository-wide search found no caller for the remotely callable `remoteFreezePlayer` wrapper, so that spoofable/unused surface is removed rather than wrapping a nonexistent UI. Commands, target resolution, freeze/restraint behavior, feedback, and existing success audit remain. MTA, Discord, adapter/service, capability freshness, mismatch behavior, target lifecycle, and logger behavior remain runtime-unverified under Issues #3 and #164.
 
 ## Latest continuation — canonical full account logout
 

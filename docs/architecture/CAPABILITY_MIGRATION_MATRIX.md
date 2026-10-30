@@ -1,0 +1,46 @@
+# Staff, GameMaster, and donor capability migration matrix
+
+This is the maintained action-level migration ledger for Issues [#3](https://github.com/itschase/OwlMTA-2026/issues/3) and [#14](https://github.com/itschase/OwlMTA-2026/issues/14). It turns broad legacy rank predicates into reviewable actions without treating a Discord role, donor tier, organization rank, duty flag, or MTA ACL as interchangeable authority.
+
+All entries are source-reviewed unless a row explicitly says `fixed-in-source`. MTA, Discord, the identity adapter/service, role resolution, database state, and gameplay remain runtime-unverified.
+
+## Decision model
+
+Every protected action is evaluated as separate gates:
+
+1. **Authenticated actor** — server-owned Owl account session and, for remote events, MTA `client` binding.
+2. **Global grant** — a narrow named capability resolved through the server-only `account:hasDiscordCapability` facade when the action reaches cutover.
+3. **Local policy** — duty, hierarchy, target type, target immunity, ownership, organization membership/rank, proximity, world, current state, and value bounds as applicable.
+4. **Audit and lifecycle** — bounded diagnostic/audit outcome, current grant freshness, logout/revocation handling, and no stale callback restoring access.
+
+Shadow mode compares the legacy decision with the Discord-backed result but returns only the reviewed legacy decision. A shadow grant never authorizes an action. Missing, stale, mismatched, or unavailable capability state is recorded, not converted into access. Donor/supporter entitlement is excluded from moderation even during shadow migration.
+
+## Phase-one action inventory
+
+| Action family | Source entry points | Source-confirmed legacy decision | Proposed capability | Independent local gates that remain | Migration state and owner |
+| --- | --- | --- | --- | --- | --- |
+| Freeze or unfreeze a player | `admin-system/Player/s_player_commands.lua`: `/freeze`, `/unfreeze` | Previously Trial Admin **or donor supporter**. The unused `remoteFreezePlayer` event also reused the command handler and trusted its first payload value as the actor. | `moderation.player.freeze` | Resolve a live target; preserve vehicle/ped freeze state, restraint weapon controls, operator feedback, and action audit. Duty/hierarchy policy is not established by current source and must not be invented during cutover. | `fixed-in-source`, shadow-only: donor access removed, unused remote surface removed, Trial Admin remains enforcement, Discord result cannot grant. Issues #3 and #164. |
+| Override account application state | `/forceapp`, `/oforceapp`, `/unforceapp` | Trial Admin or donor supporter; includes live and offline account paths. | `moderation.application.override` | Validate live/offline target, intended state transition, reason, database result, notification, and immutable audit. | `source-reviewed`; donor removal and shadow wrapper not yet implemented. Issues #3 and #281. |
+| Nudge a player | `/nudge` | Trial Admin or donor supporter. | `moderation.player.nudge` | Validate live target and bounded message/presentation behavior; retain action audit. | `source-reviewed`; donor removal and shadow wrapper not yet implemented. Issue #3. |
+| Inspect account, character, history, inventory, or monitor data | Admin check/history/inventory/monitor handlers | Mixed Trial Admin, donor supporter, client-visible helpers, and action-specific checks. | Split keys such as `moderation.player.inspect` and `moderation.history.read`; do not create one universal inspection grant. | Requester binding, purpose/scope, target validity, hierarchy, field minimization, and redacted audit. | `source-reviewed`; detailed trust/privacy work remains in #66, #164–#166. |
+| Handle player reports | `report` command/event and assignment flows | Trial Admin plus legacy supporter/GameMaster and `duty_supporter` paths are interleaved. | `gamemaster.reports.handle` and separately reviewed administrator capabilities | Current duty, report assignment/ownership, report state, target validity, rate/replay bounds, and transcript privacy. | `source-reviewed`; requires GameMaster persistence/export reconciliation under #14 before shadow cutover. |
+| View staff roster/status | HUD/overlay/global staff-list consumers | Broad `isPlayerStaff()` and supporter-based presentation; may expose hidden staff state. | `staff.roster.view` only if the audience requires a global grant | Privacy minimization, hidden-duty policy, and public-versus-staff view. | `source-reviewed`; no grant or cutover. Issues #14 and #166. |
+| Mutate staff or specialty-team ranks | `admin-system/staff_manager/*` | Numeric admin/supporter/VCT/scripter/mapper/FMT hierarchy and team-specific branches. | Action/domain keys such as `staff.ranks.manage.admin` and `staff.ranks.manage.mapping` | Actor/target hierarchy, self-edit prohibition, immutable before/after audit, transactional persistence, retry/reconciliation. | `source-reviewed`; no cutover. Issues #3 and #169. |
+| Manage server resources, ACL, or server password | `admin-system/Resources/*` and operator commands | Numeric staff checks plus MTA resource/ACL context. | Operator capabilities may be considered only alongside MTA ACL; Discord alone is insufficient. | MTA ACL, protected-resource allowlist, reason/confirmation, secret redaction, and rollback. | `source-reviewed`; operator policy and #168 must be resolved first. |
+| Use mapping, vehicle-team, scripting, or faction-management tools | Integration specialty predicates and action resources | Separate numeric specialty ranks, sometimes unioned into broad staff. | Narrow `mapping.*`, `vehicle_team.*`, `scripter.*`, and `fmt.*` keys | Tool-specific target, ownership, asset, hierarchy, and persistence checks. | `source-reviewed`; inventory each action before any role grant. Issue #3. |
+| Organization membership, rank, duty, and owned assets | `factions`, `duty`, interiors, vehicles, businesses, items | Local database membership/rank/duty/ownership. | **No global Discord replacement.** | Keep all organization, duty, ownership, proximity, world, and state rules server-side. | Retained local authority; Issues #38, #39, #53 and domain trackers. |
+| Donor/supporter perks | `supporter_level`, donor perk cache, donator UI/actions | Donor tier and purchased/assigned perk state. Some legacy staff-like call sites incorrectly reuse the predicate. | Separate `donor.*` entitlement result, never `moderation.*`, `gamemaster.*`, or `staff.*` | Entitlement expiry, perk-specific limits, economy rules, and revocation. | Separation in progress under #3/#14; no moderation grant is permitted. |
+
+## First shadow implementation: player freeze
+
+`admin-system/capability_shadow_s.lua` now queries the existing server-only Owl facade for `moderation.player.freeze` and emits rate-limited, bounded `[AUTH][CAPABILITY_SHADOW]` fields: action, capability, legacy result, Discord result, resolver state, comparison, and `enforcement=legacy`. It checks the optional account resource with MTA's [getResourceState](https://wiki.multitheftauto.com/wiki/GetResourceState) and uses the exported-function [call](https://wiki.multitheftauto.com/wiki/Call) boundary only when that resource is running. It never receives or records a Discord user ID, role ID, role list, token, or credential. A durable actor-bound log is attempted only for allowed/mismatched or resolver-unavailable decisions that need operator reconciliation; logger failure receives a credential-free outcome and cannot change enforcement.
+
+`/freeze` and `/unfreeze` enforce only the retained Trial Admin predicate in this phase. Donor `supporter_level` no longer authorizes player control. The capability result is comparison evidence only, so a Discord grant cannot bypass the legacy gate, local target resolution, or action logging. The unused remotely callable `remoteFreezePlayer` event was removed after repository-wide search found no client or server caller; commands remain available.
+
+Before capability cutover, a disposable environment must cover legacy allow/capability allow, legacy allow/capability deny, legacy deny/capability allow, both deny, adapter unavailable/error/stale, role loss during a session, logout/reconnect, target disconnect, vehicle/ped/restraint states, command burst behavior, and audit/logger failure. Operators must review mismatches and explicitly decide duty and hierarchy policy. No role ID is supplied by OwlMTA; installation-specific mappings remain blank in the reusable identity service.
+
+## Next bounded conversions
+
+1. Apply the same non-granting comparison to application override and nudge only after validating their target/persistence/input boundaries; remove donor fallthrough at the same time.
+2. Reconcile GameMaster persistence, missing exports, report-duty semantics, and the supporter-named UI fields before introducing `gamemaster.reports.handle`.
+3. Split inspection, roster, rank mutation, specialty tools, and operator controls into narrow actions. Never bulk-replace `isPlayerStaff()`, numeric ranks, organization permissions, or MTA ACL with a single capability.

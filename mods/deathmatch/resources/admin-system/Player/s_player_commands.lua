@@ -1368,7 +1368,9 @@ addCommandHandler("takemoney", takeMoney, false, false)
 
 -----------------------------------[FREEZE]----------------------------------
 function freezePlayer(thePlayer, commandName, target)
-	if (exports.integration:isPlayerTrialAdmin(thePlayer) or exports.integration:isPlayerSupporter(thePlayer)) then
+	local legacyAllowed = exports.integration:isPlayerTrialAdmin(thePlayer)
+	local allowed = adminEvaluateCapabilityShadow(thePlayer, "moderation.player.freeze", "moderation.player.freeze", legacyAllowed)
+	if allowed then
 		if not (target) then
 			outputChatBox("SYNTAX: /" .. commandName .. " [Partial Player Nick]", thePlayer, 255, 194, 14)
 		else
@@ -1397,15 +1399,19 @@ function freezePlayer(thePlayer, commandName, target)
 				exports.logs:dbLog(thePlayer, 4, targetPlayer, "FREEZE")
 			end
 		end
+	else
+		if isElement(thePlayer) and getElementType(thePlayer) == "player" then
+			outputChatBox("You are not authorized to freeze players.", thePlayer, 255, 0, 0)
+		end
 	end
 end
 addCommandHandler("freeze", freezePlayer, false, false)
-addEvent("remoteFreezePlayer", true )
-addEventHandler("remoteFreezePlayer", getRootElement(), freezePlayer)
 
 -----------------------------------[UNFREEZE]----------------------------------
 function unfreezePlayer(thePlayer, commandName, target)
-	if (exports.integration:isPlayerTrialAdmin(thePlayer) or exports.integration:isPlayerSupporter(thePlayer)) then
+	local legacyAllowed = exports.integration:isPlayerTrialAdmin(thePlayer)
+	local allowed = adminEvaluateCapabilityShadow(thePlayer, "moderation.player.unfreeze", "moderation.player.freeze", legacyAllowed)
+	if allowed then
 		if not (target) then
 			outputChatBox("SYNTAX: /" .. commandName .. " /unfreeze [Partial Player Nick]", thePlayer, 255, 194, 14)
 		else
@@ -1443,6 +1449,10 @@ function unfreezePlayer(thePlayer, commandName, target)
 				exports.global:sendMessageToAdmins("AdmCmd: " .. tostring(adminTitle) .. " " .. username .. " unfroze " .. targetPlayerName .. ".")
 				exports.logs:dbLog(thePlayer, 4, targetPlayer, "UNFREEZE")
 			end
+		end
+	else
+		if isElement(thePlayer) and getElementType(thePlayer) == "player" then
+			outputChatBox("You are not authorized to unfreeze players.", thePlayer, 255, 0, 0)
 		end
 	end
 end

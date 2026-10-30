@@ -19,7 +19,7 @@ The migration is not complete:
 - `accounts:login:attempt` still provides full password authentication and legacy hash upgrade.
 - `playerRegister` still provisions password accounts and calls the inherited activation path.
 - Login still synchronizes numeric `admin_level`, `account:gmlevel`, specialist ranks, and `supporter_level` as legacy authorities.
-- No active gameplay resource calls `account:hasDiscordCapability`; capability migration has not begun.
+- `admin-system` now performs the first non-granting `account:hasDiscordCapability` shadow comparison for `/freeze` and `/unfreeze`. Trial Admin remains enforcement, donor supporter access is removed, and no capability can grant the action yet. Wider capability migration has not begun.
 - A first canonical full-account logout slice is fixed in source. It is distinct from character change, verifies server-side character cleanup, clears Discord-derived and legacy account authority, and forces a clean same-server reconnect with disconnect fallback. Listener ordering, persistence, redirect/reconnect, outage, and race behavior remain runtime-unverified; broader session lease/revocation work in Issue #96 remains open.
 - Legacy forum link UI still sends a forum username and password to `forum:login`; it is unrelated to Discord OAuth and should not survive the identity migration.
 - The adapter/service runtime, durable identity storage, new-account provisioning, recovery, restart, outage, and reconnect matrices remain unverified.
@@ -55,7 +55,7 @@ Continue Issue #96 before retiring password login. The fixed-in-source workflow 
 
 ### 4. Staff and GameMaster capability migration
 
-Complete Issues #3 and #14 through an action inventory and shadow comparison. Start with narrow global actions, record legacy-versus-capability decisions without granting on mismatch, and migrate only after the action's independent policy checks are documented. Do not bulk-replace numeric rank reads or synchronize capability lists to clients.
+Continue Issues #3 and #14 through the maintained [action migration matrix](CAPABILITY_MIGRATION_MATRIX.md). `/freeze` and `/unfreeze` are the first fixed-in-source shadow slice: they record legacy-versus-capability decisions without granting on mismatch, retain Trial Admin enforcement, reject donor authority, and remove an unused spoofable remote wrapper. Migrate further actions only after their independent policy checks are documented. Do not bulk-replace numeric rank reads or synchronize capability lists to clients.
 
 ### 5. Supporter entitlement separation
 

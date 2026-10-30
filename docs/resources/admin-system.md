@@ -3,8 +3,9 @@
 ## Status
 
 - Tree/startup state: active and present in the tracked startup snapshot; live startup unverified.
-- Evidence: server-focused review of all 23 manifest-loaded server scripts; client presentation review remains partial.
+- Evidence: server-focused review of all 24 manifest-loaded server scripts; client presentation review remains partial.
 - Runtime: unverified.
+- Latest source state: `/freeze` and `/unfreeze` no longer accept donor `supporter_level`; they retain Trial Admin enforcement while comparing the proposed `moderation.player.freeze` grant in non-authoritative shadow mode. The unused remotely callable `remoteFreezePlayer` wrapper was removed after no caller was found.
 
 ## What it does
 
@@ -18,6 +19,8 @@ The command surface includes health/armor/skin/name/state correction, weapon/ite
 
 These actions must migrate individually to named capabilities. Supporter/donor status alone must grant no administrative authority.
 
+The maintained [capability migration matrix](../architecture/CAPABILITY_MIGRATION_MATRIX.md) records each action's legacy predicate, proposed key, retained local checks, and migration state. The first shadow helper logs bounded legacy-versus-Discord outcomes through the server-only account facade but always returns the legacy decision; it cannot grant access. No raw Discord identity, role, or credential is accepted or logged.
+
 ## Technical map
 
 - Manifest: [`mods/deathmatch/resources/admin-system/meta.xml`](../../mods/deathmatch/resources/admin-system/meta.xml)
@@ -29,6 +32,7 @@ These actions must migrate individually to named capabilities. Supporter/donor s
 
 - [#67](https://github.com/itschase/OwlMTA-2026/issues/67): remaining event-boundary work includes generic cargo's client-supplied price. A current source re-review found the scoped monitor, recon, location-manager, NPC 911, and punishment-expiration handlers retain their reviewed actor/permission/source checks; runtime verification is still pending.
 - [#164](https://github.com/itschase/OwlMTA-2026/issues/164): bind remotely triggered privileged mutations to authenticated `client`.
+- [#3](https://github.com/itschase/OwlMTA-2026/issues/3): action-by-action named-capability migration and donor/staff separation. The player-freeze slice is fixed in source but runtime-unverified; other donor-backed moderation paths remain open.
 - [#165](https://github.com/itschase/OwlMTA-2026/issues/165): authorize and make history removal consistent and auditable.
 - [#166](https://github.com/itschase/OwlMTA-2026/issues/166): minimize and capability-scope sensitive administrative data.
 - [#167](https://github.com/itschase/OwlMTA-2026/issues/167): validate feedback and bind attribution.
