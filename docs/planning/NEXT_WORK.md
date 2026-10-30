@@ -1,6 +1,18 @@
 # Next work record
 
-Last updated: 2026-10-29 after moving Part 1 quiz grading, keys, cooldown enforcement, and state transition to the server.
+Last updated: 2026-10-30 after binding terminal application presentation, notification, and accepted-state handoff to trusted server state.
+
+## Latest continuation — terminal application privacy and authority
+
+The submitted-application screen now reloads the authenticated account's stored state and pending row before presentation. Client reopen requests are source-bound and rate-limited, and cannot trigger staff alerts. Only the server-confirmed Part 2 commit path may send one in-memory alert per application; recipients are on-duty administrators rather than the former combined staff predicate, so supporter/donor accounts no longer receive applicant identity. Applicants receive a delivery count without staff usernames. Client presentation events reject mismatched sources and no longer retain an earlier personalized decision message across later generic opens.
+
+The adjacent `accounts:playerFinishApps` terminal event is now server-only. Before character selection it binds the event source, validates the authenticated account, reloads stored `appstate=3`, and requires synchronized session-state readback. Bounded diagnostics record only action/outcome/reason. Four changed Lua files parse successfully and focused source checks cover the trusted submission caller, remote reopen path, recipient predicate, disclosure removal, and terminal event boundary. MTA, database, UI, notification delivery, reconnect/restart, and gameplay behavior remain runtime-unverified under #281/#1. Next prioritize durable application/session recovery and the highest-impact remaining cataloged resource rather than lower-value cosmetic work.
+
+## Latest continuation — `weaponcap` capacity helper
+
+The previously catalog-only `weaponcap` resource now has a full manifest, export, script, and direct-consumer dossier. Its active client consumer is the `item-system` container UI; no in-tree server export consumer was found. The source now rejects invalid/fractional/unsupported weapon IDs before slot-table access, validates server ped/player inputs, clamps negative remaining totals to zero, restores the missing server `getFreeAmmo` manifest export, and emits each credential-free invalid server-input reason at most once per resource run. This is the fixed-in-source scope of #549; runtime remains unverified.
+
+The audit also confirms that the inventory server still trusts the client's submitted pickup-ammo amount instead of deriving it from the server helper. Existing Issue #213 owns that caller/item/container/capacity/settlement boundary, so no duplicate Issue is needed. Issue #550 remains a policy decision because the per-donor table fields are unused; supporter entitlements must remain separate from staff authority. The standardized `Script Resource: weaponcap` Discussion and final publication links are held for the end-of-batch publication pass.
 
 ## Latest continuation — server-graded Part 1 quiz
 

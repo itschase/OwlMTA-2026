@@ -19,6 +19,18 @@ local caps =
 	[12] = { 1, 0 }
 }
 
+local function getSupportedSlot(weapon)
+	weapon = tonumber(weapon)
+	if not weapon or weapon ~= math.floor(weapon) then
+		return false
+	end
+	local slot = getSlotFromWeapon(weapon)
+	if slot == false or not caps[slot] then
+		return false
+	end
+	return slot, weapon
+end
+
 -- counts the total number of ammo a player carries
 function countAmmo()
 	local ammo = 0
@@ -36,8 +48,12 @@ if a weapon is specified and
 otherwise, returns the total pickupable amount
 ]]
 function getFreeAmmo( weapon )
-	if weapon then
-		local slot = getSlotFromWeapon( weapon )
+	if weapon ~= nil then
+		local slot, normalizedWeapon = getSupportedSlot(weapon)
+		if not slot then
+			return 0, getFreeAmmo()
+		end
+		weapon = normalizedWeapon
 		if getPedWeapon( localPlayer, slot ) == weapon and getPedTotalAmmo( localPlayer, slot ) > 0 then
 			return math.max( 0, getAmmoCap( weapon ) - getPedTotalAmmo( localPlayer, slot ) ), getFreeAmmo()
 		elseif getPedWeapon( localPlayer, slot ) == 0 or getPedTotalAmmo( localPlayer, slot ) == 0 then
@@ -46,12 +62,16 @@ function getFreeAmmo( weapon )
 			return 0, getFreeAmmo()
 		end
 	else
-		return maxammo[1]  - countAmmo()
+		return math.max(0, maxammo[1] - countAmmo())
 	end
 end
 
 function getAmmoCap( weapon )
-	local slot = getSlotFromWeapon( weapon )
+	local slot, normalizedWeapon = getSupportedSlot(weapon)
+	if not slot then
+		return 0
+	end
+	weapon = normalizedWeapon
 	if getPedWeapon( localPlayer, slot ) == 0 or getPedTotalAmmo( localPlayer, slot ) == 0 or getPedWeapon( localPlayer, slot ) == weapon then
 		local ammo = caps[slot][1] 
 		return math.min( ammo, getFreeAmmo() )

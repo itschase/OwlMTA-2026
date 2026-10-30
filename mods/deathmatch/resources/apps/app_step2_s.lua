@@ -225,7 +225,7 @@ function processPart2(answers)
 
 	selectedQuests2[actor] = nil
 	sendSubmissionResult(actor, true)
-	triggerEvent("apps:startStep3", actor, true)
+	appsShowStep3(actor, true)
 	return true
 end
 addEvent("apps:processPart2", true)

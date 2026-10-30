@@ -47,12 +47,51 @@ local gtacaps =
 	[46] = 35,
 }
 
+local rejectedReasons = {}
+
+local function reject(reason)
+	if not rejectedReasons[reason] then
+		rejectedReasons[reason] = true
+		outputDebugString("[WEAPONCAP] outcome=rejected reason=" .. reason, 2)
+	end
+	return false
+end
+
+local function getSupportedSlot(weapon)
+	weapon = tonumber(weapon)
+	if not weapon or weapon ~= math.floor(weapon) then
+		return reject("invalid_weapon_id")
+	end
+	local slot = getSlotFromWeapon(weapon)
+	if slot == false or not caps[slot] then
+		return reject("unsupported_weapon_id")
+	end
+	return slot, weapon
+end
+
+local function isValidPed(element)
+	if not isElement(element) then
+		return false
+	end
+	local elementType = getElementType(element)
+	return elementType == "player" or elementType == "ped"
+end
+
 function getGTACap(weaponID)
+	weaponID = tonumber(weaponID)
+	if not weaponID or weaponID ~= math.floor(weaponID) or weaponID < 0 or weaponID > 46 then
+		reject("invalid_gta_weapon_id")
+		return 0
+	end
 	return gtacaps[weaponID] or 2
 end
 
 -- counts the total number of ammo a player carries
 function countAmmo(localPlayer)
+	if not isValidPed(localPlayer) then
+		reject("invalid_ped")
+		return 0
+	end
 	local ammo = 0
 	for slot = 2, 9 do
 		ammo = ammo + getPedTotalAmmo( localPlayer, slot )
@@ -68,8 +107,16 @@ if a weapon is specified and
 otherwise, returns the total pickupable amount
 ]]
 function getFreeAmmo(localPlayer, weapon )
-	if weapon then
-		local slot = getSlotFromWeapon( weapon )
+	if not isValidPed(localPlayer) then
+		reject("invalid_ped")
+		return 0, 0
+	end
+	if weapon ~= nil then
+		local slot, normalizedWeapon = getSupportedSlot(weapon)
+		if not slot then
+			return 0, getFreeAmmo(localPlayer)
+		end
+		weapon = normalizedWeapon
 		if getPedWeapon( localPlayer, slot ) == weapon and getPedTotalAmmo( localPlayer, slot ) > 0 then
 			return math.max( 0, getAmmoCap( localPlayer, weapon ) - getPedTotalAmmo( localPlayer, slot ) ), getFreeAmmo(localPlayer)
 		elseif getPedWeapon( localPlayer, slot ) == 0 or getPedTotalAmmo( localPlayer, slot ) == 0 then
@@ -78,12 +125,20 @@ function getFreeAmmo(localPlayer, weapon )
 			return 0, getFreeAmmo(localPlayer)
 		end
 	else
-		return maxammo[1]  - countAmmo( localPlayer )
+		return math.max(0, maxammo[1] - countAmmo(localPlayer))
 	end
 end
 
 function getAmmoCap(localPlayer,  weapon )
-	local slot = getSlotFromWeapon( weapon )
+	if not isValidPed(localPlayer) then
+		reject("invalid_ped")
+		return 0
+	end
+	local slot, normalizedWeapon = getSupportedSlot(weapon)
+	if not slot then
+		return 0
+	end
+	weapon = normalizedWeapon
 	if getPedWeapon( localPlayer, slot ) == 0 or getPedTotalAmmo( localPlayer, slot ) == 0 or getPedWeapon( localPlayer, slot ) == weapon then
 		local ammo = caps[slot][1] 
 		return math.min( ammo, getFreeAmmo(localPlayer) )

@@ -1,5 +1,16 @@
 # Issues and Discussions workflow
 
+## Current application-flow follow-up
+
+- The terminal application-flow change is fixed in source and awaiting end-of-batch publication: step-3 reopen is caller/state bound and rate-limited; only the trusted Part 2 commit can notify reviewers; supporter recipients and applicant-facing staff-name disclosure are removed; and `accounts:playerFinishApps` is server-only with stored accepted-state verification. Existing Issues [#281](https://github.com/itschase/OwlMTA-2026/issues/281) and [#1](https://github.com/itschase/OwlMTA-2026/issues/1), plus [Script Resource Discussion #286](https://github.com/itschase/OwlMTA-2026/discussions/286), own publication. Runtime remains unverified.
+
+## Current resource follow-up — `weaponcap`
+
+- Maintained dossier: [`docs/resources/weaponcap.md`](../resources/weaponcap.md); standardized Script Resources Discussion publication is held until the end-of-batch pass.
+- [Issue #549](https://github.com/itschase/OwlMTA-2026/issues/549) is fixed in source for invalid IDs/elements, nonnegative remaining capacity, and the missing server export; runtime verification remains before closure.
+- [Issue #550](https://github.com/itschase/OwlMTA-2026/issues/550) remains open until the unused donor-bonus fields are explicitly retained as a server-owned entitlement or removed. Donor/supporter tiers do not grant staff authority.
+- [Issue #213](https://github.com/itschase/OwlMTA-2026/issues/213) already owns the source-confirmed `item-system` defect where client-calculated ammo reaches `moveFromElement` and is used by the server. Do not create a duplicate resource Issue; the capacity helper is presentation-only until the mutation boundary derives its grant from server state.
+
 ## Current project-operations follow-up
 
 - [`docs/agent-guidelines.md`](../agent-guidelines.md) is the model-neutral pickup and handoff guide. The root [`AGENTS.md`](../../AGENTS.md) owns mandatory rules and the chronological activity log.

@@ -42,16 +42,16 @@ The durability, shared-assets, entitlement, duty, public-safety, and property ba
 | [vehicle] | `vehicle_manager` | Active tree | 7 | 5 | Vehicle Management | `mods/deathmatch/resources/[vehicle]/vehicle_manager/meta.xml` |
 | [vehicle] | `vehicle-interiors` | Active tree | 0 | 1 | No description declared in meta.xml; source-level purpose review pending. | `mods/deathmatch/resources/[vehicle]/vehicle-interiors/meta.xml` |
 | [vehicle] | `vehicleplate` | Active tree | 2 | 2 | Vehicle License Plate System | `mods/deathmatch/resources/[vehicle]/vehicleplate/meta.xml` |
-| core | `account` | Active tree | 10 | 12 | Account System | `mods/deathmatch/resources/account/meta.xml` |
+| core | `account` | Active tree | 11 | 12 | Account System | `mods/deathmatch/resources/account/meta.xml` |
 | core | `achievement` | Active tree | 1 | 1 | No description declared in meta.xml; source-level purpose review pending. | `mods/deathmatch/resources/achievement/meta.xml` |
 | core | `activities` | Active tree | 3 | 2 | Activities such as surfing, skateboarding, ice skating, ++ | `mods/deathmatch/resources/activities/meta.xml` |
-| core | `admin-system` | Active tree | 23 | 19 | Admin System | `mods/deathmatch/resources/admin-system/meta.xml` |
+| core | `admin-system` | Active tree | 24 | 19 | Admin System | `mods/deathmatch/resources/admin-system/meta.xml` |
 | core | `advertisements` | Active tree | 1 | 9 | A classifieds-like advertisement system | `mods/deathmatch/resources/advertisements/meta.xml` |
 | core | `animation-system` | Active tree | 3 | 2 | Animation System | `mods/deathmatch/resources/animation-system/meta.xml` |
 | core | `announcement` | Active tree | 5 | 5 | No description declared in meta.xml; source-level purpose review pending. | `mods/deathmatch/resources/announcement/meta.xml` |
 | core | `anti-cmdspam` | Active tree | 1 | 0 | No description declared in meta.xml; source-level purpose review pending. | `mods/deathmatch/resources/anti-cmdspam/meta.xml` |
 | core | `anticheat` | Active tree | 2 | 1 | Anticheat System | `mods/deathmatch/resources/anticheat/meta.xml` |
-| core | `apps` | Active tree | 4 | 4 | Application System | `mods/deathmatch/resources/apps/meta.xml` |
+| core | `apps` | Active tree | 5 | 4 | Application System | `mods/deathmatch/resources/apps/meta.xml` |
 | core | `artifacts` | Active tree | 2 | 3 | Artifacts System: Handles artifacts (things players can wear that are not clothes) | `mods/deathmatch/resources/artifacts/meta.xml` |
 | core | `bank` | Active tree | 4 | 4 | Bank System | `mods/deathmatch/resources/bank/meta.xml` |
 | core | `bans` | Active tree | 2 | 1 | No description declared in meta.xml; source-level purpose review pending. | `mods/deathmatch/resources/bans/meta.xml` |
@@ -142,7 +142,7 @@ The durability, shared-assets, entitlement, duty, public-safety, and property ba
 | core | `rightclick` | Active tree | 0 | 1 | Rightclick menu system | `mods/deathmatch/resources/rightclick/meta.xml` |
 | core | `roadblock-system` | Active tree | 2 | 2 | Roadblock System | `mods/deathmatch/resources/roadblock-system/meta.xml` |
 | core | `san` | Active tree | 1 | 1 | SAN System | `mods/deathmatch/resources/san/meta.xml` |
-| core | `sapt-system` | Active tree | 2 | 2 | San Andreas Public Transport bus routes and IBIS. | `mods/deathmatch/resources/sapt-system/meta.xml` |
+| core | `sapt-system` | Active tree | 2 | 2 | No description declared in meta.xml; source-level purpose review pending. | `mods/deathmatch/resources/sapt-system/meta.xml` |
 | core | `saveplayer-system` | Active tree | 1 | 0 | Save Player System | `mods/deathmatch/resources/saveplayer-system/meta.xml` |
 | core | `scoreboard` | Active tree | 1 | 1 | No description declared in meta.xml; source-level purpose review pending. | `mods/deathmatch/resources/scoreboard/meta.xml` |
 | core | `selfck-system` | Active tree | 1 | 1 | Self-CK System | `mods/deathmatch/resources/selfck-system/meta.xml` |
@@ -164,7 +164,7 @@ The durability, shared-assets, entitlement, duty, public-safety, and property ba
 | core | `tow-system` | Active tree | 1 | 3 | Towing / Impounding system | `mods/deathmatch/resources/tow-system/meta.xml` |
 | core | `usercontrolpanel` | Active tree | 1 | 0 | Site communications | `mods/deathmatch/resources/usercontrolpanel/meta.xml` |
 | core | `weapon` | Active tree | 9 | 9 | No description declared in meta.xml; source-level purpose review pending. | `mods/deathmatch/resources/weapon/meta.xml` |
-| core | `weaponcap` | Active tree | 1 | 1 | No description declared in meta.xml; source-level purpose review pending. | `mods/deathmatch/resources/weaponcap/meta.xml` |
+| core | `weaponcap` | Active tree | 1 | 1 | Weapon ammunition capacity helpers | `mods/deathmatch/resources/weaponcap/meta.xml` |
 | core | `weather` | Active tree | 0 | 0 | Weather System | `mods/deathmatch/resources/weather/meta.xml` |
 | core | `weather-system` | Active tree | 1 | 1 | Weather System | `mods/deathmatch/resources/weather-system/meta.xml` |
 | core | `xmas` | Active tree | 1 | 2 | Special christmas features | `mods/deathmatch/resources/xmas/meta.xml` |

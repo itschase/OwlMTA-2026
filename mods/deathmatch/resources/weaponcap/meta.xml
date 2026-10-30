@@ -1,5 +1,5 @@
 <meta>
-	<info author="vG MTA Scripting Team" type="script" />
+	<info author="vG MTA Scripting Team" type="script" description="Weapon ammunition capacity helpers" />
 	
 	<script src="c_weapon_cap.lua" type="client" />
 	<export function="getAmmoCap" type="client" />
@@ -7,6 +7,6 @@
 	
 	<script src="s_weapon_cap.lua" type="server" />
 	<export function="getAmmoCap" type="server" />
-	<export function="getAmmoCap" type="server" />
+	<export function="getFreeAmmo" type="server" />
 	<export function="getGTACap" type="server" />
 </meta>

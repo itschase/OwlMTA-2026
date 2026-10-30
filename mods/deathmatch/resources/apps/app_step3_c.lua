@@ -1,13 +1,14 @@
 --MAXIME
 local guiStep3 = {}
-local info = "Your application is being reviewed..\nPlease stand by!"
+local DEFAULT_INFO = "Your application is being reviewed..\nPlease stand by!"
 function startStep3(infoFromServer)
+	if source ~= localPlayer then
+		return false
+	end
 	triggerEvent("account:hideRules", localPlayer)
 	
 	destroyGUIPart3()
-	if infoFromServer then
-		info = infoFromServer
-	end
+	local info = type(infoFromServer) == "string" and infoFromServer or DEFAULT_INFO
 	
 	local sWidth,sHeight = guiGetScreenSize() 
 	
@@ -52,4 +53,8 @@ function destroyGUIPart3()
 	guiStep3 = {}
 end
 addEvent("apps:destroyGUIPart3", true)
-addEventHandler("apps:destroyGUIPart3", root, destroyGUIPart3)
+addEventHandler("apps:destroyGUIPart3", root, function()
+	if source == localPlayer then
+		destroyGUIPart3()
+	end
+end)

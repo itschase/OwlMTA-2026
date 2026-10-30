@@ -608,17 +608,47 @@ addEventHandler("onPlayerQuit", root, function()
 end)
 
 function playerFinishApps()
-	if source then
-		client = source
+	local player = source
+	if not isElement(player) or getElementType(player) ~= "player"
+		or getElementData(player, "account:loggedin") ~= true then
+		outputDebugString("[ACCOUNT][APPLICATION_FINISH] outcome=rejected reason=invalid_session", 2)
+		return false
 	end
-	local index = getElementData(client, "account:id")
-	triggerClientEvent(client, "accounts:login:attempt", client, 0)--, accountCharacters[index] )
-	triggerEvent( "social:account", client, index )
-	triggerClientEvent (client,"hideLoginWindow",client)
-	triggerClientEvent (client,"apps:destroyGUIPart3",client)
-	--accountCharacters[index] = nil
+	local accountID = tonumber(getElementData(player, "account:id"))
+	if not accountID or accountID < 1 or accountID ~= math.floor(accountID) then
+		outputDebugString("[ACCOUNT][APPLICATION_FINISH] outcome=rejected reason=invalid_account", 2)
+		return false
+	end
+	local row = exports.mysql:query_fetch_assoc("SELECT `appstate` FROM `account_details`"
+		.. " WHERE `account_id`='" .. accountID .. "' LIMIT 1")
+	if not row or tonumber(row.appstate) ~= 3 then
+		outputDebugString("[ACCOUNT][APPLICATION_FINISH] outcome=rejected reason=application_not_accepted", 2)
+		return false
+	end
+	local stateSyncSucceeded = pcall(function()
+		exports.anticheat:setEld(player, "appstate", 3)
+	end)
+	if not stateSyncSucceeded or tonumber(getElementData(player, "appstate")) ~= 3 then
+		outputDebugString("[ACCOUNT][APPLICATION_FINISH] outcome=rejected reason=session_state_failed", 1)
+		return false
+	end
+	if not triggerClientEvent(player, "accounts:login:attempt", player, 0) then
+		outputDebugString("[ACCOUNT][APPLICATION_FINISH] outcome=rejected reason=selection_delivery_failed", 1)
+		return false
+	end
+	if not triggerEvent("social:account", player, accountID) then
+		outputDebugString("[ACCOUNT][APPLICATION_FINISH] outcome=committed followup=social_event_failed", 2)
+	end
+	if not triggerClientEvent(player, "hideLoginWindow", player) then
+		outputDebugString("[ACCOUNT][APPLICATION_FINISH] outcome=committed followup=login_hide_failed", 2)
+	end
+	if not triggerClientEvent(player, "apps:destroyGUIPart3", player) then
+		outputDebugString("[ACCOUNT][APPLICATION_FINISH] outcome=committed followup=application_ui_cleanup_failed", 2)
+	end
+	outputDebugString("[ACCOUNT][APPLICATION_FINISH] outcome=committed", 3)
+	return true
 end
-addEvent("accounts:playerFinishApps",true)
+addEvent("accounts:playerFinishApps", false)
 addEventHandler("accounts:playerFinishApps",getRootElement(),playerFinishApps)
 
 --local lastClient = nil

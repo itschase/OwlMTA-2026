@@ -125,6 +125,7 @@ $published = @{
     "achievement" = @{ Number = 285; Dossier = "docs/resources/achievement.md"; State = "Full manifest-script and direct-caller source review; individual Discussion published" }
     "apps" = @{ Number = 286; Dossier = "docs/resources/apps.md"; State = "Full manifest-script and direct-caller source review; individual Discussion published" }
     "weapon" = @{ Number = 291; Dossier = "docs/resources/weapon.md"; State = "Full manifest-script and direct-caller source review; individual Discussion published" }
+    "weaponcap" = @{ Number = ""; Dossier = "docs/resources/weaponcap.md"; State = "Full manifest/export/direct-caller source review; Discussion publication pending"; NextAction = "Publish standardized Script Resource Discussion and complete runtime gate" }
     "es-system" = @{ Number = 303; Dossier = "docs/resources/es-system.md"; State = "Full manifest-script and direct-caller source review; individual Discussion published" }
     "cargo" = @{ Number = 304; Dossier = "docs/resources/cargo.md"; State = "Full manifest-script and direct-caller source review; individual Discussion published" }
     "event-system" = @{ Number = 305; Dossier = "docs/resources/event-system.md"; State = "Full manifest-script and direct-caller source review; individual Discussion published" }

@@ -6,12 +6,13 @@ All runtime behavior remains unverified unless a document explicitly records a c
 
 ## Current verified documentation checkpoint
 
-As of October 29, 2026, the branch contains fixed-in-source work for optional Discord-linked account admission/session revocation, canonical full-account logout, capability shadow comparisons with selected donor/staff separation, and server-authoritative application quiz/essay/review boundaries. Legacy password paths and numeric ranks remain active; Discord-first provisioning/cutover, restart-safe session and application state, schema modernization, safe startup, and all runtime evidence remain incomplete.
+As of October 30, 2026, the branch contains fixed-in-source work for optional Discord-linked account admission/session revocation, canonical full-account logout, capability shadow comparisons with selected donor/staff separation, and server-authoritative application quiz/essay/review/terminal-handoff boundaries. Legacy password paths and numeric ranks remain active; Discord-first provisioning/cutover, restart-safe session and application state, schema modernization, safe startup, and all runtime evidence remain incomplete.
 
 - [Next work record](planning/NEXT_WORK.md) — newest commits, published Issue/Discussion checkpoints, remaining risks, and precise continuation.
 - [Legacy login to Discord migration](architecture/LEGACY_LOGIN_DISCORD_MIGRATION.md) and [capability migration matrix](architecture/CAPABILITY_MIGRATION_MATRIX.md) — identity/session and action-level authority state.
 - [`account` dossier](resources/account.md) and [`apps` dossier](resources/apps.md) — source-confirmed behavior, fixes, player/staff/operator impact, and runtime matrix.
 - [Static safe-start preflight](planning/SAFE_START_PREFLIGHT.md) — gate that must be satisfied before any server or database runtime claim.
+- [README status history](history/README_STATUS_HISTORY.md) — dated archive of superseded public status summaries and their evidence commits.
 
 ## Architecture and framework design
 
