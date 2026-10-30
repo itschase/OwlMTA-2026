@@ -1,10 +1,8 @@
 --MAXIME
 appOpened = {}
 function openAppsWindow(thePlayer, cmd)
-	if thePlayer then
-		client = thePlayer
-	end
-	if not (exports.integration:isPlayerTrialAdmin(client) or exports.integration:isPlayerSupporter(client)) then
+	local actor = appsResolveManagerActor(thePlayer)
+	if not actor or not appsAuthorizeManager(actor, "applications.review.list", "applications.review") then
 		return false
 	end
 
@@ -38,7 +36,8 @@ function openAppsWindow(thePlayer, cmd)
 
 
 
-	triggerClientEvent(client, "apps:openAppsWindow", client, apps, quests)
+	triggerClientEvent(actor, "apps:openAppsWindow", actor, apps, quests)
+	return true
 end
 addEvent("apps:openAppsWindow", true)
 addEventHandler("apps:openAppsWindow", root, openAppsWindow)
@@ -53,19 +52,44 @@ function updateNumber()
 
 	setElementData(getResourceRootElement(), "apps:number", apps)
 end
-addEvent("apps:requestApps", true)
+addEvent("apps:requestApps", false)
 addEventHandler("onResourceStart", getResourceRootElement(), updateNumber)
-addEventHandler("apps:requestApps", getRootElement(), updateNumber)
+addEventHandler("apps:requestApps", getResourceRootElement(), updateNumber)
 
 
 function openQuestionDetail(id, part)
+	local actor = appsResolveManagerActor()
+	if not actor or not appsAuthorizeManager(actor, "applications.question_bank.read", "applications.question_bank.manage") then
+		return false
+	end
+	id = tonumber(id)
+	part = tonumber(part)
+	if not id or id < 1 or id ~= math.floor(id) or (part ~= 1 and part ~= 2) then
+		outputDebugString("[APPS][QUESTION_BANK] outcome=rejected reason=invalid_detail_request", 2)
+		return false
+	end
 	local mysqlResult = exports.mysql:query_fetch_assoc("SELECT * FROM `applications_questions` WHERE `id`='"..(id) .."' LIMIT 1")
-	triggerClientEvent(client, "apps:openQuestionDetail", client, part, false, true, mysqlResult)
+	triggerClientEvent(actor, "apps:openQuestionDetail", actor, part, false, true, mysqlResult)
 end
 addEvent("apps:openQuestionDetail", true)
 addEventHandler("apps:openQuestionDetail", root, openQuestionDetail)
 
 function saveQuestion(part, id, question, key, answer1, answer2, answer3)
+	local actor = appsResolveManagerActor()
+	if not actor or not appsAuthorizeManager(actor, "applications.question_bank.write", "applications.question_bank.manage") then
+		return false
+	end
+	local client = actor
+	part = tonumber(part)
+	local numericID = id and tonumber(id)
+	if (part ~= 1 and part ~= 2) or type(question) ~= "string" or question == ""
+		or (id and (not numericID or numericID < 1 or numericID ~= math.floor(numericID)))
+		or (part == 1 and (tonumber(key) == nil or tonumber(key) < 1 or tonumber(key) > 3
+			or type(answer1) ~= "string" or type(answer2) ~= "string" or type(answer3) ~= "string")) then
+		outputDebugString("[APPS][QUESTION_BANK] outcome=rejected reason=invalid_save_request", 2)
+		return false
+	end
+	id = numericID
 	if part == 1 then
 		if id and tonumber(id) then
 			local mQuery1 = exports.mysql:query_free("UPDATE `applications_questions` SET `question`='"..toSQL(question).."', `key`='"..toSQL(key or 1).."', `answer1`='"..toSQL(answer1 or "").."', `answer2`='"..toSQL(answer2 or "").."', `answer3`='"..toSQL(answer3 or "").."', `part`='"..toSQL(part).."', `updatedBy`='"..toSQL(getElementData(client, "account:id")).."', `updateDate`=NOW() WHERE `id`='"..toSQL(id).."' ")
@@ -125,13 +149,20 @@ addEvent("apps:saveQuestion", true)
 addEventHandler("apps:saveQuestion", root, saveQuestion)
 
 function deleteQuestion(id, part)
-	if id and tonumber(id) and part and tonumber(part) then
+	local actor = appsResolveManagerActor()
+	if not actor or not appsAuthorizeManager(actor, "applications.question_bank.delete", "applications.question_bank.manage") then
+		return false
+	end
+	local client = actor
+	id = tonumber(id)
+	part = tonumber(part)
+	if id and id >= 1 and id == math.floor(id) and (part == 1 or part == 2) then
 		local sumQuests = exports.mysql:query_fetch_assoc("SELECT COUNT(*) AS 'num' FROM `applications_questions` WHERE `part`='"..part.."' ")
 		local limit = 6
 		if tonumber(part) == 2 then
 			limit = 4
 		end
-		if tonumber(sumQuests["num"]) <= 6 then
+		if not sumQuests or not tonumber(sumQuests["num"]) or tonumber(sumQuests["num"]) <= limit then
 			outputChatBox("[APPLICATION MANAGER] At least "..limit.." questions must be in part "..part.."'s bank, please add more questions to be able to delete.", client, 255,0,0)
 			return false
 		end
@@ -147,18 +178,22 @@ function deleteQuestion(id, part)
 		openAppsWindow(client)
 		return true
 	else
-		outputDebugString("APPLICATION MANAGER / DATABASE ERROR")
-		outputChatBox("[APPLICATION MANAGER] Failed to delete question #"..mQuery1..".", client, 255,0,0)
+		outputDebugString("[APPS][QUESTION_BANK] outcome=rejected reason=invalid_delete_request", 2)
+		outputChatBox("[APPLICATION MANAGER] Invalid question delete request.", client, 255,0,0)
 		return false
 	end
-	return false
 end
 addEvent("apps:deleteQuestion", true)
 addEventHandler("apps:deleteQuestion", root, deleteQuestion)
 
 function openAppDetail(id, readOnly)
-	if id and tonumber(id) then
-		id = tonumber(id)
+	local actor = appsResolveManagerActor()
+	if not actor or not appsAuthorizeManager(actor, "applications.review.read", "applications.review") then
+		return false
+	end
+	local client = actor
+	id = tonumber(id)
+	if id and id >= 1 and id == math.floor(id) then
 		if appOpened[id] and isElement(appOpened[id]) and getElementType(appOpened[id]) == "player" and not readOnly then
 			if client ~= appOpened[id] then
 				outputChatBox("[APPLICATION MANAGER] This application is currently being reviewed by "..exports.global:getAdminTitle1(appOpened[id])..".", client, 255,0,0)
@@ -168,12 +203,16 @@ function openAppDetail(id, readOnly)
 		local appData = exports.mysql:query_fetch_assoc("SELECT `a`.`id` AS `id`, `a`.`applicant` AS `username`, `question1`, `question2`, `question3`, `question4`, `answer1`, `answer2`, `answer3`, `answer4`, `dateposted`, `state`, `reviewer`, `note`, `datereviewed`, `applicant` FROM `applications` `a` WHERE `a`.`id`='"..id.."' ")
 
 		if appData and appData.id then
+			readOnly = readOnly == true or tonumber(appData.state) ~= 0
 			appData.reviewer = exports.cache:getUsernameFromId(appData.reviewer)
 			appData.username = exports.cache:getUsernameFromId(appData.username)
 			if not readOnly then
 				local staffName = exports.global:getAdminTitle1(client)
+				if not exports.mysql:query_free("UPDATE `applications` SET `reviewer`='"..getElementData(client, "account:id").."', `datereviewed`=NOW() WHERE `id`='"..id.."' AND `state`='0'") then
+					outputDebugString("[APPS][REVIEW] outcome=rejected reason=lock_persistence_failed", 1)
+					return false
+				end
 				appOpened[id] = client
-				exports.mysql:query_free("UPDATE `applications` SET `reviewer`='"..getElementData(client, "account:id").."', `datereviewed`=NOW() WHERE `id`='"..id.."'")
 				sendMsgToStaff(staffName.." has opened and reviewing "..appData.username.."'s application ID#"..id..".")
 				sendMsgToApplicant(appData.applicant, staffName.." has opened and is currently reviewing your application.\nPlease stand by..")
 			end
@@ -196,14 +235,53 @@ addEventHandler ( "onPlayerQuit", getRootElement(), cleanUpOpenedApps )
 addEventHandler ( "accounts:characters:change", getRootElement(), cleanUpOpenedApps )
 
 local app_fail_attempts = {}
-function updateAppState(id, applicantID, applicationName, state, reason)
-	if id and tonumber(id) then
-		id = tonumber(id)
-		state = tonumber(state)
+function updateAppState(id, state, reason)
+	local actor = appsResolveManagerActor()
+	if not actor or not appsAuthorizeManager(actor, "applications.review.decide", "applications.review") then
+		return false
+	end
+	local client = actor
+	id = tonumber(id)
+	state = tonumber(state)
+	if type(reason) == "string" then
+		reason = reason:match("^%s*(.-)%s*$")
+	end
+	if not id or id < 1 or id ~= math.floor(id) or (state ~= 1 and state ~= 2)
+		or type(reason) ~= "string" or #reason < 2 or #reason > 500 then
+		outputDebugString("[APPS][REVIEW] outcome=rejected reason=invalid_decision", 2)
+		return false
+	end
+	if appOpened[id] ~= actor then
+		outputDebugString("[APPS][REVIEW] outcome=rejected reason=lock_not_owned", 2)
+		return false
+	end
+
+	local storedApplication = exports.mysql:query_fetch_assoc("SELECT `applicant`, `state`"
+		.. " FROM `applications` WHERE `id`='" .. id .. "' LIMIT 1")
+	local applicantID = storedApplication and tonumber(storedApplication.applicant)
+	if not applicantID or applicantID < 1 or applicantID ~= math.floor(applicantID)
+		or tonumber(storedApplication.state) ~= 0 then
+		outputDebugString("[APPS][REVIEW] outcome=rejected reason=stale_or_missing_application", 2)
+		return false
+	end
+	local applicationName = exports.cache:getUsernameFromId(applicantID) or ("account #" .. applicantID)
+
+	do
 		local reviewer = getElementData(client, "account:id")
-		local appData = exports.mysql:query_free("UPDATE `applications` SET `reviewer`='"..reviewer.."', `datereviewed`=NOW(), `state`='"..state.."', `note`='"..toSQL(reason).."' WHERE `id`='"..id.."' ")
+		local appData = exports.mysql:query_free("UPDATE `applications` SET `reviewer`='"..reviewer.."', `datereviewed`=NOW(), `state`='"..state.."', `note`='"..toSQL(reason).."' WHERE `id`='"..id.."' AND `state`='0' ")
+		if not appData then
+			outputDebugString("[APPS][REVIEW] outcome=rejected reason=decision_persistence_failed", 1)
+			return false
+		end
+		local auditSucceeded = pcall(function()
+			exports.logs:dbLog(client, 4, "ac" .. applicantID,
+				"APPLICATION DECISION id=" .. id .. " state=" .. state)
+		end)
+		if not auditSucceeded then
+			outputDebugString("[APPS][REVIEW] outcome=audit_unavailable", 1)
+		end
 		openAppsWindow(client)
-		if appData then
+		do
 			local staffName = exports.global:getAdminTitle1(client)
 			sendMsgToStaff(staffName.." has "..(state == 1 and "accepted" or "declined").." "..applicationName.."'s application ID#"..id..". Reason: "..reason)
 			if state == 1 then -- accepted
@@ -248,15 +326,22 @@ addEvent("apps:updateAppState", true)
 addEventHandler("apps:updateAppState", root, updateAppState)
 
 function closeAppDetail(id)
-	if source and isElement(source) and getElementType(source) == "player" then
-		client = source
+	local actor = appsResolveManagerActor(source)
+	if not actor or not appsAuthorizeManager(actor, "applications.review.close", "applications.review") then
+		return false
 	end
 	if id and tonumber(id) then
 		id = tonumber(id)
+		if appOpened[id] and appOpened[id] ~= actor then
+			outputDebugString("[APPS][REVIEW] outcome=rejected reason=lock_not_owned", 2)
+			return false
+		end
 		appOpened[id] = nil
 		--exports.mysql:query_free("UPDATE `applications` SET `reviewer`='0' WHERE `id`='"..id.."'")
-		triggerClientEvent(client, "apps:closeAppDetail",client)
+		triggerClientEvent(actor, "apps:closeAppDetail", actor)
+		return true
 	end
+	return false
 end
 addEvent("apps:closeAppDetail", true)
 addEventHandler("apps:closeAppDetail", root, closeAppDetail)

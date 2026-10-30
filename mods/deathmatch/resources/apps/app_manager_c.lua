@@ -7,7 +7,7 @@ local apps = {}
 local quests = {}
 local part = 1
 function openAppsWindow(apps1, quests1)
-	if not (exports.integration:isPlayerTrialAdmin(localPlayer) or exports.integration:isPlayerSupporter(localPlayer)) then
+	if not exports.integration:isPlayerTrialAdmin(localPlayer) then
 		return false
 	end
 
@@ -232,7 +232,7 @@ end
 --
 
 local function updateButton(  )
-	if exports.integration:isPlayerSupporter(localPlayer) or exports.integration:isPlayerTrialAdmin(localPlayer) then
+	if exports.integration:isPlayerTrialAdmin(localPlayer) then
 
 		count = getElementData(getResourceRootElement(), "apps:number")
 
@@ -445,7 +445,7 @@ function openConfirmBox(id, applicant, username, num, text34 )
 		if source == GUIEditor_Button[11] then
 			closeConfirmDelete(true)
 			exports.global:playSoundSuccess()
-			triggerServerEvent("apps:updateAppState", localPlayer, tonumber(id), tonumber(applicant), username, num, text34)
+			triggerServerEvent("apps:updateAppState", localPlayer, tonumber(id), num, text34)
 		end
 	end)
 

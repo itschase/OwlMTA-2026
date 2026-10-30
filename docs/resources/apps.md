@@ -4,6 +4,7 @@
 
 - Active resource at `mods/deathmatch/resources/apps`; its manifest loads the application manager and three player application steps.
 - Full manifest, direct-caller, persistence, and workflow review completed from source.
+- Latest source state: every application-manager remote now binds the MTA event client to an authenticated Trial Admin and records comparison-only `applications.review` or `applications.question_bank.manage` evidence; donor/supporter status cannot open or mutate the manager. The global pending-count refresh event is server-only. Decisions require the reviewer's lock, derive applicant/name from the pending row, accept only state 1/2 with a 2–500 character reason, and conditionally update the pending row. Question detail/save/delete inputs are typed and the part-specific deletion floor is corrected. Runtime and downstream multi-table settlement remain unverified.
 - The tracked backup startup list places it after account and shared service resources; this is not proof of current deployment order.
 - No MTA server or database was started. Runtime behavior, live schema, ACL, and startup are unverified.
 - [Discussion #286](https://github.com/itschase/OwlMTA-2026/discussions/286).
@@ -23,7 +24,7 @@
 
 ### Staff review and question bank
 
-Staff open `/apps`, `/applications`, or press F7. The manager lists up to 75 applications and supports opening a response, accepting/declining with a reason, and creating/editing/deleting both quiz and essay questions. Review opens write reviewer/date fields and takes an in-memory lock; restart loses that lock. The UI and list endpoint currently permit Trial Admin or supporter. This describes legacy code, not intended Discord role mapping or future policy.
+Staff open `/apps`, `/applications`, or press F7. The manager lists up to 75 applications and supports opening a response, accepting/declining with a reason, and creating/editing/deleting both quiz and essay questions. Review opens write reviewer/date fields and takes an in-memory lock; restart loses that lock. Fixed-in-source server and client gates now permit only legacy Trial Admin while comparing separate review and question-bank capabilities without granting. This is migration behavior, not completed Discord authority.
 
 ## Commands, events, and dependencies
 
@@ -45,10 +46,10 @@ Staff open `/apps`, `/applications`, or press F7. The manager lists up to 75 app
 
 ## Source-confirmed issues and tracker
 
-1. **Unauthenticated manager remotes and caller-controlled decision target.** Detail reads and question/application mutations lack server-side reviewer checks. Application decisions accept client-supplied applicant ID/name/state/reason rather than deriving the account from the stored row. Client UI checks are not authorization. Tracked in [Issue #280](https://github.com/itschase/OwlMTA-2026/issues/280).
+1. **Manager authorization and decision target — fixed in source, runtime open.** All manager remotes now bind an authenticated MTA event client, retain Trial Admin enforcement, compare separate named capabilities without granting, and reject donor authority. Decisions derive applicant/name/state from the stored pending row, require the actor's lock, allow only accept/decline with a bounded reason, conditionally update pending state, and attempt a minimized action audit. Runtime direct-call/replay/concurrency evidence and downstream state-transition recovery remain open in [Issue #280](https://github.com/itschase/OwlMTA-2026/issues/280).
 2. **Client-driven progression and unsafe replacement.** Correct quiz keys reach the client; completion and essay submission are not bound to server-issued stages/prompts; cooldown is not enforced on transitions; replacing a pending row deletes before a successful replacement. Tracked in [Issue #281](https://github.com/itschase/OwlMTA-2026/issues/281).
 3. **Unbounded question selection and weak question-bank readiness.** Selectors do not validate the minimum question count and the manager delete check is inconsistent by question part. Tracked in [Issue #282](https://github.com/itschase/OwlMTA-2026/issues/282).
-4. **Legacy supporter authority.** The login bypass is fixed in source to exclude supporter/donor status, but supporter remains accepted for the manager and force/unforce commands. Keep donor entitlements separate from reviewer, operator, or staff capabilities; see existing [Issue #3](https://github.com/itschase/OwlMTA-2026/issues/3).
+4. **Legacy supporter authority.** The login bypass and application manager are fixed in source to exclude supporter/donor status, but supporter remains accepted for force/unforce commands. Keep donor entitlements separate from reviewer, operator, or staff capabilities; see existing [Issue #3](https://github.com/itschase/OwlMTA-2026/issues/3).
 5. **Review/privacy/reliability gaps.** Any client can attempt repeated count/notification requests; the step-3 path discloses alerted staff usernames; several DB calls lack checked failure handling. Review lock and decline throttle are memory-only. Existing broad ownership includes remote hardening [#1](https://github.com/itschase/OwlMTA-2026/issues/1), account application flow [#80](https://github.com/itschase/OwlMTA-2026/issues/80), admin-system controls [#164](https://github.com/itschase/OwlMTA-2026/issues/164), and schema/transaction groundwork [#6](https://github.com/itschase/OwlMTA-2026/issues/6).
 
 ## Modernization direction

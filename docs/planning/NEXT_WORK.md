@@ -1,6 +1,12 @@
 # Next work record
 
-Last updated: 2026-10-29 after separating donor access from the post-admission application bypass and making that bypass persistence-aware.
+Last updated: 2026-10-29 after securing the application-manager remote boundary and deriving decisions from stored rows.
+
+## Latest continuation — application manager authority and target binding
+
+The `apps` resource now loads a server-only manager authorization helper before its manager. Every manager remote binds MTA `client` with `source == client`, validates the authenticated local account, retains Trial Admin enforcement, and compares either `applications.review` or `applications.question_bank.manage` without allowing Discord to grant. Donor/supporter status is removed from both the client UI and server authority. The global pending-count refresh is no longer remotely triggerable.
+
+Application decisions now accept only application ID, state 1/2, and a trimmed 2–500 character reason. The server requires the actor's in-memory review lock, reloads the pending row, derives applicant ID and display name from that row, conditionally updates only state 0, and attempts a minimized actor/target action audit. Detail opens force reviewed rows to read-only and require the reviewer-marker write before taking a lock; close requests cannot clear another reviewer's lock. Question-bank detail/save/delete paths validate their typed identifiers/fields, and the delete readiness floor now uses six questions for part 1 and four for part 2. All related MTA/database/UI/concurrency behavior remains runtime-unverified; downstream account-state/force-app/report-count writes are still non-atomic legacy work under #281.
 
 ## Latest continuation — application-gate donor separation
 
