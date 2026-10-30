@@ -256,71 +256,103 @@ function updateAppState(id, state, reason)
 		return false
 	end
 
-	local storedApplication = exports.mysql:query_fetch_assoc("SELECT `applicant`, `state`"
-		.. " FROM `applications` WHERE `id`='" .. id .. "' LIMIT 1")
+	local storedApplication = exports.mysql:query_fetch_assoc("SELECT `a`.`applicant`, `a`.`state`, `d`.`appstate`"
+		.. " FROM `applications` `a` INNER JOIN `account_details` `d` ON `d`.`account_id`=`a`.`applicant`"
+		.. " WHERE `a`.`id`='" .. id .. "' LIMIT 1")
 	local applicantID = storedApplication and tonumber(storedApplication.applicant)
 	if not applicantID or applicantID < 1 or applicantID ~= math.floor(applicantID)
-		or tonumber(storedApplication.state) ~= 0 then
+		or tonumber(storedApplication.state) ~= 0 or tonumber(storedApplication.appstate) ~= 2 then
 		outputDebugString("[APPS][REVIEW] outcome=rejected reason=stale_or_missing_application", 2)
 		return false
 	end
 	local applicationName = exports.cache:getUsernameFromId(applicantID) or ("account #" .. applicantID)
 
-	do
-		local reviewer = getElementData(client, "account:id")
-		local appData = exports.mysql:query_free("UPDATE `applications` SET `reviewer`='"..reviewer.."', `datereviewed`=NOW(), `state`='"..state.."', `note`='"..toSQL(reason).."' WHERE `id`='"..id.."' AND `state`='0' ")
-		if not appData then
-			outputDebugString("[APPS][REVIEW] outcome=rejected reason=decision_persistence_failed", 1)
+	local declineAttempt = state == 2 and (app_fail_attempts[applicantID] or 1) or 0
+	local thirdDecline = state == 2 and declineAttempt >= 3
+	local targetAppState = state == 1 and 3 or (thirdDecline and 0 or 1)
+	local stagedForceApp = false
+	if thirdDecline then
+		if not exports.mysql:query_free("DELETE FROM `force_apps` WHERE `account`='" .. applicantID .. "'")
+			or not exports.mysql:query_free("INSERT INTO `force_apps` SET `account`='" .. applicantID .. "'") then
+			outputDebugString("[APPS][REVIEW] outcome=rejected reason=cooldown_stage_failed", 1)
 			return false
 		end
-		local auditSucceeded = pcall(function()
-			exports.logs:dbLog(client, 4, "ac" .. applicantID,
-				"APPLICATION DECISION id=" .. id .. " state=" .. state)
-		end)
-		if not auditSucceeded then
-			outputDebugString("[APPS][REVIEW] outcome=audit_unavailable", 1)
+		stagedForceApp = true
+	end
+
+	local reviewer = tonumber(getElementData(client, "account:id"))
+	local transitionExecuted = reviewer and exports.mysql:query_free("UPDATE `applications` `a`"
+		.. " INNER JOIN `account_details` `d` ON `d`.`account_id`=`a`.`applicant`"
+		.. " SET `a`.`reviewer`='" .. reviewer .. "', `a`.`datereviewed`=NOW(),"
+		.. " `a`.`state`='" .. state .. "', `a`.`note`='" .. toSQL(reason) .. "',"
+		.. " `d`.`appstate`='" .. targetAppState .. "'"
+		.. " WHERE `a`.`id`='" .. id .. "' AND `a`.`applicant`='" .. applicantID .. "'"
+		.. " AND `a`.`state`='0' AND `d`.`appstate`='2'")
+	if not transitionExecuted then
+		local compensated = not stagedForceApp
+			or exports.mysql:query_free("DELETE FROM `force_apps` WHERE `account`='" .. applicantID .. "'")
+		outputDebugString("[APPS][REVIEW] outcome=rejected reason=transition_failed compensation="
+			.. (compensated and "complete" or "failed"), compensated and 2 or 1)
+		return false
+	end
+
+	local affectedRow = exports.mysql:query_fetch_assoc("SELECT ROW_COUNT() AS `affected_rows`")
+	local affectedRows = affectedRow and tonumber(affectedRow.affected_rows)
+	if not affectedRows then
+		outputDebugString("[APPS][REVIEW] outcome=indeterminate reason=affected_row_check_failed", 1)
+		return false
+	elseif affectedRows < 1 then
+		local compensated = not stagedForceApp
+			or exports.mysql:query_free("DELETE FROM `force_apps` WHERE `account`='" .. applicantID .. "'")
+		outputDebugString("[APPS][REVIEW] outcome=rejected reason=stale_transition compensation="
+			.. (compensated and "complete" or "failed"), compensated and 2 or 1)
+		return false
+	end
+
+	local auditSucceeded = pcall(function()
+		exports.logs:dbLog(client, 4, "ac" .. applicantID,
+			"APPLICATION DECISION id=" .. id .. " state=" .. state .. " account_state=" .. targetAppState)
+	end)
+	if not auditSucceeded then
+		outputDebugString("[APPS][REVIEW] outcome=audit_unavailable", 1)
+	end
+
+	local staffName = exports.global:getAdminTitle1(client)
+	sendMsgToStaff(staffName.." has "..(state == 1 and "accepted" or "declined").." "..applicationName.."'s application ID#"..id..". Reason: "..reason)
+	if state == 1 then
+		app_fail_attempts[applicantID] = nil
+		sendMsgToApplicant(applicantID, "Congratulations! Your application has been reviewed and accepted by "..staffName..".\nReason: "..reason.."\nJoining the game...")
+		if not setTimer(movePlayerToSelectionScreen, 10000, 1, applicantID) then
+			outputDebugString("[APPS][REVIEW] outcome=committed followup=selection_timer_failed", 1)
 		end
-		openAppsWindow(client)
-		do
-			local staffName = exports.global:getAdminTitle1(client)
-			sendMsgToStaff(staffName.." has "..(state == 1 and "accepted" or "declined").." "..applicationName.."'s application ID#"..id..". Reason: "..reason)
-			if state == 1 then -- accepted
-				app_fail_attempts[applicantID] = nil
-				sendMsgToApplicant(applicantID, "Congratulations! Your application has been reviewed and accepted by "..staffName..".\nReason: "..reason.."\nJoining the game...")
-				exports.mysql:query_free("UPDATE `account_details` SET `appstate`='3' WHERE `account_id`='"..applicantID.."' ")
-				setTimer(movePlayerToSelectionScreen, 10000, 1, applicantID)
-				exports['report']:updateStaffReportCount(client)
-			elseif state == 2 then
-				if not app_fail_attempts[applicantID] then
-					app_fail_attempts[applicantID] = 1
+	elseif thirdDecline then
+		app_fail_attempts[applicantID] = nil
+		for _, player in pairs(getElementsByType("player")) do
+			if getElementData(player, "account:id") == applicantID and getElementData(player, "loggedin") ~= 1 then
+				if not redirectPlayer(player, "", 0) then
+					outputDebugString("[APPS][REVIEW] outcome=committed followup=redirect_failed", 1)
 				end
-				if app_fail_attempts[applicantID] >= 3 then
-					exports.mysql:query_free("DELETE FROM `force_apps` WHERE `account`='" .. applicantID .. "' ")
-					exports.mysql:query_free("INSERT INTO `force_apps` SET `account`='" .. applicantID .. "' ")
-					exports.mysql:query_free("UPDATE `account_details` SET `appstate`='0' WHERE `account_id`='" .. applicantID .. "' ")
-					for i, player in pairs(getElementsByType("player")) do
-						if getElementData(player, "account:id") == tonumber(applicantID) and (getElementData(player, "loggedin") ~= 1) then
-							redirectPlayer ( player, "" , 0 )
-							break
-						end
-					end
-					app_fail_attempts[applicantID] = nil
-					sendMsgToStaff(applicationName.." has been 24 hours banned from retaking application as it has been declined 3 times in a row.")
-					exports['report']:updateStaffReportCount(client)
-					updateNumber()
-					return true
-				else
-					sendMsgToApplicant(applicantID, "Unfortunately, your application has been declined by "..staffName..".\nReason: "..reason.."\nReturning to application section 2..\n\nYou have "..tostring(3-app_fail_attempts[applicantID]).." chance(s) left to re-submit another application.")
-					app_fail_attempts[applicantID] = app_fail_attempts[applicantID] + 1
-					exports.mysql:query_free("UPDATE `account_details` SET `appstate`='1' WHERE `account_id`='"..applicantID.."' ")
-					setTimer(movePlayerBackToStep2, 10000, 1, applicantID)
-				end
-				exports['report']:updateStaffReportCount(client)
+				break
 			end
-			updateNumber()
-			triggerEvent("apps:closeAppDetail",client, id)
+		end
+		sendMsgToStaff(applicationName.." has been restricted for 24 hours after three declined applications.")
+	else
+		local remainingAttempts = math.max(0, 3 - declineAttempt)
+		sendMsgToApplicant(applicantID, "Unfortunately, your application has been declined by "..staffName..".\nReason: "..reason.."\nReturning to application section 2..\n\nYou have "..remainingAttempts.." chance(s) left to re-submit another application.")
+		app_fail_attempts[applicantID] = declineAttempt + 1
+		if not setTimer(movePlayerBackToStep2, 10000, 1, applicantID) then
+			outputDebugString("[APPS][REVIEW] outcome=committed followup=step2_timer_failed", 1)
 		end
 	end
+
+	local reportCallSucceeded = pcall(function() exports.report:updateStaffReportCount(client) end)
+	if not reportCallSucceeded then
+		outputDebugString("[APPS][REVIEW] outcome=committed followup=report_count_failed", 1)
+	end
+	updateNumber()
+	triggerEvent("apps:closeAppDetail", client, id)
+	openAppsWindow(client)
+	return true
 end
 addEvent("apps:updateAppState", true)
 addEventHandler("apps:updateAppState", root, updateAppState)
