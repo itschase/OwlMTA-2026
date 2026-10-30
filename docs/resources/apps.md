@@ -9,6 +9,7 @@
 - No MTA server or database was started. Runtime behavior, live schema, ACL, and startup are unverified.
 - [Discussion #286](https://github.com/itschase/OwlMTA-2026/discussions/286).
 - Application-gate checkpoint: source commit [`81667d9`](https://github.com/itschase/OwlMTA-2026/commit/81667d9), [Issue #281 update](https://github.com/itschase/OwlMTA-2026/issues/281#issuecomment-6513911222), and [Script Resource Discussion #286 update](https://github.com/itschase/OwlMTA-2026/discussions/286#discussioncomment-19284167).
+- Manager checkpoint: source commit [`9bc2b7b`](https://github.com/itschase/OwlMTA-2026/commit/9bc2b7b); Issue updates [#280](https://github.com/itschase/OwlMTA-2026/issues/280#issuecomment-6514020111), [#281](https://github.com/itschase/OwlMTA-2026/issues/281#issuecomment-6514020805), and [#282](https://github.com/itschase/OwlMTA-2026/issues/282#issuecomment-6514021085); Discussion updates [#286](https://github.com/itschase/OwlMTA-2026/discussions/286#discussioncomment-19284251), [#70](https://github.com/itschase/OwlMTA-2026/discussions/70#discussioncomment-19284254), and [#173](https://github.com/itschase/OwlMTA-2026/discussions/173#discussioncomment-19284255).
 
 ## Purpose and user workflows
 

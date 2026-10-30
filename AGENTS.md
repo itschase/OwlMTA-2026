@@ -33,6 +33,22 @@ This file is a high-level, human- and AI-agent readable guide and chronological 
 
 ## 2. Activity Read Log
 
+### [2026-10-29] — Codex / ChatGPT (Application Manager Authority and Target Binding)
+* **Goal**: Secure the full application-manager remote surface, separate review from question-bank capabilities, remove donor authority, and stop clients from choosing decision targets.
+* **Work Completed**:
+  1. Added `apps/manager_authorization_s.lua` ahead of manager handlers. All seven manager remote families bind `client` with `source == client`, require an authenticated account, retain Trial Admin enforcement, and compare either `applications.review` or `applications.question_bank.manage` without granting. Donor/supporter access was removed from server gates and client presentation.
+  2. Application decisions now accept only application ID, decision state, and reason. The server requires the actor's review lock, reloads a pending row, derives applicant ID/name, allowlists accept/decline, bounds the trimmed reason to 2–500 characters, conditionally updates state 0, and attempts a minimized actor/target audit.
+  3. Reviewed rows are forced read-only; lock acquisition requires its reviewer-marker update; lock close is owner-bound. The pending-count refresh is server-only. Question detail/save/delete inputs are typed, and the deletion floor now correctly uses six questions for part 1 and four for part 2.
+  4. Updated the capability/login architecture, apps dossier, work queue, and tracker index. Published to Issues [#280](https://github.com/itschase/OwlMTA-2026/issues/280#issuecomment-6514020111), [#3](https://github.com/itschase/OwlMTA-2026/issues/3#issuecomment-6514020549), [#281](https://github.com/itschase/OwlMTA-2026/issues/281#issuecomment-6514020805), and [#282](https://github.com/itschase/OwlMTA-2026/issues/282#issuecomment-6514021085), plus Discussions [#286](https://github.com/itschase/OwlMTA-2026/discussions/286#discussioncomment-19284251), [#70](https://github.com/itschase/OwlMTA-2026/discussions/70#discussioncomment-19284254), and [#173](https://github.com/itschase/OwlMTA-2026/discussions/173#discussioncomment-19284255).
+* **Commit**:
+  - [`9bc2b7b`](https://github.com/itschase/OwlMTA-2026/commit/9bc2b7b) — `security(apps): bind application manager authority`
+* **Validation**: Three changed Lua files parsed successfully with `luaparser`; `apps/meta.xml` parsed with the authorization helper first among five server scripts; focused invariants confirmed all manager handlers use the guard, supporter is absent from manager presentation, the count event is server-only, the client no longer sends applicant identity, decision target/lock/conditional state are server-derived, and changed-document links plus `git diff --check` pass. No MTA server/client, database, Discord application, identity adapter/service, application UI, concurrency, restart, or gameplay test was run.
+* **Current Status**: Fixed in source, shadow-only, and published; runtime unverified. Issues #280/#281/#282 remain open for direct-call/runtime evidence, downstream non-atomic account/force-app/report-count transitions, question-bank readiness/content policy, and restart/concurrency recovery.
+* **Recommended Next Work**:
+  1. Replace the remaining non-atomic application/account/force-app decision follow-up with a failure-aware transition/reconciliation design before claiming #280/#281 complete.
+  2. Add minimized durable question-bank mutation audit and validate empty/underfilled selector behavior under #282.
+  3. Audit `/forceapp`, `/oforceapp`, and `/unforceapp` against the same transition helper before removing donor fallthrough or adding `moderation.application.override` shadow comparison.
+
 ### [2026-10-29] — Codex / ChatGPT (Application-Gate Donor Separation)
 * **Goal**: Remove donor authority from the post-admission application bypass and make the retained legacy staff bypass fail closed on persistence/session-state failure before changing the riskier force/unforce workflows.
 * **Work Completed**:
