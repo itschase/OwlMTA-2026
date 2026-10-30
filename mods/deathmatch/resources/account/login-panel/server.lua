@@ -523,15 +523,56 @@ function goFromLoginToSelectionScreen(player)
 	if source then
 		player = source
 	end
+	if not isElement(player) or getElementType(player) ~= "player" then
+		outputDebugString("[ACCOUNT][APPLICATION_GATE] outcome=rejected reason=invalid_player", 2)
+		return false
+	end
 
 	-- Check if player passed application
-	if (getElementData(player, "appstate") or 0) < 3 then
-		if exports.integration:isPlayerTrialAdmin(player) or exports.integration:isPlayerSupporter(player) then
-			dbExec( exports.mysql:getConn('mta'), "UPDATE account_details SET appstate=3, appreason=NULL WHERE account_id=? ", getElementData(player,"account:id") )
-		else
-			triggerClientEvent(player,"account:showRules",player, (getElementData(player, "appstate") or 0) )
+	local applicationState = tonumber(getElementData(player, "appstate")) or 0
+	if applicationState < 3 then
+		local legacyAllowed = exports.integration:isPlayerTrialAdmin(player)
+		local capabilityAllowed, resolverState = false, "unavailable"
+		if type(getDiscordCapabilityShadowResult) == "function" then
+			capabilityAllowed, resolverState = getDiscordCapabilityShadowResult(player,
+				"moderation.application.bypass")
+		end
+		outputDebugString("[AUTH][CAPABILITY_SHADOW] action=moderation.application.bypass"
+			.. " capability=moderation.application.bypass"
+			.. " legacy=" .. (legacyAllowed and "allow" or "deny")
+			.. " discord=" .. (capabilityAllowed and "allow" or "deny")
+			.. " resolver=" .. resolverState
+			.. " comparison=" .. (legacyAllowed == capabilityAllowed and "match" or "mismatch")
+			.. " enforcement=legacy", legacyAllowed == capabilityAllowed and 3 or 2)
+
+		if not legacyAllowed then
+			triggerClientEvent(player, "account:showRules", player, applicationState)
 			return false
 		end
+
+		local accountID = tonumber(getElementData(player, "account:id"))
+		if not accountID or accountID < 1 or accountID ~= math.floor(accountID)
+			or not exports.mysql:query_free("UPDATE `account_details` SET `appstate`='3', `appreason`=NULL"
+				.. " WHERE `account_id`='" .. accountID .. "'") then
+			outputDebugString("[ACCOUNT][APPLICATION_GATE] outcome=rejected reason=persistence_failed", 1)
+			triggerClientEvent(player, "account:showRules", player, applicationState)
+			return false
+		end
+
+		exports.anticheat:setEld(player, "appstate", 3)
+		if tonumber(getElementData(player, "appstate")) ~= 3 then
+			outputDebugString("[ACCOUNT][APPLICATION_GATE] outcome=rejected reason=session_state_failed", 1)
+			triggerClientEvent(player, "account:showRules", player, applicationState)
+			return false
+		end
+
+		local auditSucceeded = pcall(function()
+			exports.logs:dbLog(player, 4, player, "APPLICATION BYPASS")
+		end)
+		if not auditSucceeded then
+			outputDebugString("[ACCOUNT][APPLICATION_GATE] outcome=audit_unavailable", 1)
+		end
+		outputDebugString("[ACCOUNT][APPLICATION_GATE] outcome=legacy_staff_bypass", 3)
 	end
 
 	triggerClientEvent(player, "vehicle_rims", player)
