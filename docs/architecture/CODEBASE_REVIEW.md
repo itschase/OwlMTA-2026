@@ -2,6 +2,10 @@
 
 This is the first pass over the upstream `main` snapshot. It maps the major systems and records concrete findings for the full review; it is not a line-by-line audit of every resource yet. See [GAMEMODE_GUIDE.md](GAMEMODE_GUIDE.md) for the consolidated functional map, database ownership, account lifecycle, gameplay domains, UCP dependencies, and review queue.
 
+## Current branch checkpoint
+
+Subsequent fixed-in-source work now includes optional Discord-linked admission/session activation and revocation handling, canonical full-account logout, selected non-granting capability-shadow comparisons and donor/staff separation, plus server-authoritative application quiz/essay/review transitions. Legacy password/forum authority and numeric ranks remain active; most capability consumers, schema modernization, safe startup, and runtime evidence remain open. The chronological evidence is maintained in [`AGENTS.md`](../../AGENTS.md) and [NEXT_WORK.md](../planning/NEXT_WORK.md); this file remains an architecture review rather than a release-status claim.
+
 ## Repository scale and structure
 
 - 1,093 Lua files across 144 active resource manifests under `mods/deathmatch/resources`.
@@ -50,7 +54,7 @@ This is the first pass over the upstream `main` snapshot. It maps the major syst
 - The legacy UCP resource declares HTTP-callable management actions and provisions a `website` ACL account that belongs to the broad `Admin` group. The UCP web application itself is missing.
 - Critical source-level authorization gaps were found in the sample audit: remotely triggerable `staff:editStaff` could update ranks without permission checks, and faction edit/delete plus staff/faction data events lacked server authorization. Committed source adds server authorization, validates rank/faction payloads, and moves staff side effects after the durable rank update. Further faction system handlers remain open; see Issues #38–39.
 - Additional sampled transaction risks included negative personal bank withdrawals, faction transfers without `manage_finance` checks, insurance and inventory handlers trusting client-selected targets, and a remote bank-ledger writer. Committed source hardens bank handlers and history access. Insurance/inventory authorization, property purchase/keypad checks, car-shop ordering, job ID validation, payday event boundaries and the full event audit remain open. Character creation now checks account state and quota server-side and ignores client coordinates. These source changes have not been runtime tested; see [GAMEMODE_GUIDE.md](GAMEMODE_GUIDE.md) and Issues #15, #45–48.
-- Discord is the planned primary production authentication source; browser OAuth proves identity, existing accounts require an explicit proof-of-control link, and in-game login uses a short-lived one-use server-redeemed ticket. Authentication remains separate from staff permissions. [DISCORD_AUTH_DESIGN.md](DISCORD_AUTH_DESIGN.md) records the proposed flow, capability vocabulary, blank role-ID slots, session revocation, and staged migration.
+- Discord is the planned primary production authentication source; browser OAuth proves identity, existing accounts require an explicit proof-of-control link, and in-game login uses a short-lived one-use server-redeemed ticket. The current branch has a compatibility slice for linked-account admission, bounded session activation/revocation, and capability comparisons, but not completed provisioning or password retirement. Authentication remains separate from staff permissions. [DISCORD_AUTH_DESIGN.md](DISCORD_AUTH_DESIGN.md) records the target flow; [LEGACY_LOGIN_DISCORD_MIGRATION.md](LEGACY_LOGIN_DISCORD_MIGRATION.md) records current source state.
 - A broader scan found 181 remotely-triggerable event declarations in active server scripts (rough count, not unique or confirmed vulnerabilities). A further handler-by-handler review is needed, starting with money, inventory, ownership, character, ban and staff actions.
 - `event-system/bmxpier/server.lua` contained a hard-coded external score-submission key. Committed source removes the key and disables outbound submission; external credential revocation and repository-history cleanup remain tracked work. Do not copy the key into docs or logs.
 - The checked-in `mtaserver.conf.bak` has 138 startup entries for 136 unique resources and 144 resource manifests overall. `event-system` and `selfck-system` are duplicated; eight manifests are not startup-listed. See [RESOURCE_INVENTORY.csv](../../RESOURCE_INVENTORY.csv).
@@ -59,7 +63,7 @@ This is the first pass over the upstream `main` snapshot. It maps the major syst
 
 ## Review status
 
-The account/data, gameplay-domain, deployment, and sampled authorization architecture passes are complete at a map-and-triage level. The first hardening batch for account creation, staff/faction managers, banking, and the BMX outbound credential is committed to `main`; it has not been runtime-tested. The complete event/query inventory, permission call-site audit, dependency validation, disposable server boot, and runtime reproduction of reported issues remain outstanding.
+The account/data, gameplay-domain, deployment, and sampled authorization architecture passes are complete at a map-and-triage level. Multiple hardening batches covering account/character lifecycle, selected staff/faction/banking/remotes, Discord compatibility boundaries, donor separation, and application progression are committed to `main`; none has been runtime-tested. The complete event/query inventory, permission call-site audit, dependency validation, disposable server boot, and runtime reproduction of reported issues remain outstanding.
 
 ## GitHub issue tracker
 

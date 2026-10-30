@@ -20,6 +20,10 @@ This guide separates staff operations from player features and server operation.
 - Faction management has its own member/rank/perk/duty/finance controls. Do not map faction leader to global admin by default.
 - Report/support queues currently blend forum permissions, supporter duty, and admin duty; this needs a deliberate support capability separate from donor level.
 
+### Current capability-migration checkpoint
+
+The branch now has a server-only Discord capability facade and action-level shadow comparisons for selected admin/application paths. Legacy predicates still enforce access: Discord comparison cannot grant. Reviewed freeze/unfreeze, nudge, application bypass, and application-manager paths no longer accept donor/supporter tier as moderation authority. This is a bounded migration checkpoint, not proof that all commands, GameMaster actions, specialty teams, or supporter call sites are corrected. See the [capability migration matrix](../architecture/CAPABILITY_MIGRATION_MATRIX.md) and [next-work record](../planning/NEXT_WORK.md).
+
 ## Source findings requiring issues/fixes
 
 - Remote admin-history deletion lacks server-side creator/lead authorization even though the client UI enforces it. It can also reverse warning/punishment counters.

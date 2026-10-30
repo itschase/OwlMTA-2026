@@ -49,9 +49,11 @@ Factions group characters into organizations with ranks, membership, permissions
 
 Activities and event resources include sports and other events. Some source folders are not loaded by the active resource manifest; for example BMX/Easter entries are commented out in `event-system/meta.xml`. A file existing in the repository does not necessarily mean its feature is running.
 
-## Discord registration and login (planned)
+## Discord registration and login (target; not runtime-ready)
 
 Discord authorization is planned as the primary way to register and log in. The game uses a trusted authorization service to verify Discord identity and resolve the linked game account; the player completes the browser authorization flow from the in-game login screen. Existing legacy accounts need a one-time verified linking/migration step. Discord login does not automatically grant staff or donor access: those role IDs are configured by each server owner, and unmapped roles grant no capabilities. If authorization is unavailable, new login attempts wait or fail with a clear message; the game must not silently accept a password-only login. A revoked account authorization ends the associated active session.
+
+The current branch contains an initial linked-account compatibility path and confirmed-revocation disconnect handling, but legacy password login/registration still exists and no live Discord/MTA flow has been tested. Players should not treat the current UI or source presence as a usable public login service yet.
 
 ## Known limitations
 

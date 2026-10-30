@@ -51,6 +51,8 @@ Inventory all integrations before enabling them: activation email, legacy forum 
 
 MTA's server-side `fetchRemote` supports outbound HTTP(S) request options and invokes a callback asynchronously. Therefore resource code must not block a join/login handler waiting for Discord. Use a short-lived challenge and one-use ticket for registration/login; perform Discord exchange and role resolution asynchronously. New logins fail closed without a verified result. Track session leases and a revocation feed/status check so an authorization revoke ends the linked session within a documented bound. Store Discord bot credentials only on the trusted service or protected server configuration, never in client files or source.
 
+Current source provides an optional linked-account adapter boundary, post-local-gate session activation, a server-only capability facade, confirmed-revocation disconnect, and lifecycle clearing. It does not provide a validated deployment: no real Discord application, HTTPS service, MTA runtime, database, outage, lease-expiry, reconnect, or recovery test has been run. Legacy password and forum paths remain, so operators must not advertise this checkout as Discord-primary or enable production access based only on source presence.
+
 The preferred topology is:
 
 ```text

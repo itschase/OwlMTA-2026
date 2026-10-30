@@ -14,13 +14,22 @@ This repository is an active overhaul of the OwlGaming roleplay gamemode for Mul
 - Make external services such as media storage and metrics/log search optional adapters that can be enabled by an operator.
 - Document what resources do, how players and staff use them, how operators configure them, and how they depend on one another.
 
-These are project goals, not claims that each integration or workflow is already implemented. The Discord authentication service and MTA adapter are not implemented. The server process should be able to start without them, while user registration and login in production require a successful Discord authorization result. Development and owner recovery must use an explicit, audited setup path rather than silently falling back to password-only login.
+These are project goals, not claims that each integration or workflow is production-ready. An initial standalone Discord identity service and optional MTA account adapter now exist at source level: the game can begin linked-account admission, activate a bounded identity session after local gates, compare named capabilities without granting from them, and disconnect confirmed revocations. Legacy password registration/login and numeric authority remain active, durable provisioning and full capability cutover are incomplete, and no Discord/MTA runtime has been validated. The server process must still be able to start without the companion service, while a future Discord-primary production policy must fail closed rather than silently fall back to password-only login.
 
 ## Current state
 
 The repository is in source-review and hardening work. The existing resource tree, account and character flows, staff/faction systems, vehicle and property features, and data model are being documented and reviewed incrementally. Some source-level defects and authorization boundaries have been corrected, and findings are tracked in GitHub Issues. Runtime behavior remains unverified until the project is brought up in a controlled MTA and database environment.
 
 The inherited database and configuration still reflect the legacy gamemode. Schema restructuring, compatibility, deployment requirements, and upgrade/migration behavior are open work. No Discord role IDs, bot credentials, API secrets, or server-specific settings are supplied by this repository. Discord identity can be configured independently of role mapping; until role IDs are filled in, no Discord role-based staff or donor capabilities are granted.
+
+### Latest fixed-in-source checkpoint — October 29, 2026
+
+- Account lifecycle now has a canonical full-session logout distinct from character change, plus optional Discord-linked admission/session activation and confirmed-revocation disconnect handling. Password retirement, durable session leases, provisioning, recovery, and live service behavior remain open.
+- Selected staff/application actions compare named Discord capabilities in shadow mode while legacy staff predicates remain enforcement. Donor/supporter tiers were removed from the reviewed freeze, nudge, application-bypass, and application-manager authority paths; supporter still requires a complete call-site audit.
+- The application system now keeps quiz answer keys server-side, binds quiz and essay submission to authenticated accounts and stored stages, uses expiring server question snapshots, verifies affected rows, and avoids delete-before-insert replacement. Review decisions settle the application/account state together. Step-3 privacy/replay, reconnect/restart recovery, MyISAM failure behavior, and runtime validation remain open.
+- No MTA server, game client, database, Discord application/service, or gameplay environment has been run. Every item above is `fixed-in-source`, not `runtime-verified` or release-ready.
+
+See the [current next-work record](docs/planning/NEXT_WORK.md), [legacy-login migration map](docs/architecture/LEGACY_LOGIN_DISCORD_MIGRATION.md), [capability migration matrix](docs/architecture/CAPABILITY_MIGRATION_MATRIX.md), and [`apps` resource dossier](docs/resources/apps.md) for evidence and remaining work.
 
 ## Documentation and project tracking
 
@@ -46,6 +55,7 @@ Start with the [documentation hub](docs/README.md). The principal guides are:
 - [Current economy/business](docs/architecture/ECONOMY_AND_BUSINESS_CURRENT_STATE.md), [criminal justice](docs/architecture/CRIMINAL_JUSTICE_CURRENT_STATE.md), and [administration](docs/architecture/ADMINISTRATION_CURRENT_STATE.md) maps — source-reviewed inherited behavior and modernization boundaries.
 - [Documentation and planning program](docs/planning/DOCUMENTATION_PROGRAM.md) — artifact hierarchy, publishing lanes, quality gates, batch workflow, and focus controls.
 - [Issues and Discussions index](docs/planning/DISCUSSIONS_AND_ISSUES.md) — published tracker links and documentation workflow.
+- [Next work record](docs/planning/NEXT_WORK.md) — most recent fixed-in-source checkpoint, publication evidence, unresolved risks, and bounded continuation.
 - [Coding conventions](docs/reference/coding_conventions.md) and [useful functions](docs/reference/useful_functions.md) — inherited developer references under review.
 
 Use [GitHub Issues](https://github.com/itschase/OwlMTA-2026/issues) for actionable defects and implementation tasks. Use [GitHub Discussions](https://github.com/itschase/OwlMTA-2026/discussions) for feature plans, resource documentation, gameplay and staff guidance, operator knowledge, and design questions. Record source findings as findings; mark runtime claims as unverified until tested on a server.

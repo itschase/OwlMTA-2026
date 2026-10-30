@@ -8,9 +8,16 @@ Restore this repository as a maintainable, deployable OwlGaming roleplay server,
 
 - The runtime is a large collection of MTA resources under `mods/deathmatch/resources` with additional disabled or archived resources under `resource-archive`.
 - Runtime state is split between the `mta` and `core` MySQL databases. Their bootstrap snapshots are `mods/deathmatch/data/mta.sql` and `mods/deathmatch/data/core.sql`; `data.sql` appears to hold a small settings table. Several tables use MyISAM and `latin1`, and the `core` schema includes account, forum, and Django-era UCP data.
-- `settings.xml.bak` configures separate runtime/core DB connections, a UCP website password, a forums API key, and an Imgur client ID. The server login flow calls a localhost activation-mail endpoint. No Discord integration was found in the current resource/config search.
+- `settings.xml.bak` configures separate runtime/core DB connections, a UCP website password, a forums API key, and an Imgur client ID. The inherited login flow calls a localhost activation-mail endpoint. The current branch now includes an optional Discord-linked account adapter and server-only capability facade, but legacy password/forum paths remain active and no Discord application/service runtime has been verified.
 - The Docker image downloads the current MTA Linux server binary at build time, while the checked-in server config specifies a minimum client version of `1.5.7-9.20324.0`. This needs an explicit compatibility policy and repeatable pinned builds.
 - The Dockerfile creates `mtasa` with Debian's `useradd`, then invokes Alpine-specific `adduser -D -S`; that second command fails on the Debian base image. The redundant command is removed in this initial repair.
+
+## Current fixed-in-source checkpoint
+
+- Optional linked-account Discord admission, post-gate identity-session activation, server-only capability comparison, confirmed-revocation disconnect, lifecycle clearing, and canonical full-account logout exist in source. They do not yet constitute Discord-first registration/login, durable provisioning, password retirement, or runtime validation.
+- Freeze/unfreeze, nudge, application bypass, and application-manager paths have bounded capability-shadow/donor-separation work. Legacy staff predicates remain enforcement; most action consumers remain to migrate.
+- Application quiz, essay, and review paths now bind trusted callers and stored stages/targets, keep quiz keys server-side, bound question snapshots and answers, verify affected rows, use insert-first replacement, and reduce split application/account decisions. Memory-only challenges/streaks, step-3 privacy/replay, MyISAM recovery, and runtime evidence remain open.
+- The repository remains in delivery stage 1 below. Do not interpret source fixes or static parsing as permission to skip the safe-start preflight.
 
 ## Proposed delivery sequence
 
