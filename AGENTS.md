@@ -33,6 +33,20 @@ This file is a high-level, human- and AI-agent readable guide and chronological 
 
 ## 2. Activity Read Log
 
+### [2026-10-29] — Codex / ChatGPT (Current-State Documentation Refresh)
+* **Goal**: Reconcile public entry-point and audience documentation with the latest identity, capability, logout, and application hardening without turning source completion into runtime claims.
+* **Work Completed**:
+  1. Replaced stale statements that the Discord service/adapter did not exist with the precise current boundary: optional linked-account admission/session/revocation and capability comparison exist in source, while password/forum paths, provisioning, durable leases, capability cutover, and runtime validation remain incomplete.
+  2. Added the October 29 fixed-in-source checkpoint to the root README, documentation hub, rebuild plan, project knowledge base, and codebase review. It summarizes canonical logout, selected donor/staff separation, application quiz/essay/review hardening, and the safe-start prohibition.
+  3. Updated player, staff, and operator guides with audience-specific descriptions of what currently exists, what remains target design, and why operators must not advertise the checkout as Discord-primary or runtime-ready.
+* **Commit**:
+  - [`ef7a00b`](https://github.com/itschase/OwlMTA-2026/commit/ef7a00b) — `docs(project): refresh current rebuild status`
+* **Validation**: `git diff --check` and staged checks passed; all relative links in the eight changed documents resolve; focused searches confirmed the two stale Discord implementation claims were removed. No code, GitHub Issue/Discussion, MTA server/client, database, Discord service, or gameplay runtime was changed or run.
+* **Current Status**: Documentation-only refresh committed and pushed; runtime status remains unverified. Final branch/remote cleanliness is checked after committing this activity handoff.
+* **Recommended Next Work**:
+  1. Resume from the top of `docs/planning/NEXT_WORK.md`, beginning with the remaining application step-3 notification/privacy/replay boundary.
+  2. Keep README-level status compact and update it only when a material fixed-in-source or runtime-verified boundary changes.
+
 ### [2026-10-29] — Codex / ChatGPT (Server-Graded Part 1 Application Quiz)
 * **Goal**: Remove answer-key exposure and client-declared quiz completion while preserving the legitimate staff-decline retry route.
 * **Work Completed**:
