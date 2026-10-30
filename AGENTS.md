@@ -33,6 +33,22 @@ This file is a high-level, human- and AI-agent readable guide and chronological 
 
 ## 2. Activity Read Log
 
+### [2026-10-29] — Codex / ChatGPT (Server-Graded Part 1 Application Quiz)
+* **Goal**: Remove answer-key exposure and client-declared quiz completion while preserving the legitimate staff-decline retry route.
+* **Work Completed**:
+  1. Bound quiz start/submission to the trusted caller, authenticated account, stored state 0, and per-action cooldowns. Filtered the bank, rejected fewer than six valid questions, finitely shuffled, retained keys in a 30-minute server snapshot, and sent presentation fields without keys.
+  2. Server-grades six bounded option indexes, rechecks the latest persisted 24-hour cooldown, invalidates wrong/expired challenges without answer counts, and conditionally advances state 0 to 1 only after positive affected-row proof. Session sync and minimized audit have bounded post-commit diagnostics.
+  3. The client waits for server outcome. Reissued Part 1/2 challenges rebuild visible forms from the current snapshot. Staff-decline retry now opens guarded Part 2 directly instead of invoking quiz completion.
+  4. Updated maintained docs and published to Issues [#281](https://github.com/itschase/OwlMTA-2026/issues/281#issuecomment-6514288811), [#282](https://github.com/itschase/OwlMTA-2026/issues/282#issuecomment-6514289045), [#1](https://github.com/itschase/OwlMTA-2026/issues/1#issuecomment-6514289385), and [Discussion #286](https://github.com/itschase/OwlMTA-2026/discussions/286#discussioncomment-19284432).
+* **Commit**:
+  - [`233e706`](https://github.com/itschase/OwlMTA-2026/commit/233e706) — `security(apps): move quiz grading to server`
+* **Validation**: Four changed Lua files parsed successfully. Focused checks confirmed caller/session/stage gates, no client key grading, server answer submission, snapshot/cooldown enforcement, conditional affected-row transition, and direct guarded Part 2 retry. Changed-document links and diff/staged checks passed. No MTA server/client, database, Discord application/service, or gameplay test was run.
+* **Current Status**: Fixed in source and published; runtime, reconnect, crash, and event-order behavior remain unverified. Final branch/remote cleanliness is checked after this handoff.
+* **Recommended Next Work**:
+  1. Harden `apps:startStep3` notification/privacy/replay behavior and complete stored-state/caller controls for every remaining player-flow remote.
+  2. Design restart/reconnect reconciliation for memory-only quiz/essay snapshots and indeterminate MyISAM outcomes before closing #281/#282.
+  3. Resume only after the documented safe-start preflight permits targeted application-flow failure injection and UI/runtime validation.
+
 ### [2026-10-29] — Codex / ChatGPT (Server-Authoritative Part 2 Application Submission)
 * **Goal**: Remove client question authority and delete-before-insert data loss from the written application stage while preserving explicit recovery boundaries.
 * **Work Completed**:

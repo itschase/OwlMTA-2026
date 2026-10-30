@@ -10,6 +10,8 @@ The client no longer grades or declares success; it waits for the server and sta
 
 All MTA/database/UI behavior remains runtime-unverified. Memory-only challenge recovery, step-3/retake notification privacy and replay controls, MyISAM indeterminate recovery, and full safe-start testing remain open under #281/#282/#1.
 
+Publication checkpoint: source commit [`233e706`](https://github.com/itschase/OwlMTA-2026/commit/233e706); Issue comments [#281](https://github.com/itschase/OwlMTA-2026/issues/281#issuecomment-6514288811), [#282](https://github.com/itschase/OwlMTA-2026/issues/282#issuecomment-6514289045), and [#1](https://github.com/itschase/OwlMTA-2026/issues/1#issuecomment-6514289385); [Script Resource Discussion #286](https://github.com/itschase/OwlMTA-2026/discussions/286#discussioncomment-19284432).
+
 ## Latest continuation — server-authoritative Part 2 submission
 
 The Part 2 remotes now bind MTA `client` to an authenticated integer account, load the stored application state, and apply per-action cooldowns. Question selection filters invalid/oversized rows, rejects a bank with fewer than four valid prompts, uses a bounded shuffle, and retains the exact four-question snapshot server-side for 30 minutes. Submission accepts only four answer strings; client-supplied question text is removed. Answers are trimmed and bounded to the schema's 500-character fields, while diagnostics and audit omit their content.
