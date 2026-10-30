@@ -1931,25 +1931,58 @@ end
 addCommandHandler("setintlimit", intLimit)
 
 -- /NUDGE by Bean
+local nudgeRequestTicks = setmetatable({}, { __mode = "k" })
+
 function nudgePlayer(thePlayer, commandName, targetPlayer)
-	if (exports.integration:isPlayerTrialAdmin(thePlayer) or exports.integration:isPlayerSupporter(thePlayer)) then
-		if not (targetPlayer) then
-			outputChatBox("SYNTAX: /" .. commandName .. " [Player Partial Nick / ID]", thePlayer, 255, 194, 14)
-		else
-			local targetPlayer, targetPlayerName = exports.global:findPlayerByPartialNick(thePlayer, targetPlayer)
-			if not targetPlayer then
-				return false
-			end
-			local logged = getElementData(targetPlayer, "loggedin")
-			if (logged==0) then
-			   outputChatBox("Player is not logged in.", thePlayer, 255, 0, 0)
-			else
-				triggerClientEvent ( "playNudgeSound", targetPlayer)
-				outputChatBox("You have nudged " .. targetPlayerName .. ".", thePlayer)
-				outputChatBox("You have been nudged by " .. getPlayerName(thePlayer) .. ".", targetPlayer)
-			end
-		end
+	if not isElement(thePlayer) or getElementType(thePlayer) ~= "player" then
+		return false
 	end
+
+	local legacyAllowed = exports.integration:isPlayerTrialAdmin(thePlayer)
+	local allowed = adminEvaluateCapabilityShadow(thePlayer, "moderation.player.nudge", "moderation.player.nudge", legacyAllowed)
+	if not allowed then
+		outputChatBox("You are not authorized to nudge players.", thePlayer, 255, 0, 0)
+		return false
+	end
+
+	if not targetPlayer then
+		outputChatBox("SYNTAX: /" .. commandName .. " [Player Partial Nick / ID]", thePlayer, 255, 194, 14)
+		return false
+	end
+
+	local now = getTickCount()
+	local lastRequest = nudgeRequestTicks[thePlayer]
+	if lastRequest and (now - lastRequest) % 4294967296 < 5000 then
+		outputChatBox("Please wait before nudging another player.", thePlayer, 255, 194, 14)
+		outputDebugString("[ADMIN][NUDGE] outcome=rejected reason=rate_limited", 2)
+		return false
+	end
+
+	local target, targetPlayerName = exports.global:findPlayerByPartialNick(thePlayer, targetPlayer)
+	if not target then
+		return false
+	end
+	if getElementData(target, "loggedin") ~= 1 then
+		outputChatBox("Player is not logged in.", thePlayer, 255, 0, 0)
+		return false
+	end
+
+	if not triggerClientEvent(target, "playNudgeSound", target) then
+		outputChatBox("The nudge notification could not be delivered.", thePlayer, 255, 0, 0)
+		outputDebugString("[ADMIN][NUDGE] outcome=rejected reason=delivery_failed", 1)
+		return false
+	end
+
+	nudgeRequestTicks[thePlayer] = now
+	outputChatBox("You have nudged " .. targetPlayerName .. ".", thePlayer)
+	outputChatBox("You have been nudged by " .. getPlayerName(thePlayer) .. ".", target)
+	local auditSucceeded = pcall(function()
+		exports.logs:dbLog(thePlayer, 4, target, "NUDGE")
+	end)
+	if not auditSucceeded then
+		outputDebugString("[ADMIN][NUDGE] outcome=audit_unavailable", 1)
+	end
+	return true
 end
 addCommandHandler("nudge", nudgePlayer, false, false)
 

@@ -1,6 +1,12 @@
 # Next work record
 
-Last updated: 2026-10-29 after implementing the first non-granting capability shadow, donor/staff separation for player freeze, and the canonical full-account logout slice.
+Last updated: 2026-10-29 after extending the non-granting capability shadow and donor/staff separation through player nudge.
+
+## Latest continuation — bounded player nudge authority
+
+`/nudge` is the second action migrated under the capability matrix. Donor `supporter_level` no longer grants this player-control action; Trial Admin remains the sole enforcement predicate while `moderation.player.nudge` is comparison-only and cannot grant. The command now requires a player actor and active logged-in target, limits successful actor requests to one per five seconds, explicitly sends the sound/flash event only to the target client, and attempts an actor/target audit with a bounded logger-outage diagnostic. The unreferenced local `playthenoise` developer command was removed. No caller-supplied message enters this path.
+
+Static parsing and source checks cover the changed Lua and event/caller boundary; the official MTA `triggerClientEvent` destination/return contract and `getTickCount` wrap behavior were reviewed. MTA sound/window behavior, target disconnect timing, repeated/parallel commands, Discord capability freshness, logger outage, and all gameplay behavior remain runtime-unverified under Issue #3. The next bounded migration is application override only after its live/offline target and database-result behavior are reviewed.
 
 ## Latest continuation — first capability shadow and donor separation
 

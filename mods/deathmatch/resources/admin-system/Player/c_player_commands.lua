@@ -9,7 +9,6 @@ function nudgeNoise(message, type)
 end
 addEvent("playNudgeSound", true)
 addEventHandler("playNudgeSound", getLocalPlayer(), nudgeNoise)
-addCommandHandler("playthenoise", nudgeNoise)
 
 function doEarthquake(intensity)
 	local x, y, z = getElementPosition(getLocalPlayer())

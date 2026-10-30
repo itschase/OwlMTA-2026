@@ -5,7 +5,7 @@
 - Tree/startup state: active and present in the tracked startup snapshot; live startup unverified.
 - Evidence: server-focused review of all 24 manifest-loaded server scripts; client presentation review remains partial.
 - Runtime: unverified.
-- Latest source state: `/freeze` and `/unfreeze` no longer accept donor `supporter_level`; they retain Trial Admin enforcement while comparing the proposed `moderation.player.freeze` grant in non-authoritative shadow mode. The unused remotely callable `remoteFreezePlayer` wrapper was removed after no caller was found.
+- Latest source state: `/freeze`, `/unfreeze`, and `/nudge` no longer accept donor `supporter_level`; they retain Trial Admin enforcement while comparing narrow proposed capabilities in non-authoritative shadow mode. Nudge additionally requires an active target, limits successful actor requests to one per five seconds, sends only to the intended client, and attempts an actor/target audit with a bounded outage diagnostic. The local `playthenoise` developer command and unused remotely callable `remoteFreezePlayer` wrapper were removed.
 - Publication checkpoint: source commit [`2ffbfc1`](https://github.com/itschase/OwlMTA-2026/commit/2ffbfc1), [Issue #3 update](https://github.com/itschase/OwlMTA-2026/issues/3#issuecomment-6513765640), [Issue #164 update](https://github.com/itschase/OwlMTA-2026/issues/164#issuecomment-6513765906), and [Script Resource Discussion #178 update](https://github.com/itschase/OwlMTA-2026/discussions/178#discussioncomment-19284015).
 
 ## What it does
@@ -34,6 +34,7 @@ The maintained [capability migration matrix](../architecture/CAPABILITY_MIGRATIO
 - [#67](https://github.com/itschase/OwlMTA-2026/issues/67): remaining event-boundary work includes generic cargo's client-supplied price. A current source re-review found the scoped monitor, recon, location-manager, NPC 911, and punishment-expiration handlers retain their reviewed actor/permission/source checks; runtime verification is still pending.
 - [#164](https://github.com/itschase/OwlMTA-2026/issues/164): bind remotely triggered privileged mutations to authenticated `client`.
 - [#3](https://github.com/itschase/OwlMTA-2026/issues/3): action-by-action named-capability migration and donor/staff separation. The player-freeze slice is fixed in source but runtime-unverified; other donor-backed moderation paths remain open.
+- `/nudge` has no caller-supplied message payload. Its source path now binds authorization to the invoking player command, validates an active target, applies a five-second per-actor cooldown, explicitly addresses the target client, and attempts a successful actor/target audit without letting logger outage break the completed notification. Runtime behavior remains unverified.
 - [#165](https://github.com/itschase/OwlMTA-2026/issues/165): authorize and make history removal consistent and auditable.
 - [#166](https://github.com/itschase/OwlMTA-2026/issues/166): minimize and capability-scope sensitive administrative data.
 - [#167](https://github.com/itschase/OwlMTA-2026/issues/167): validate feedback and bind attribution.

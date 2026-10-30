@@ -22,7 +22,7 @@ function adminEvaluateCapabilityShadow(player, action, capability, legacyAllowed
 	local now = getTickCount()
 	local playerTicks = shadowEvaluationTicks[player]
 	local lastEvaluation = playerTicks and playerTicks[action]
-	if lastEvaluation and now >= lastEvaluation and now - lastEvaluation < 2000 then
+	if lastEvaluation and (now - lastEvaluation) % 4294967296 < 2000 then
 		return legacyAllowed, false, "rate_limited"
 	end
 	if not playerTicks then
