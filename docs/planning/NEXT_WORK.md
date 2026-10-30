@@ -1,6 +1,14 @@
 # Next work record
 
-Last updated: 2026-10-29 after binding Part 2 essay submission to server-issued questions, stored account stage, and insert-first persistence.
+Last updated: 2026-10-29 after moving Part 1 quiz grading, keys, cooldown enforcement, and state transition to the server.
+
+## Latest continuation — server-graded Part 1 quiz
+
+Part 1 now binds the trusted MTA caller to an authenticated integer account at stored state 0 and rate-limits quiz start/submission. It filters the question bank, rejects fewer than six valid rows, uses finite shuffling, retains answer keys only in a 30-minute server snapshot, and sends presentation fields without keys. Submission accepts only six option indexes, rechecks the latest persisted force-app cooldown, invalidates incorrect/expired challenges without revealing correct-answer counts, and conditionally advances state 0 to 1 with immediate affected-row proof. Session state and minimized audit are post-commit follow-ups with bounded diagnostics.
+
+The client no longer grades or declares success; it waits for the server and starts a new challenge after failure. Reissuing either Part 1 or Part 2 now rebuilds the visible form so UI questions cannot diverge from the current server snapshot. The declined-application retry route now opens Part 2 directly and lets its stored-state guard decide, rather than abusing the Part 1 completion event.
+
+All MTA/database/UI behavior remains runtime-unverified. Memory-only challenge recovery, step-3/retake notification privacy and replay controls, MyISAM indeterminate recovery, and full safe-start testing remain open under #281/#282/#1.
 
 ## Latest continuation — server-authoritative Part 2 submission
 

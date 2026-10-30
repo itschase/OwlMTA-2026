@@ -48,10 +48,21 @@ addEvent("apps:startStep3", true)
 addEventHandler("apps:startStep3", root, startStep3)
 
 function retakeApplicationPart2()
-	if source and isElement(source) and getElementType(source) == "player" then
-		client = source
+	local actor = source
+	if client then
+		if source ~= client then
+			outputDebugString("[APPS][FLOW] outcome=rejected action=part2_retake reason=source_mismatch", 2)
+			return false
+		end
+		actor = client
 	end
-	triggerEvent("apps:finishStep1", client)
+	if not isElement(actor) or getElementType(actor) ~= "player"
+		or getElementData(actor, "account:loggedin") ~= true then
+		outputDebugString("[APPS][FLOW] outcome=rejected action=part2_retake reason=invalid_session", 2)
+		return false
+	end
+	triggerEvent("apps:startStep2", actor, true)
+	return true
 end
 addEvent("apps:retakeApplicationPart2", true)
 addEventHandler("apps:retakeApplicationPart2", root, retakeApplicationPart2)

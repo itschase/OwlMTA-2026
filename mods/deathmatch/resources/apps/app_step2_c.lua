@@ -8,11 +8,10 @@ function startStep2(questsFromServer)
 	submissionPending = false
 	
 	if guiStep2.back and isElement(guiStep2.back) then
-		showGUIPart(guiStep2)
-		return false
-	else
-		quests_p2 = questsFromServer
+		destroyGUIPart2()
 	end
+	q2 = {}
+	quests_p2 = questsFromServer
 	
 	local sWidth,sHeight = guiGetScreenSize() 
 	

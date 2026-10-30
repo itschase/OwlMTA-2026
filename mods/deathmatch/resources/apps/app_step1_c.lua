@@ -9,18 +9,21 @@
 
 local guiStep11 = {}
 local q = {{},{},{},{},{},{}}
-local result = {}
 local quests = {}
 local timer = nil
+local submissionPending = false
+local cooldownText = nil
 function startStep11(quests1, retest, remainHours, remainMinutes, remainSeconds)
 	triggerEvent("account:hideRules", localPlayer)
+	submissionPending = false
+	cooldownText = nil
 	
 	if guiStep11.back and isElement(guiStep11.back) then
-		showGUIPart(guiStep11)
-		return false
-	else
-		quests = quests1
+		destroyGUIPart(guiStep11)
 	end
+	guiStep11 = {}
+	q = {{},{},{},{},{},{}}
+	quests = quests1
 
 	local sWidth,sHeight = guiGetScreenSize() 
 	
@@ -91,18 +94,17 @@ function startStep11(quests1, retest, remainHours, remainMinutes, remainSeconds)
 	guiSetEnabled(guiStep11.next, false)
 	addEventHandler ( "onClientGUIClick", root, clickOnApplication)
 	
-	text1 = nil
 	if remainSeconds then
-		text1 = remainSeconds.." second(s)"
+		cooldownText = remainSeconds.." second(s)"
 	elseif remainMinutes then
-		text1 = remainMinutes.." minute(s)"
+		cooldownText = remainMinutes.." minute(s)"
 	elseif remainHours then
-		text1 = remainHours.." hour(s)"
+		cooldownText = remainHours.." hour(s)"
 	end
-	if text1 then 
+	if cooldownText then
 		guiSetEnabled(guiStep11.next, false)
-		guiSetText(guiStep11.intro2, "Because a staff has forced you back to the application stage or you have constantly failed too many times. You will now have "..text1.." to review our server rules and retry with another application.")
-		guiSetText(guiStep11.intro, "Because a staff has forced you back to the application stage or you have constantly failed too many times. You will now have "..text1.." to review our server rules and retry with another application.")
+		guiSetText(guiStep11.intro2, "Because a staff has forced you back to the application stage or you have constantly failed too many times. You will now have "..cooldownText.." to review our server rules and retry with another application.")
+		guiSetText(guiStep11.intro, "Because a staff has forced you back to the application stage or you have constantly failed too many times. You will now have "..cooldownText.." to review our server rules and retry with another application.")
 		guiLabelSetColor ( guiStep11.intro, 255,0,0 )
 	end
 
@@ -123,50 +125,27 @@ addEventHandler("apps:step11", root, startStep11)
 
 function clickOnApplication()
 	if source == guiStep11.next then
-		if text1 then
+		if cooldownText or submissionPending then
 			guiSetEnabled(guiStep11.next, false)
 			return false
 		end
-		local corrects, incorrects = 0, 0
-		for i = 1, 6 do 
-			if quests[i].key == getAnswerFromRadio(q[i]) then
-				corrects = corrects + 1
-			else
-				incorrects = incorrects + 1
+		local answers = {}
+		for i = 1, 6 do
+			answers[i] = getAnswerFromRadio(q[i])
+			if not answers[i] then
+				return false
 			end
 		end
-		if incorrects > 0 then
-			guiSetText(guiStep11.intro2, "Oops, Sorry! "..(incorrects < 6 and incorrects or "all").." of your answers "..(incorrects <= 1 and "is" or "are").." wrong and "..(corrects < 1 and "none" or ("only "..corrects)).." "..(corrects <= 1 and "is" or "are").." right. You have to correct them all to continue.")
-			guiSetText(guiStep11.intro, "Oops, Sorry! "..(incorrects < 6 and incorrects or "all").." of your answers "..(incorrects <= 1 and "is" or "are").." wrong and "..(corrects < 1 and "none" or ("only "..corrects)).." "..(corrects <= 1 and "is" or "are").." right. You have to correct them all to continue.")
-			guiLabelSetColor ( guiStep11.intro, 255,0,0 )
-			guiSetVisible(guiStep11.retest, true)
-			guiSetVisible(guiStep11.next, false)
-			guiSetEnabled(guiStep11.back, false)
-			killTimer1()
-			timer = setTimer(function()
-				destroyGUIPart(guiStep11)
-				triggerEvent("account:showRules",localPlayer, 0)
-			end, 3000, 1)
-		else
-			guiSetText(guiStep11.intro2, "Congratulations! You have passed this section of the application. Moving to next section..")
-			guiSetText(guiStep11.intro, "Congratulations! You have passed this section of the application. Moving to next section..")
-			guiLabelSetColor ( guiStep11.intro, 0,255,0 )
-			killTimer1()
-			guiSetEnabled(guiStep11.retest, false)
-			guiSetEnabled(guiStep11.back, false)
-			guiSetEnabled(guiStep11.next, false)
-			guiSetEnabled(guiStep11.q1, false)
-			guiSetEnabled(guiStep11.q2, false)
-			guiSetEnabled(guiStep11.q3, false)
-			guiSetEnabled(guiStep11.q4, false)
-			guiSetEnabled(guiStep11.q5, false)
-			guiSetEnabled(guiStep11.q6, false)
-			
-			timer = setTimer(function()
-				destroyGUIPart(guiStep11)
-				triggerServerEvent("apps:finishStep1",localPlayer)
-			end, 3000, 1)
+		submissionPending = true
+		guiSetText(guiStep11.intro2, "Checking your answers with the server..")
+		guiSetText(guiStep11.intro, "Checking your answers with the server..")
+		guiLabelSetColor(guiStep11.intro, 255, 255, 255)
+		guiSetEnabled(guiStep11.back, false)
+		guiSetEnabled(guiStep11.next, false)
+		for i = 1, 6 do
+			guiSetEnabled(guiStep11['q'..i], false)
 		end
+		triggerServerEvent("apps:finishStep1", localPlayer, answers)
 	elseif source == guiStep11.retest then
 		killTimer1()
 		destroyGUIPart(guiStep11)
@@ -187,7 +166,7 @@ function clickOnApplication()
 					end
 				end
 			end
-			if count == 6 then
+			if count == 6 and not cooldownText and not submissionPending then
 				guiSetEnabled(guiStep11.next, true)
 			else
 				guiSetEnabled(guiStep11.next, false)
@@ -195,6 +174,41 @@ function clickOnApplication()
 		end
 	end
 end
+
+function handleStep1Result(succeeded, message, resetRequired)
+	if source ~= localPlayer then
+		return false
+	end
+	if succeeded then
+		destroyGUIPart(guiStep11)
+		return true
+	end
+	submissionPending = false
+	if resetRequired then
+		destroyGUIPart(guiStep11)
+		triggerEvent("account:showRules", localPlayer, 0)
+		if type(message) == "string" then
+			outputChatBox(message, 255, 100, 100)
+		end
+		return false
+	end
+	if guiStep11.intro and isElement(guiStep11.intro) then
+		local failureMessage = type(message) == "string" and message or "The quiz could not be checked. Please try again."
+		guiSetText(guiStep11.intro2, failureMessage)
+		guiSetText(guiStep11.intro, failureMessage)
+		guiLabelSetColor(guiStep11.intro, 255, 0, 0)
+		guiSetEnabled(guiStep11.back, true)
+		for i = 1, 6 do
+			guiSetEnabled(guiStep11['q'..i], true)
+		end
+		guiSetEnabled(guiStep11.next, not cooldownText)
+	elseif type(message) == "string" then
+		outputChatBox(message, 255, 100, 100)
+	end
+	return false
+end
+addEvent("apps:finishStep1:result", true)
+addEventHandler("apps:finishStep1:result", root, handleStep1Result)
 
 function hideGUIPart(GUIs)
 	for i, gui in pairs (GUIs) do
@@ -219,12 +233,16 @@ function destroyGUIPart(GUIs)
 		end
 	end
 	removeEventHandler ( "onClientGUIClick", root, clickOnApplication)
+	if GUIs == guiStep11 then
+		submissionPending = false
+		cooldownText = nil
+	end
 end
 
 function getAnswerFromRadio(radios)
 	for i = 1, 3 do
 		if guiRadioButtonGetSelected(radios[i]) then
-			return tostring(i)
+			return i
 		end
 	end
 end
