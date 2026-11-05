@@ -27,6 +27,7 @@ local drugList = {[30]=" gram(s)", [31]=" gram(s)", [32]=" gram(s)", [33]=" gram
 
 local saveditems = {}
 local subscribers = {}
+local pendingItemSettlements = {}
 
 -- util function for sendItems
 local function itemconv( arr )
@@ -52,8 +53,18 @@ end
 -- notify all subscribers on inventory change
 local function notify( element, noload )
 	if subscribers[ element ] then
-		for subscriber in pairs( subscribers[ element ] ) do
-			sendItems( element, subscriber, noload )
+		for subscriber, subscriptionType in pairs(subscribers[element]) do
+			local allowed = isElement(subscriber)
+			if allowed and subscriptionType == "container" then
+				allowed = type(canReceiveContainerInventoryChanges) == "function"
+					and canReceiveContainerInventoryChanges(subscriber, element) == true
+			end
+
+			if allowed then
+				sendItems(element, subscriber, noload)
+			else
+				subscribers[element][subscriber] = nil
+			end
 		end
 	end
 end
@@ -94,31 +105,60 @@ addEventHandler( "savePlayer", getRootElement(),
 	end
 )
 
--- subscribe from inventory changes
-local function subscribeChanges( element )
-	sendItems( element, source )
-	subscribers[ element ][ source ] = true
+-- Internal subscription helpers are called only by server-side workflows. The
+-- custom events below remain non-remote compatibility entry points.
+function subscribeInventoryChanges(element, subscriber, subscriptionType)
+	if not isElement(subscriber) or getElementType(subscriber) ~= "player" or not isElement(element) then
+		return false
+	end
+
+	local loaded = loadItems(element)
+	if not loaded or not subscribers[element] then
+		return false
+	end
+
+	sendItems(element, subscriber, true)
+	subscribers[element][subscriber] = subscriptionType or true
+	return true
 end
 
-addEvent( "subscribeToInventoryChanges", true )
+local function subscribeChanges(element)
+	return subscribeInventoryChanges(element, source)
+end
+
+addEvent( "subscribeToInventoryChanges", false )
 addEventHandler( "subscribeToInventoryChanges", getRootElement(), subscribeChanges )
 
 -- Send items without subscription
 local function sendCurrentInventory( element )
-	sendItems( element, source )
+	if not isElement(source) or getElementType(source) ~= "player" or not isElement(element) then
+		return false
+	end
+	sendItems(element, source)
+	return true
 end
 
-addEvent( "sendCurrentInventory", true )
+addEvent( "sendCurrentInventory", false )
 addEventHandler( "sendCurrentInventory", getRootElement(), sendCurrentInventory )
 
 -- remove from inventory changes list
-local function unsubscribeChanges( element )
-	subscribers[ element ][ source ] = nil
-	triggerClientEvent( source, "recieveItems", element )
+function unsubscribeInventoryChanges(element, subscriber)
+	if not isElement(subscriber) or getElementType(subscriber) ~= "player" or not isElement(element) then
+		return false
+	end
+	if subscribers[element] then
+		subscribers[element][subscriber] = nil
+	end
+	triggerClientEvent(subscriber, "recieveItems", element)
+	return true
 end
 
-addEvent( "unsubscribeFromInventoryChanges", true )
-addEventHandler( "unsubscribeFromInventoryChanges", getRootElement(), subscribeChanges )
+local function unsubscribeChanges(element)
+	return unsubscribeInventoryChanges(element, source)
+end
+
+addEvent( "unsubscribeFromInventoryChanges", false )
+addEventHandler( "unsubscribeFromInventoryChanges", getRootElement(), unsubscribeChanges )
 
 -- returns the 'owner' column content
 local function getID(element)
@@ -225,7 +265,10 @@ function clearItems( element, onlyifnosqlones )
 			return false
 		else
 			while #saveditems[ element ] > 0 do
-				takeItemFromSlot( element, 1 )
+				local removed = takeItemFromSlot( element, 1 )
+				if not removed then
+					return false, "Unable to clear a pending item."
+				end
 			end
 
 			saveditems[ element ] = nil
@@ -242,7 +285,10 @@ function SpecialclearItems( element, onlyifnosqlones )
 			return false
 		else
 			while #saveditems[ element ] > 0 do
-				takeItemFromSlot( element, 1 )
+				local removed = takeItemFromSlot( element, 1 )
+				if not removed then
+					return false, "Unable to clear a pending item."
+				end
 			end
 
 			saveditems[ element ] = nil
@@ -356,6 +402,9 @@ function takeItemFromSlot(element, slot, nosqlupdate, no_update_guns)
 			local itemID = saveditems[element][slot][1]
 			local itemValue = saveditems[element][slot][2]
 			local index = saveditems[element][slot][3]
+			if pendingItemSettlements[index] then
+				return false, "Item settlement pending."
+			end
 			local success = true
 			if not nosqlupdate then
 				local result = mysql:query_free( "DELETE FROM items WHERE `index` = " .. index .. " LIMIT 1" )
@@ -391,6 +440,9 @@ function updateItemValue(element, slot, itemValue)
 			local itemValue = tonumber(itemValue) or tostring(itemValue)
 			if itemValue then
 				local itemIndex = saveditems[element][slot][3]
+				if pendingItemSettlements[itemIndex] then
+					return false, "Item settlement pending."
+				end
 				saveditems[element][slot][2] = itemValue
 				notify( element )
 				dbExec( exports.mysql:getConn('mta'), "UPDATE items SET itemValue=? WHERE `index`=? ", itemValue, itemIndex )
@@ -404,6 +456,295 @@ function updateItemValue(element, slot, itemValue)
 	else
 		return false, "loadItems error: " .. error
 	end
+end
+
+local function findCachedItemByIndex(element, itemIndex)
+	local items = saveditems[element]
+	if not items then
+		return false
+	end
+
+	for slot, item in ipairs(items) do
+		if tonumber(item[3]) == itemIndex then
+			return slot, item
+		end
+	end
+
+	return false
+end
+
+local function callSettlementCallback(callback, ...)
+	if type(callback) ~= "function" then
+		return false
+	end
+
+	local ok = pcall(callback, ...)
+	if not ok then
+		outputDebugString("[ITEM][SETTLEMENT] outcome=callback_failed", 2)
+	end
+	return ok
+end
+
+-- Conditionally reserves ammunition from one stored weapon item. The item cache is
+-- changed only after the database confirms that exactly one expected row changed.
+-- The caller must either complete the returned settlement after granting the live
+-- weapon, or request compensation if that grant cannot be applied.
+function settleWeaponPickup(element, slot, expectedIndex, pickupAmount, callback)
+	slot = tonumber(slot)
+	expectedIndex = tonumber(expectedIndex)
+	pickupAmount = tonumber(pickupAmount)
+	if not isElement(element) or not slot or slot ~= math.floor(slot) or slot < 1
+		or not expectedIndex or expectedIndex ~= math.floor(expectedIndex) or expectedIndex < 1
+		or not pickupAmount or pickupAmount ~= math.floor(pickupAmount) or pickupAmount < 1 then
+		callSettlementCallback(callback, false, "invalid_input")
+		return false, "invalid_input"
+	end
+
+	local loaded, loadError = loadItems(element)
+	if not loaded then
+		callSettlementCallback(callback, false, "load_failed")
+		return false, loadError or "load_failed"
+	end
+
+	local item = saveditems[element] and saveditems[element][slot]
+	local itemID = item and tonumber(item[1])
+	local storedAmount = item and tonumber(item[2])
+	local itemIndex = item and tonumber(item[3])
+	if not item or itemIndex ~= expectedIndex or not itemID or itemID >= 0 or itemID == -100
+		or not storedAmount or storedAmount ~= math.floor(storedAmount) or storedAmount < 1
+		or pickupAmount > storedAmount then
+		callSettlementCallback(callback, false, "stale_item")
+		return false, "stale_item"
+	end
+
+	if pendingItemSettlements[itemIndex] then
+		callSettlementCallback(callback, false, "already_pending")
+		return false, "already_pending"
+	end
+
+	local ownerType = getType(element)
+	local ownerID = tonumber(getID(element))
+	local connection = exports.mysql:getConn("mta")
+	if not connection or ownerType == 255 or not ownerID then
+		callSettlementCallback(callback, false, "database_unavailable")
+		return false, "database_unavailable"
+	end
+
+	local remainder = storedAmount - pickupAmount
+	local settlement = {
+		element = element,
+		originalSlot = slot,
+		itemID = itemID,
+		itemIndex = itemIndex,
+		storedAmount = storedAmount,
+		pickupAmount = pickupAmount,
+		remainder = remainder,
+		ownerType = ownerType,
+		ownerID = ownerID,
+		protected = tonumber(item[4]) or 0,
+		metadata = item[5]
+	}
+	pendingItemSettlements[itemIndex] = settlement
+
+	local query
+	local queryParameters
+	if remainder > 0 then
+		query = "UPDATE items SET itemValue=? WHERE `index`=? AND `type`=? AND owner=? AND itemID=? AND itemValue=? LIMIT 1"
+		queryParameters = { remainder, itemIndex, ownerType, ownerID, itemID, storedAmount }
+	else
+		query = "DELETE FROM items WHERE `index`=? AND `type`=? AND owner=? AND itemID=? AND itemValue=? LIMIT 1"
+		queryParameters = { itemIndex, ownerType, ownerID, itemID, storedAmount }
+	end
+
+	local handle = dbQuery(
+		function(queryHandle)
+			local result, affectedRows = dbPoll(queryHandle, 0)
+			if result == false or tonumber(affectedRows) ~= 1 then
+				pendingItemSettlements[itemIndex] = nil
+				callSettlementCallback(callback, false, result == false and "database_error" or "stale_database_row")
+				return
+			end
+
+			settlement.committed = true
+			local cacheProjected = pcall(function()
+				if isElement(element) then
+					local currentSlot, currentItem = findCachedItemByIndex(element, itemIndex)
+					if currentSlot and currentItem then
+						if remainder > 0 then
+							currentItem[2] = remainder
+						else
+							table.remove(saveditems[element], currentSlot)
+						end
+						notify(element, true)
+					else
+						saveditems[element] = nil
+						loadItems(element, true)
+					end
+				end
+			end)
+			if not cacheProjected then
+				settlement.cacheProjectionFailed = true
+				if isElement(element) then
+					saveditems[element] = nil
+				end
+				outputDebugString("[ITEM][SETTLEMENT] outcome=cache_projection_failed", 1)
+			end
+
+			if not callSettlementCallback(callback, true, nil, settlement) then
+				if settlement.grantApplied then
+					pendingItemSettlements[itemIndex] = nil
+					outputDebugString("[ITEM][SETTLEMENT] outcome=callback_indeterminate_after_grant", 1)
+				else
+					restoreWeaponPickupSettlement(settlement, function(restored, reason)
+						if not restored then
+							outputDebugString(
+								"[ITEM][SETTLEMENT] outcome=callback_compensation_failed reason=" .. tostring(reason or "unknown"),
+								1
+							)
+						end
+					end)
+				end
+			end
+		end,
+		connection,
+		query,
+		unpack(queryParameters)
+	)
+
+	if not handle then
+		pendingItemSettlements[itemIndex] = nil
+		callSettlementCallback(callback, false, "query_start_failed")
+		return false, "query_start_failed"
+	end
+
+	return true
+end
+
+function completeWeaponPickupSettlement(settlement)
+	if type(settlement) ~= "table" or not settlement.itemIndex
+		or pendingItemSettlements[settlement.itemIndex] ~= settlement then
+		return false
+	end
+
+	pendingItemSettlements[settlement.itemIndex] = nil
+	settlement.completed = true
+	return true
+end
+
+function restoreWeaponPickupSettlement(settlement, callback)
+	if type(settlement) ~= "table" or not settlement.committed or settlement.completed
+		or pendingItemSettlements[settlement.itemIndex] ~= settlement then
+		callSettlementCallback(callback, false, "invalid_settlement")
+		return false, "invalid_settlement"
+	end
+
+	local connection = exports.mysql:getConn("mta")
+	if not connection then
+		settlement.quarantined = true
+		callSettlementCallback(callback, false, "database_unavailable")
+		return false, "database_unavailable"
+	end
+
+	local query
+	local queryParameters
+	if settlement.remainder > 0 then
+		query = "UPDATE items SET itemValue=? WHERE `index`=? AND `type`=? AND owner=? AND itemID=? AND itemValue=? LIMIT 1"
+		queryParameters = {
+			settlement.storedAmount,
+			settlement.itemIndex,
+			settlement.ownerType,
+			settlement.ownerID,
+			settlement.itemID,
+			settlement.remainder
+		}
+	else
+		local metadata = settlement.metadata and toJSON(settlement.metadata) or false
+		if metadata then
+			query = "INSERT INTO items (`index`, `type`, owner, itemID, itemValue, protected, metadata) "
+				.. "SELECT ?,?,?,?,?,?,? FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM items WHERE `index`=? LIMIT 1)"
+			queryParameters = {
+				settlement.itemIndex,
+				settlement.ownerType,
+				settlement.ownerID,
+				settlement.itemID,
+				settlement.storedAmount,
+				settlement.protected,
+				metadata,
+				settlement.itemIndex
+			}
+		else
+			query = "INSERT INTO items (`index`, `type`, owner, itemID, itemValue, protected, metadata) "
+				.. "SELECT ?,?,?,?,?,?,NULL FROM DUAL WHERE NOT EXISTS (SELECT 1 FROM items WHERE `index`=? LIMIT 1)"
+			queryParameters = {
+				settlement.itemIndex,
+				settlement.ownerType,
+				settlement.ownerID,
+				settlement.itemID,
+				settlement.storedAmount,
+				settlement.protected,
+				settlement.itemIndex
+			}
+		end
+	end
+
+	local handle = dbQuery(
+		function(queryHandle)
+			local result, affectedRows = dbPoll(queryHandle, 0)
+			local restored = result ~= false and tonumber(affectedRows) == 1
+			if restored then
+				pendingItemSettlements[settlement.itemIndex] = nil
+				settlement.completed = true
+			else
+				settlement.quarantined = true
+			end
+
+			if restored then
+				local cacheProjected = pcall(function()
+					if isElement(settlement.element) then
+						local currentSlot, currentItem = findCachedItemByIndex(settlement.element, settlement.itemIndex)
+						if currentSlot and currentItem then
+							currentItem[2] = settlement.storedAmount
+						elseif saveditems[settlement.element] then
+							local restoredItem = {
+								settlement.itemID,
+								settlement.storedAmount,
+								settlement.itemIndex,
+								settlement.protected,
+								settlement.metadata
+							}
+							table.insert(
+								saveditems[settlement.element],
+								math.min(settlement.originalSlot, #saveditems[settlement.element] + 1),
+								restoredItem
+							)
+						else
+							loadItems(settlement.element, true)
+						end
+						notify(settlement.element, true)
+					end
+				end)
+				if not cacheProjected then
+					if isElement(settlement.element) then
+						saveditems[settlement.element] = nil
+					end
+					outputDebugString("[ITEM][SETTLEMENT] outcome=compensation_cache_projection_failed", 1)
+				end
+			end
+
+			callSettlementCallback(callback, restored, restored and nil or (result == false and "database_error" or "stale_database_row"))
+		end,
+		connection,
+		query,
+		unpack(queryParameters)
+	)
+
+	if not handle then
+		settlement.quarantined = true
+		callSettlementCallback(callback, false, "query_start_failed")
+		return false, "query_start_failed"
+	end
+
+	return true
 end
 
 -- updates the item value
@@ -489,6 +830,9 @@ function moveItem(from, to, slot)
 				if hasSpaceForItem(to, saveditems[from][slot][1], saveditems[from][slot][2], saveditems[from][slot][5]) then
 					local itemIndex = saveditems[from][slot][3]
 					if itemIndex then
+						if pendingItemSettlements[itemIndex] then
+							return false, "Item settlement pending."
+						end
 						local itemID = saveditems[from][slot][1]
 						if itemID == 48 or itemID == 126 or itemID == 60 or itemID == 103 or itemID == 163 then
 							return false, "This Item cannot be moved"

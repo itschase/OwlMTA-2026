@@ -22,14 +22,15 @@ The repository is in source-review and hardening work. The existing resource tre
 
 The inherited database and configuration still reflect the legacy gamemode. Schema restructuring, compatibility, deployment requirements, and upgrade/migration behavior are open work. No Discord role IDs, bot credentials, API secrets, or server-specific settings are supplied by this repository. Discord identity can be configured independently of role mapping; until role IDs are filled in, no Discord role-based staff or donor capabilities are granted.
 
-### Latest fixed-in-source checkpoint — October 30, 2026
+### Latest fixed-in-source checkpoint — November 5, 2026
 
 - Account lifecycle now has a canonical full-session logout distinct from character change, plus optional Discord-linked admission/session activation and confirmed-revocation disconnect handling. Password retirement, durable session leases, provisioning, recovery, and live service behavior remain open.
 - Selected staff/application actions compare named Discord capabilities in shadow mode while legacy staff predicates remain enforcement. Donor/supporter tiers were removed from the reviewed freeze, nudge, application-bypass, and application-manager authority paths; supporter still requires a complete call-site audit.
 - The application system now keeps quiz answer keys server-side, binds all three player stages to authenticated accounts and stored state, rate-limits step-3 reopening, and allows reviewer notification only from a committed server-side submission. Supporter/donor recipients and staff-name disclosure were removed, while final character-selection handoff is server-only and rechecks stored acceptance. Reconnect/restart recovery, MyISAM failure behavior, and runtime validation remain open.
+- The first high-risk `item-system` container slice now binds weapon pickup to the authenticated account/character, a short-lived server container session, current ownership/access/proximity, and the stored item row. Ammunition capacity and the grant are server-derived; conditional affected-row proof, in-process locking/quarantine, and compensation reduce replay and split-settlement risk. Other inventory remotes and durable crash/restart recovery remain open.
 - No MTA server, game client, database, Discord application/service, or gameplay environment has been run. Every item above is `fixed-in-source`, not `runtime-verified` or release-ready.
 
-See the [current next-work record](docs/planning/NEXT_WORK.md), [README status history](docs/history/README_STATUS_HISTORY.md), [legacy-login migration map](docs/architecture/LEGACY_LOGIN_DISCORD_MIGRATION.md), [capability migration matrix](docs/architecture/CAPABILITY_MIGRATION_MATRIX.md), and [`apps` resource dossier](docs/resources/apps.md) for evidence and remaining work.
+See the [current next-work record](docs/planning/NEXT_WORK.md), [README status history](docs/history/README_STATUS_HISTORY.md), [legacy-login migration map](docs/architecture/LEGACY_LOGIN_DISCORD_MIGRATION.md), [capability migration matrix](docs/architecture/CAPABILITY_MIGRATION_MATRIX.md), [`apps` resource dossier](docs/resources/apps.md), and [`item-system` resource dossier](docs/resources/item-system.md) for evidence and remaining work.
 
 ## Documentation and project tracking
 

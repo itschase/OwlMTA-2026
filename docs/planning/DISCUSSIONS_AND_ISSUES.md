@@ -1,5 +1,12 @@
 # Issues and Discussions workflow
 
+## Current inventory-authority follow-up
+
+- [Issue #213](https://github.com/itschase/OwlMTA-2026/issues/213) owns the fixed-in-source `moveFromElement` slice: trusted caller/session/access binding, server-derived weapon capacity, conditional affected-row settlement, in-process item locking, and best-effort compensation. Other mutation handlers remain open.
+- [Issue #214](https://github.com/itschase/OwlMTA-2026/issues/214) continues to own durable operation identity, transactional-engine migration, crash/restart recovery, concurrency, and failure injection; the new conditional settlement is not a crash-safe transaction.
+- [Issue #15](https://github.com/itschase/OwlMTA-2026/issues/15) retains indirect frisk/admin subscription and remaining inventory read/privacy scope. Direct subscription events are server-only and the unsubscribe wiring is corrected in source.
+- [Script Resource: item-system](https://github.com/itschase/OwlMTA-2026/discussions/102) remains the maintained resource overview. Publication comments and the source commit will be linked here after the coherent batch is committed.
+
 ## Current application-flow follow-up
 
 - Terminal application-flow checkpoint: source commit [`7a331bf`](https://github.com/itschase/OwlMTA-2026/commit/7a331bf) makes step-3 reopen caller/state bound and rate-limited; only the trusted Part 2 commit can notify reviewers; supporter recipients and applicant-facing staff-name disclosure are removed; and `accounts:playerFinishApps` is server-only with stored accepted-state verification. Published to Issues [#281](https://github.com/itschase/OwlMTA-2026/issues/281#issuecomment-6517284775), [#1](https://github.com/itschase/OwlMTA-2026/issues/1#issuecomment-6517284961), and [#3](https://github.com/itschase/OwlMTA-2026/issues/3#issuecomment-6517284799), plus Discussions [#286](https://github.com/itschase/OwlMTA-2026/discussions/286#discussioncomment-19287480) and [#99](https://github.com/itschase/OwlMTA-2026/discussions/99#discussioncomment-19287479). Runtime remains unverified.

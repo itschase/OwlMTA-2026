@@ -1,6 +1,14 @@
 # Next work record
 
-Last updated: 2026-10-30 after binding terminal application presentation, notification, and accepted-state handoff to trusted server state.
+Last updated: 2026-11-05 after binding the first `item-system` container pickup and stored-weapon settlement slice to trusted server state.
+
+## Latest continuation — authoritative container weapon pickup
+
+The `item-system` `moveFromElement` path now derives the actor from MTA `client`; requires the matching event source, active character, five-minute server-issued container session, current access/proximity, integer slot/index identity, and a short cooldown; and rechecks vehicle, interior, safe, and world-storage policy at open and mutation time. Direct inventory subscribe/send/unsubscribe events are server-only, and the unsubscribe handler is correctly wired. The client no longer submits an ammunition amount.
+
+Stored-weapon pickup capacity is derived through the guarded server `weaponcap` export and bounded by the stored amount, current weapon capacity, and total capacity. A conditional native database update/delete must affect exactly one expected item row before the built-in server weapon grant. The item remains locked in-process until success or conditional compensation; cache projection is isolated from the confirmed transition; failed restoration stays quarantined in-process; and bounded rejection diagnostics contain reason codes only. Container subscriptions revalidate the active session and access before later updates, and expire on a timer. Three changed Lua files parse successfully in static checks.
+
+This bounded #213 slice is fixed in source, not runtime-verified. MyISAM cannot make the item-row transition and live MTA weapon grant one crash-safe transaction; restart during an in-flight callback, failed compensation, concurrency/event order, dependency outage, and all actual container/gameplay behavior remain open under #214 and the safe-start gate. Other item mutations remain under #213, while indirect frisk/admin subscriptions and remaining read/privacy paths stay under #15. Next complete publication/cross-linking for this batch, then either continue the next highest-risk `item-system` mutation or audit the active `toll` resource before lower-impact shader work.
 
 ## Latest continuation — terminal application privacy and authority
 

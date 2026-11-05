@@ -8,7 +8,7 @@ Subsequent fixed-in-source work now includes optional Discord-linked admission/s
 
 ## Repository scale and structure
 
-- 1,093 Lua files across 144 active resource manifests under `mods/deathmatch/resources`.
+- 1,095 Lua files across 144 active resource manifests under `mods/deathmatch/resources`.
 - 114 additional Lua files are under `mods/deathmatch/resource-archive` and should be treated as inactive until a live dependency proves otherwise.
 - Three SQL snapshots contain 125 `CREATE TABLE` statements in total: `data/core.sql`, `data/mta.sql`, and `data/data.sql`.
 - The game is composed of MTA resources with broad shared exports. Major cross-cutting systems include `account`, `mysql`, `integration`, `global`, `admin-system`, `factions`, `item-system`, `vehicle`, and `logs`.

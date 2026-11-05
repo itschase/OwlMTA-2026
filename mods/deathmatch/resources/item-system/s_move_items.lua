@@ -1,41 +1,279 @@
-local function canAccessElement( player, element )
-	if isPedDead ( player ) then
+local INVENTORY_SESSION_TTL = 300000
+local MOVE_REQUEST_COOLDOWN = 250
+local INVENTORY_DISTANCE = 6
+local inventorySessions = {}
+local lastMoveRequest = {}
+local rejectionLogTicks = {}
+
+local function elapsedTicks(now, previous)
+	return (now - previous) % 4294967296
+end
+
+local function reportMoveRejection(reason)
+	local now = getTickCount()
+	local previous = rejectionLogTicks[reason]
+	if not previous or elapsedTicks(now, previous) >= 30000 then
+		rejectionLogTicks[reason] = now
+		outputDebugString("[ITEM][MOVE_FROM] outcome=rejected reason=" .. reason, 2)
+	end
+end
+
+local function isActiveInventoryActor(player)
+	return isElement(player)
+		and getElementType(player) == "player"
+		and not isPedDead(player)
+		and tonumber(getElementData(player, "loggedin")) == 1
+		and (tonumber(getElementData(player, "account:id")) or 0) > 0
+		and (tonumber(getElementData(player, "dbid")) or 0) > 0
+end
+
+local function isWorldStorageObject(player, element)
+	if getElementType(element) ~= "object" then
 		return false
 	end
 
-	if getElementDimension( player ) ~= getElementDimension( element ) then
-		return getElementType(element) == 'interior' and getElementID(element) == getElementDimension(player)
+	local parent = getElementParent(element)
+	local grandparent = parent and getElementParent(parent)
+	local worldResource = getResourceFromName("item-world")
+	if not worldResource or grandparent ~= getResourceRootElement(worldResource) then
+		return false
 	end
 
-	if getElementType( element ) == "vehicle" then
-		if not isVehicleLocked( element ) then
-			return true
-		else
-			local veh = getPedOccupiedVehicle( player )
-			local inVehicle = getElementData( player, "realinvehicle" )
+	local itemID = tonumber(getElementData(element, "itemID"))
+	if not itemID or isStorageItem(itemID, getElementData(element, "itemValue")) ~= true then
+		return false
+	end
 
-			if veh == element and inVehicle == 1 then
-				return true
-			elseif veh == element and inVehicle == 0 then
-				outputDebugString( "canAcccessElement failed (hack?): " .. getPlayerName( player ) .. " on Vehicle " .. getElementData( element, "dbid" ) )
-				return false
-			else
-				outputDebugString( "canAcccessElement failed (locked): " .. getPlayerName( player ) .. " on Vehicle " .. getElementData( element, "dbid" ) )
-				return false
-			end
-		end
-	else
+	local itemWorld = getResourceFromName("item-world")
+	if not itemWorld or getResourceState(itemWorld) ~= "running" then
+		return false
+	end
+
+	local ok, allowed = pcall(function()
+		return exports["item-world"]:can(player, "use", element)
+	end)
+	return ok and allowed == true
+end
+
+local function hasInteriorStorageAccess(player, element)
+	local interiorID = tonumber(getElementData(element, "dbid"))
+	if not interiorID then
+		return false
+	end
+
+	if hasItem(player, 4, interiorID) or hasItem(player, 5, interiorID)
+		or tonumber(getElementData(player, "duty_admin")) == 1 then
 		return true
 	end
+
+	local status = getElementData(element, "status")
+	if type(status) == "table" and tonumber(status.type) == 2 then
+		local factions = getResourceFromName("factions")
+		if factions and getResourceState(factions) == "running" then
+			local ok, allowed = pcall(function()
+				return exports.factions:isInFactionType(player, 2) or exports.factions:isInFactionType(player, 3)
+			end)
+			return ok and allowed == true
+		end
+	end
+
+	return false
+end
+
+local function hasSafeStorageAccess(player, element)
+	local dimension = getElementDimension(player)
+	if tonumber(getElementData(player, "admin_level")) and tonumber(getElementData(player, "admin_level")) >= 2
+		and tonumber(getElementData(player, "duty_admin")) == 1 then
+		return true
+	elseif dimension < 19000 then
+		return hasItem(player, 5, dimension) or hasItem(player, 4, dimension)
+	elseif dimension >= 20000 then
+		return hasItem(player, 3, dimension - 20000)
+	end
+
+	return false
+end
+
+local function isWithinInventoryDistance(player, element)
+	local playerX, playerY, playerZ = getElementPosition(player)
+	local elementX, elementY, elementZ = getElementPosition(element)
+	if not playerX or not elementX then
+		return false
+	end
+
+	return getDistanceBetweenPoints3D(playerX, playerY, playerZ, elementX, elementY, elementZ) <= INVENTORY_DISTANCE
+end
+
+local function canAccessInventoryContainer(player, element)
+	if not isActiveInventoryActor(player) or not isElement(element) then
+		return false
+	end
+
+	local elementType = getElementType(element)
+	if elementType ~= "vehicle" and elementType ~= "interior" and elementType ~= "object" then
+		return false
+	end
+
+	if elementType == "interior" then
+		local interiorID = tonumber(getElementData(element, "dbid"))
+		local isInside = interiorID and getElementDimension(player) == interiorID
+		local isAtEntrance = getElementDimension(player) == getElementDimension(element)
+			and getElementInterior(player) == getElementInterior(element)
+			and isWithinInventoryDistance(player, element)
+		return (isInside or isAtEntrance) and hasInteriorStorageAccess(player, element)
+	end
+
+	if getElementDimension(player) ~= getElementDimension(element)
+		or getElementInterior(player) ~= getElementInterior(element)
+		or not isWithinInventoryDistance(player, element) then
+		return false
+	end
+
+	if elementType == "vehicle" then
+		local vehicleID = tonumber(getElementData(element, "dbid"))
+		local isDriver = getVehicleController(element) == player
+		local hasKey = vehicleID and hasItem(player, 3, vehicleID)
+		local factionID = tonumber(getElementData(element, "faction")) or -1
+		local inOwningFaction = false
+		local factions = getResourceFromName("factions")
+		if factionID >= 0 and factions and getResourceState(factions) == "running" then
+			local ok, allowed = pcall(function()
+				return exports.factions:isPlayerInFaction(player, factionID)
+			end)
+			inOwningFaction = ok and allowed == true
+		end
+
+		if not isDriver and not hasKey and not inOwningFaction then
+			return false
+		end
+
+		if (tonumber(getElementData(element, "Impounded")) or 0) > 0
+			and not hasKey then
+			return false
+		end
+
+		if isVehicleLocked(element) then
+			return isDriver and tonumber(getElementData(player, "realinvehicle")) == 1
+		end
+		return true
+	end
+
+	local model = getElementModel(element)
+	if model == 2332 then
+		return hasSafeStorageAccess(player, element)
+	end
+
+	return isWorldStorageObject(player, element)
+end
+
+-- Retained for legacy move-to/world-item paths until their own Issue #213
+-- slices are caller-bound. The stricter session policy above is used for
+-- opening a container and taking an item from it.
+local function canAccessElement(player, element)
+	if not isElement(player) or getElementType(player) ~= "player" or isPedDead(player)
+		or not isElement(element) then
+		return false
+	end
+
+	if getElementDimension(player) ~= getElementDimension(element) then
+		return getElementType(element) == "interior"
+			and tonumber(getElementData(element, "dbid")) == getElementDimension(player)
+	end
+
+	if getElementType(element) ~= "vehicle" or not isVehicleLocked(element) then
+		return true
+	end
+
+	return getPedOccupiedVehicle(player) == element and tonumber(getElementData(player, "realinvehicle")) == 1
+end
+
+local function createInventorySession(actor, element)
+	local accountID = tonumber(getElementData(actor, "account:id"))
+	local characterID = tonumber(getElementData(actor, "dbid"))
+	local sessionCharacterID = tonumber(getElementData(actor, "account:character:id"))
+	if not accountID or accountID < 1 or not characterID or characterID < 1 then
+		return false
+	end
+
+	inventorySessions[actor] = {
+		element = element,
+		accountID = accountID,
+		characterID = characterID,
+		sessionCharacterID = sessionCharacterID,
+		refreshedAt = getTickCount()
+	}
+	return inventorySessions[actor]
+end
+
+local function getCurrentInventorySession(actor, element)
+	local session = inventorySessions[actor]
+	if not session or session.element ~= element
+		or session.accountID ~= tonumber(getElementData(actor, "account:id"))
+		or session.characterID ~= tonumber(getElementData(actor, "dbid"))
+		or session.sessionCharacterID ~= tonumber(getElementData(actor, "account:character:id"))
+		or elapsedTicks(getTickCount(), session.refreshedAt) > INVENTORY_SESSION_TTL then
+		return false
+	end
+	return session
+end
+
+local function clearInventorySession(actor)
+	local session = inventorySessions[actor]
+	if session and isElement(session.element) and isElement(actor) then
+		unsubscribeInventoryChanges(session.element, actor)
+	end
+	inventorySessions[actor] = nil
+end
+
+function canReceiveContainerInventoryChanges(actor, element)
+	local allowed = isActiveInventoryActor(actor)
+		and getCurrentInventorySession(actor, element) ~= false
+		and canAccessInventoryContainer(actor, element)
+	if not allowed and inventorySessions[actor] then
+		clearInventorySession(actor)
+	end
+	return allowed
 end
 
 --
 
-local function openInventory( element, ax, ay )
-	if canAccessElement( source, element ) then
-		triggerEvent( "subscribeToInventoryChanges", source, element )
-		triggerClientEvent( source, "openElementInventory", element, ax, ay )
+local function openInventory(element, ax, ay)
+	local actor = client
+	if not actor or source ~= actor then
+		reportMoveRejection("open_invalid_caller")
+		return false
 	end
+
+	if not canAccessInventoryContainer(actor, element) then
+		reportMoveRejection("open_access_denied")
+		return false
+	end
+
+	clearInventorySession(actor)
+	local session = createInventorySession(actor, element)
+	if not session then
+		reportMoveRejection("open_session_failed")
+		return false
+	end
+	if not subscribeInventoryChanges(element, actor, "container") then
+		clearInventorySession(actor)
+		reportMoveRejection("open_subscription_failed")
+		return false
+	end
+
+	setTimer(function(player, expectedElement, accountID, characterID)
+		local current = inventorySessions[player]
+		if current and current.element == expectedElement and current.accountID == accountID
+			and current.characterID == characterID
+			and elapsedTicks(getTickCount(), current.refreshedAt) >= INVENTORY_SESSION_TTL then
+			clearInventorySession(player)
+		end
+	end, INVENTORY_SESSION_TTL + 100, 1, actor, element, session.accountID, session.characterID)
+
+	ax = tonumber(ax) or 0
+	ay = tonumber(ay) or 0
+	triggerClientEvent(actor, "openElementInventory", element, ax, ay)
+	return true
 end
 
 addEvent( "openFreakinInventory", true )
@@ -43,12 +281,50 @@ addEventHandler( "openFreakinInventory", getRootElement(), openInventory )
 
 --
 
-local function closeInventory( element )
-	triggerEvent( "unsubscribeFromInventoryChanges", source, element )
+local function closeInventory(element)
+	local actor = client
+	if not actor or source ~= actor then
+		reportMoveRejection("close_invalid_caller")
+		return false
+	end
+
+	local session = inventorySessions[actor]
+	if not session or session.element ~= element then
+		reportMoveRejection("close_session_mismatch")
+		return false
+	end
+
+	clearInventorySession(actor)
+	return true
 end
 
 addEvent( "closeFreakinInventory", true )
 addEventHandler( "closeFreakinInventory", getRootElement(), closeInventory )
+
+addEventHandler("onPlayerQuit", root, function()
+	clearInventorySession(source)
+	lastMoveRequest[source] = nil
+end)
+
+addEventHandler("savePlayer", root, function(reason)
+	if reason == "Change Character" or reason == "Account Logout" then
+		clearInventorySession(source)
+		lastMoveRequest[source] = nil
+	end
+end)
+
+addEventHandler("accounts:characters:logout", root, function()
+	clearInventorySession(source)
+	lastMoveRequest[source] = nil
+end)
+
+addEventHandler("onElementDestroy", root, function()
+	for player, session in pairs(inventorySessions) do
+		if session.element == source then
+			inventorySessions[player] = nil
+		end
+	end
+end)
 
 --
 
@@ -486,24 +762,184 @@ addEventHandler( "moveWorldItemToElement", getRootElement(), moveWorldItemToElem
 
 --
 
-local function moveFromElement( element, slot, ammo, index )
-	if false then
-		return outputDebugString("[ITEM] moveFromElement / Disabled ")
+local function finishElementMove(actor, forceUpdate)
+	if not isElement(actor) then
+		return
+	end
+	if forceUpdate then
+		triggerClientEvent(actor, "forceElementMoveUpdate", actor)
+	end
+	triggerClientEvent(actor, "finishItemMove", actor)
+end
+
+local function getServerAmmoGrant(actor, itemID, storedAmount)
+	local normalizedItemID = tonumber(itemID)
+	local weaponID = normalizedItemID and -normalizedItemID
+	storedAmount = tonumber(storedAmount)
+	if not weaponID or weaponID ~= math.floor(weaponID) or weaponID < 0 or weaponID > 46
+		or not storedAmount or storedAmount ~= math.floor(storedAmount) or storedAmount < 1 then
+		return false, "invalid_weapon_item"
 	end
 
-	if not canAccessElement( source, element ) then
+	local weaponcap = getResourceFromName("weaponcap")
+	if not weaponcap or getResourceState(weaponcap) ~= "running" then
+		return false, "weaponcap_unavailable"
+	end
+
+	local ok, freeForWeapon, freeTotal = pcall(function()
+		return exports.weaponcap:getFreeAmmo(actor, weaponID)
+	end)
+	freeForWeapon = tonumber(freeForWeapon)
+	freeTotal = tonumber(freeTotal)
+	if not ok or not freeForWeapon or not freeTotal then
+		return false, "weaponcap_error"
+	end
+
+	local grant = math.min(storedAmount, math.floor(freeForWeapon), math.floor(freeTotal))
+	if grant < 1 then
+		return false, "capacity_exhausted"
+	end
+
+	return grant, nil, weaponID
+end
+
+local function compensateWeaponPickup(actor, settlement, reason)
+	reportMoveRejection(reason)
+	restoreWeaponPickupSettlement(settlement, function(restored, restoreReason)
+		if not restored then
+			reportMoveRejection("compensation_" .. tostring(restoreReason or "failed"))
+		end
+		if isElement(actor) then
+			outputChatBox("The item could not be moved. Please try again.", actor, 255, 0, 0)
+			finishElementMove(actor, true)
+		end
+	end)
+end
+
+local function processWeaponPickup(actor, element, slot, item, itemIndex, name)
+	local grant, grantError, weaponID = getServerAmmoGrant(actor, item[1], item[2])
+	if not grant then
+		reportMoveRejection(grantError)
+		outputChatBox("You cannot carry any more of that weapon or ammunition.", actor, 255, 0, 0)
+		finishElementMove(actor, false)
 		return false
 	end
-	local item = getItems( element )[slot]
+
+	local started, startError = settleWeaponPickup(element, slot, itemIndex, grant, function(settled, settleError, settlement)
+		if not settled then
+			reportMoveRejection("settlement_" .. tostring(settleError or "failed"))
+			if isElement(actor) then
+				outputChatBox("The item changed before it could be moved. Please try again.", actor, 255, 0, 0)
+				finishElementMove(actor, true)
+			end
+			return
+		end
+
+		local session = isActiveInventoryActor(actor) and getCurrentInventorySession(actor, element)
+		if not isElement(element) or not session or not canAccessInventoryContainer(actor, element) then
+			clearInventorySession(actor)
+			compensateWeaponPickup(actor, settlement, "post_commit_access_changed")
+			return
+		end
+
+		local currentGrant = getServerAmmoGrant(actor, item[1], settlement.pickupAmount)
+		if not currentGrant or currentGrant < settlement.pickupAmount then
+			compensateWeaponPickup(actor, settlement, "post_commit_capacity_changed")
+			return
+		end
+
+		settlement.grantAttempted = true
+		if not giveWeapon(actor, weaponID, settlement.pickupAmount, false) then
+			compensateWeaponPickup(actor, settlement, "weapon_grant_failed")
+			return
+		end
+		settlement.grantApplied = true
+
+		if not completeWeaponPickupSettlement(settlement) then
+			reportMoveRejection("post_grant_settlement_indeterminate")
+			finishElementMove(actor, true)
+			return
+		end
+		output(element, actor, item[1], nil, nil, item[5])
+		local auditOK = pcall(function()
+			exports.logs:dbLog(
+				actor,
+				39,
+				{ actor, element },
+				name .. " #" .. getElementID(element) .. "->" .. getPlayerName(actor)
+					.. " - " .. getItemName(item[1], item[2], item[5]) .. " - " .. settlement.pickupAmount
+			)
+		end)
+		if not auditOK then
+			reportMoveRejection("audit_unavailable_after_commit")
+		end
+		finishElementMove(actor, true)
+	end)
+
+	if not started and startError then
+		reportMoveRejection("settlement_" .. tostring(startError))
+	end
+	return started
+end
+
+local function moveFromElement(element, slot, index)
+	local actor = client
+	local eventSource = source
+	if not actor or eventSource ~= actor or not isActiveInventoryActor(actor) then
+		reportMoveRejection("invalid_caller")
+		return false
+	end
+
+	local source = actor
+	slot = tonumber(slot)
+	index = tonumber(index)
+	if not isElement(element) or not slot or slot ~= math.floor(slot) or slot < 1
+		or not index or index ~= math.floor(index) or index < 1 then
+		reportMoveRejection("invalid_item_reference")
+		finishElementMove(source, false)
+		return false
+	end
+
+	local session = getCurrentInventorySession(source, element)
+	if not session then
+		clearInventorySession(source)
+		reportMoveRejection("missing_inventory_session")
+		finishElementMove(source, false)
+		return false
+	end
+
+	local now = getTickCount()
+	if lastMoveRequest[source] and elapsedTicks(now, lastMoveRequest[source]) < MOVE_REQUEST_COOLDOWN then
+		reportMoveRejection("rate_limited")
+		finishElementMove(source, false)
+		return false
+	end
+	lastMoveRequest[source] = now
+
+	if not canAccessInventoryContainer(source, element) then
+		reportMoveRejection("access_denied")
+		finishElementMove(source, false)
+		return false
+	end
+
+	local items = getItems(element)
+	local item = items and items[slot]
+	if not item or tonumber(item[3]) ~= index then
+		reportMoveRejection("stale_item_reference")
+		finishElementMove(source, true)
+		return false
+	end
+
 	if not canPickup(source, item) then
 		outputChatBox("You can not move this item. Contact an admin via F1.", source, 255, 0, 0)
-		return
+		finishElementMove(source, false)
+		return false
 	end
 
 
 	local name = getName(element)
 
-	if item and tonumber(item[3]) == tonumber(index) then
+	if item and tonumber(item[3]) == index then
 		-- ANTI ALT-ALT FOR NON AMMO ITEMS, CHECK THIS FUNCTION FOR AMMO ITEM BELOW AND FOR WORLD ITEM CHECK s_world_items.lua
 		--31 -> 43  = DRUGS
 		if ( (item[1] >= 31 and item[1] <= 43) or itemBannedByAltAltChecker[item[1]]) and not (getElementModel(element) == 2942 and item[1] == 150) then
@@ -595,17 +1031,8 @@ local function moveFromElement( element, slot, ammo, index )
 			end
 			triggerClientEvent( source, "forceElementMoveUpdate", source )
 		else
-			takeItemFromSlot( element, slot )
-			output( element, source, item[1], nil, nil, item[5])
-			if ammo < item[2] then
-				exports.global:giveWeapon( source, -item[1], ammo )
-				giveItem( element, item[1], item[2] - ammo )
-				exports.logs:dbLog(source, 39, source, name .. " #" .. getElementID(element) .. "->" .. getPlayerName( source ) .. " - " .. getItemName( item[1], item[2], item[5] ) .. " - " .. ( item[2] - ammo ))
-			else
-				exports.global:giveWeapon( source, -item[1], item[2] )
-				exports.logs:dbLog(source, 39, {source, element}, name .. " #" .. getElementID(element) .. "->" .. getPlayerName( source ) .. " - " .. getItemName( item[1], item[2], item[5] ) .. " - " .. item[2])
-			end
-			triggerClientEvent( source, "forceElementMoveUpdate", source )
+			processWeaponPickup(source, element, slot, item, index, name)
+			return
 		end
 	else
 		outputDebugString( "Index mismatch: " .. tostring( item and item[3] or "nil" ) .. " " .. tostring( index ) )

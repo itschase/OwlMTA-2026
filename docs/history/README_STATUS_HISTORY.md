@@ -2,6 +2,20 @@
 
 This document preserves the public status text that is replaced when the root README advances to a materially new source or runtime checkpoint. Git remains the exact immutable history; each entry links the last commit that carried the archived wording. Minor copy and link corrections do not require a new entry.
 
+## October 30, 2026 — terminal application boundary hardened
+
+- Exact README snapshot: [`6573ac5`](https://github.com/itschase/OwlMTA-2026/blob/6573ac5/README.md)
+- Evidence state: fixed in source; no MTA, database, Discord, notification UI, inventory, or gameplay runtime was run.
+- Replaced on November 5, 2026 after the first authoritative item-system container weapon-pickup settlement slice was completed in source.
+
+> Account lifecycle now has a canonical full-session logout distinct from character change, plus optional Discord-linked admission/session activation and confirmed-revocation disconnect handling. Password retirement, durable session leases, provisioning, recovery, and live service behavior remain open.
+>
+> Selected staff/application actions compare named Discord capabilities in shadow mode while legacy staff predicates remain enforcement. Donor/supporter tiers were removed from the reviewed freeze, nudge, application-bypass, and application-manager authority paths; supporter still requires a complete call-site audit.
+>
+> The application system now keeps quiz answer keys server-side, binds all three player stages to authenticated accounts and stored state, rate-limits step-3 reopening, and allows reviewer notification only from a committed server-side submission. Supporter/donor recipients and staff-name disclosure were removed, while final character-selection handoff is server-only and rechecks stored acceptance. Reconnect/restart recovery, MyISAM failure behavior, and runtime validation remain open.
+>
+> No MTA server, game client, database, Discord application/service, or gameplay environment has been run. Every item above is `fixed-in-source`, not `runtime-verified` or release-ready.
+
 ## October 29, 2026 — application Parts 1 and 2 hardened
 
 - Exact README snapshot: [`ef7a00b`](https://github.com/itschase/OwlMTA-2026/blob/ef7a00b/README.md)

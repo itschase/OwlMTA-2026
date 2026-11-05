@@ -225,12 +225,12 @@ local function moveFromElement( button )
 						else
 							--guiSetVisible( wWait, true )
 							--guiSetEnabled( wInventory, false )
-							triggerServerEvent( "moveFromElement", localPlayer, element, slot, free, itemIndex )
+							triggerServerEvent( "moveFromElement", localPlayer, element, slot, itemIndex )
 						end
 					else
 						--guiSetVisible( wWait, true )
 						--guiSetEnabled( wInventory, false )
-						triggerServerEvent( "moveFromElement", localPlayer, element, slot, nil, itemIndex )
+						triggerServerEvent( "moveFromElement", localPlayer, element, slot, itemIndex )
 					end
 				else
 					outputChatBox("You must have the keys to his house to take items from the Mailbox.", getLocalPlayer(), 255, 0, 0)

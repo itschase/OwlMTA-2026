@@ -7,6 +7,14 @@
 - Runtime: unverified. The server has not been started.
 - Discussion: [Script Resource: item-system](https://github.com/itschase/OwlMTA-2026/discussions/102).
 
+## Current fixed-in-source checkpoint
+
+The container-to-player `moveFromElement` slice now derives the actor from MTA `client`, requires `source == client`, an active account/character, a matching account-and-character-bound five-minute server-issued inventory session, current access/proximity, integer slot/index identity, and a short request cooldown. Vehicle driver/key/organization ownership plus lock/impound state, interior mailbox key/government access, safe keys, and item-world `use` policy for recognized storage objects are rechecked on the server when the inventory opens and when an item moves. Character change/logout clears the session. The client still uses `weaponcap` for presentation, but it no longer submits an ammunition amount.
+
+For stored weapon pickups, the server calls the guarded server `weaponcap` export, bounds the grant by the stored amount plus current per-weapon and total capacity, and rechecks capacity after persistence. A conditional native database update/delete must report exactly one affected row before the built-in server `giveWeapon` runs. The item instance is locked while pending; cache projection is isolated from the confirmed database transition; live-grant failure attempts a conditional restoration; failed restoration keeps the instance quarantined in-process; and bounded diagnostics record reason codes without player, account, Discord, item-metadata, or credential data. Inventory subscribe/send/unsubscribe events are now server-only, the unsubscribe handler no longer points to subscribe, container subscriptions revalidate session/access before updates, and a timer clears expired sessions.
+
+This is not a crash-safe transaction. MyISAM cannot atomically combine the stored item transition with the live MTA weapon grant, so process failure between those steps, failed compensation, resource restart during an in-flight callback, and every runtime event/order case remain open under [Issue #214](https://github.com/itschase/OwlMTA-2026/issues/214). The in-process quarantine is diagnostic containment, not durable recovery; it disappears on restart while any already-committed row state remains. Other `item-system` mutation handlers remain under [Issue #213](https://github.com/itschase/OwlMTA-2026/issues/213); indirect frisk/admin inventory subscriptions and other read/privacy paths remain under [Issue #15](https://github.com/itschase/OwlMTA-2026/issues/15). No MTA or database runtime has been performed.
+
 ## What it does
 
 `item-system` is the shared inventory and item-instance provider. It defines item identity, name, description, model, weight, metadata, capacity, storage and use behavior; persists player/container items; and supports world items, books, notes, safes, locks, badges, drugs, ghettoblasters, vehicle upgrades, shell casings, item creation, and staff maintenance.
@@ -31,9 +39,9 @@ Stored inventory is cached server-side and persisted in `items`; world placement
 
 ## Source-confirmed risks
 
-- Unsubscribe is wired to subscribe, and inventory read/subscription events accept arbitrary elements and forgeable source without consistent ownership/proximity. Existing [Issue #15](https://github.com/itschase/OwlMTA-2026/issues/15) owns this read/privacy boundary.
-- Many mutating remotes use event source or caller-supplied elements as actor/target. Access helpers lack a complete proximity/key/container/session policy, and client coordinates reach world placement. [Issue #213](https://github.com/itschase/OwlMTA-2026/issues/213).
-- SQL owner/state and live cache/world mutations occur separately; multi-step moves lack transaction, idempotency, and restart recovery. [Issue #214](https://github.com/itschase/OwlMTA-2026/issues/214).
+- Direct inventory subscribe/send/unsubscribe events are server-only and unsubscribe is correctly wired in current source. Indirect frisk/admin subscriptions and other inventory read paths still need purpose, target, proximity, role, and lifecycle review under [Issue #15](https://github.com/itschase/OwlMTA-2026/issues/15).
+- The `moveFromElement` container weapon-pickup slice is caller/session/access-bound and server-derives ammunition in current source. Many other mutating remotes still use event source or caller-supplied elements as actor/target, and client coordinates still reach world placement. [Issue #213](https://github.com/itschase/OwlMTA-2026/issues/213).
+- The weapon-pickup slice now uses conditional affected-row proof, an in-process item lock, and best-effort compensation. SQL owner/state and live cache/world mutations still cannot form a crash-safe MyISAM transaction; multi-step moves lack durable operation identity and restart reconciliation. [Issue #214](https://github.com/itschase/OwlMTA-2026/issues/214).
 - ItemCreator accepts a caller-supplied player before delegating to `giveitem`; downstream rechecks do not make attribution safe.
 - MyISAM polymorphic owners have no foreign-key, uniqueness, instance-provenance, or versioned metadata constraints.
 - Drug mixing is a fixed server-checked recipe but has no workbench/tool/session/provenance model; [Issue #152](https://github.com/itschase/OwlMTA-2026/issues/152) owns future opportunity design.
