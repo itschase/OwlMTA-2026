@@ -2,10 +2,11 @@
 
 ## Current inventory-authority follow-up
 
-- [Issue #213](https://github.com/itschase/OwlMTA-2026/issues/213) owns the fixed-in-source `moveFromElement` slice: trusted caller/session/access binding, server-derived weapon capacity, conditional affected-row settlement, in-process item locking, and best-effort compensation. Other mutation handlers remain open.
-- [Issue #214](https://github.com/itschase/OwlMTA-2026/issues/214) continues to own durable operation identity, transactional-engine migration, crash/restart recovery, concurrency, and failure injection; the new conditional settlement is not a crash-safe transaction.
-- [Issue #15](https://github.com/itschase/OwlMTA-2026/issues/15) retains indirect frisk/admin subscription and remaining inventory read/privacy scope. Direct subscription events are server-only and the unsubscribe wiring is corrected in source.
-- [Script Resource: item-system](https://github.com/itschase/OwlMTA-2026/discussions/102) remains the maintained resource overview. Publication comments and the source commit will be linked here after the coherent batch is committed.
+- Source commit [`d337fbd`](https://github.com/itschase/OwlMTA-2026/commit/d337fbd) completes the fixed-in-source `moveFromElement` weapon-pickup slice: trusted caller/session/access binding, server-derived capacity, conditional affected-row settlement, in-process item locking, and best-effort compensation.
+- [Issue #213 checkpoint](https://github.com/itschase/OwlMTA-2026/issues/213#issuecomment-6672260732) keeps the other mutation handlers open.
+- [Issue #214 checkpoint](https://github.com/itschase/OwlMTA-2026/issues/214#issuecomment-6672260737) keeps durable operation identity, transactional-engine migration, crash/restart recovery, concurrency, and failure injection open; the new conditional settlement is not a crash-safe transaction.
+- [Issue #15 checkpoint](https://github.com/itschase/OwlMTA-2026/issues/15#issuecomment-6672260772) retains indirect frisk/admin subscription and remaining inventory read/privacy scope. Direct subscription events are server-only and the unsubscribe wiring is corrected in source.
+- [Script Resource: item-system checkpoint](https://github.com/itschase/OwlMTA-2026/discussions/102#discussioncomment-19428896) records the matching human and operator overview. Runtime remains unverified.
 
 ## Current application-flow follow-up
 
