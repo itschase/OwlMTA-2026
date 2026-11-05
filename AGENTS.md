@@ -33,6 +33,24 @@ This file is a high-level, human- and AI-agent readable guide and chronological 
 
 ## 2. Activity Read Log
 
+### [2026-11-05] — Codex / ChatGPT (Authoritative Container Weapon Pickup)
+* **Goal**: Complete the next high-priority Issue #213 slice by removing client authority from container weapon pickup, narrowing split settlement, and reconciling current project documentation.
+* **Work Completed**:
+  1. Bound `moveFromElement` to MTA `client`, matching source, active account/character state, a five-minute account/character/container session, current proximity/access, integer slot and immutable item index, and a short cooldown. Opening and mutation now recheck vehicle driver/key/organization, lock/impound, property mailbox, safe, and item-world storage authority. Session cleanup covers close, expiry, character change, account logout, quit, and container destruction.
+  2. Removed the client-declared ammunition amount. The server derives the grant from the stored weapon item plus guarded `weaponcap` per-weapon and total capacity, then rechecks capacity before the built-in server weapon grant.
+  3. Added exact conditional item-row update/delete with affected-row proof, an in-process item lock, isolated cache projection, conditional compensation, and bounded reason-only diagnostics. Failed restoration stays quarantined in-process. The documentation explicitly preserves the MyISAM crash/restart, cross-resource concurrency, and durable recovery boundary under #214.
+  4. Made direct subscribe/send/unsubscribe inventory events server-only, corrected unsubscribe wiring, and made container subscriptions revalidate session/access before later updates. Indirect frisk/admin readers remain open under #15; other item mutations remain open under #213.
+  5. Refreshed the README checkpoint/history, item-system dossier, player feature guide, current-state architecture/planning text, and continuation record. Published checkpoints to Issues [#213](https://github.com/itschase/OwlMTA-2026/issues/213#issuecomment-6672260732), [#214](https://github.com/itschase/OwlMTA-2026/issues/214#issuecomment-6672260737), and [#15](https://github.com/itschase/OwlMTA-2026/issues/15#issuecomment-6672260772), plus [Script Resource Discussion #102](https://github.com/itschase/OwlMTA-2026/discussions/102#discussioncomment-19428896).
+* **Commits**:
+  - [`d337fbd`](https://github.com/itschase/OwlMTA-2026/commit/d337fbd) — `security(item-system): bind container weapon pickups`
+  - [`9b52c06`](https://github.com/itschase/OwlMTA-2026/commit/9b52c06) — `docs(project): publish inventory authority checkpoint`
+* **Validation**: All three changed Lua files parsed successfully; `item-system/meta.xml` parsed as XML; focused checks confirmed the caller/session/access, server-derived capacity, affected-row, lock/compensation, expiry, and subscription boundaries; all changed-document relative links resolved; diff and staged checks passed. No MTA server/client, database, Discord application/service, inventory UI, concurrency, restart, or gameplay runtime was run.
+* **Current Status**: The bounded container weapon-pickup unit is fixed in source, documented, published, committed, and pushed through `9b52c06`; runtime remains unverified. The in-process quarantine is not durable recovery.
+* **Recommended Next Work**:
+  1. Continue Issue #213 with the next highest-risk `item-system` mutation only after tracing its paired client callers, container/world authority, persistence, cache, and compensation boundaries.
+  2. Design a versioned transactional-engine and durable operation/reconciliation plan under #214 before claiming item transfers crash-safe.
+  3. If switching to catalog work, audit the active `toll` resource before lower-impact shader/archive resources, maintaining its dossier and standardized Discussion without duplicating trackers.
+
 ### [2026-10-30] — Codex / ChatGPT (Terminal Application Boundary and `weaponcap` Audit)
 * **Goal**: Close the next application privacy/replay/selection gap, then complete one high-value catalog-only resource review without creating duplicate trackers.
 * **Work Completed**:
